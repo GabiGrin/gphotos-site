@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Google Photos Website Creator
+
+Easily turn your Google Photos albums into beautiful websites to share with family and friends.
 
 ## Getting Started
 
