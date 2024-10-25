@@ -46,7 +46,11 @@ export default function ProtectedPage() {
     console.log("Session:", session);
 
     const googleAccessToken = session.data.session.provider_token;
-    setGoogleAccessToken(googleAccessToken!);
+    if (!googleAccessToken) {
+      console.error("User is not logged in");
+      return;
+    }
+    setGoogleAccessToken(googleAccessToken);
 
     const response = await fetch(
       "https://photospicker.googleapis.com/v1/sessions",
@@ -97,19 +101,15 @@ export default function ProtectedPage() {
 
   useEffect(() => {
     if (imagesSet) {
-      let itemsQuery = `sessionId=${sessionId}&pageSize=100`;
+      const processSession = async () => {
+        const res = await fetch("/api/process-session", {
+          method: "POST",
+          body: JSON.stringify({ sessionId }),
+        }).then((res) => res.json());
+        console.log("Process session response:", res);
+      };
 
-      fetch(`https://photospicker.googleapis.com/v1/mediaItems?${itemsQuery}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + googleAccessToken,
-        },
-      })
-        .then((response) => response.json())
-        .then((responseData) => {
-          console.log("Response:", responseData);
-        });
+      processSession();
     }
   }, [imagesSet]);
 
