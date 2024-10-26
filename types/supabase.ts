@@ -16,6 +16,7 @@ export type Database = {
           job_data: Json
           last_error: string | null
           retries: number | null
+          session_id: string
           status: string
           type: string
           updated_at: string | null
@@ -27,6 +28,7 @@ export type Database = {
           job_data: Json
           last_error?: string | null
           retries?: number | null
+          session_id: string
           status?: string
           type: string
           updated_at?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           job_data?: Json
           last_error?: string | null
           retries?: number | null
+          session_id?: string
           status?: string
           type?: string
           updated_at?: string | null
@@ -49,29 +52,38 @@ export type Database = {
         Row: {
           created_at: string | null
           gphotos_id: string | null
+          height: number | null
           order: number | null
           path: string
           raw_metadata: Json | null
+          thumbnail_path: string | null
           user_id: string
           visible: boolean | null
+          width: number | null
         }
         Insert: {
           created_at?: string | null
           gphotos_id?: string | null
+          height?: number | null
           order?: number | null
           path: string
           raw_metadata?: Json | null
+          thumbnail_path?: string | null
           user_id: string
           visible?: boolean | null
+          width?: number | null
         }
         Update: {
           created_at?: string | null
           gphotos_id?: string | null
+          height?: number | null
           order?: number | null
           path?: string
           raw_metadata?: Json | null
+          thumbnail_path?: string | null
           user_id?: string
           visible?: boolean | null
+          width?: number | null
         }
         Relationships: []
       }

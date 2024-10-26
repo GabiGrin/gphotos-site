@@ -1,4 +1,3 @@
-import { createServerApi } from "@/app/server-lib/api";
 import { Database } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
