@@ -30,23 +30,22 @@ export function getGPhotosClient() {
       ).then((response) => response.json());
     },
     getImage: async ({
-      sessionId,
       token,
-      mediaItemId,
+      baseUrl,
+      width,
+      height,
     }: {
-      sessionId: string;
       token: string;
-      mediaItemId: string;
+      baseUrl: string;
+      width: number;
+      height: number;
     }): Promise<Blob> => {
-      return fetch(
-        `https://photospicker.googleapis.com/v1/mediaItems/${mediaItemId}?sessionId=${sessionId}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        }
-      ).then((response) => response.blob());
+      return fetch(`${baseUrl}=w${width}-h${height}`, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }).then((response) => response.blob());
     },
     getSession: async ({
       sessionId,

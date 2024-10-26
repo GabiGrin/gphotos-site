@@ -1,4 +1,4 @@
-import { MediaFile } from "./google-photos";
+import { MediaItem } from "./google-photos";
 import { Database } from "./supabase";
 
 export enum JobType {
@@ -26,7 +26,7 @@ export interface CreateProcessPageJobData extends BaseJobData {
 }
 
 export interface CreateImageUploadJobData extends BaseJobData {
-  imageFile: MediaFile;
+  mediaItem: MediaItem;
 }
 
 type DBJob = Database["public"]["Tables"]["jobs"]["Row"];
