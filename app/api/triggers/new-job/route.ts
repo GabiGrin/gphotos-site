@@ -125,6 +125,7 @@ export async function POST(req: NextRequest) {
         try {
           await processImage({
             userId: newJob.user_id,
+            sessionId: newJob.session_id,
             mediaItem,
             googleAccessToken,
           });

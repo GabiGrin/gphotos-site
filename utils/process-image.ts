@@ -7,10 +7,12 @@ import { MediaItem } from "@/types/google-photos";
 
 export async function processImage({
   userId,
+  sessionId,
   mediaItem,
   googleAccessToken,
 }: {
   userId: string;
+  sessionId: string;
   mediaItem: MediaItem;
   googleAccessToken: string;
 }): Promise<{
@@ -42,9 +44,13 @@ export async function processImage({
     // Upload the image to Supabase storage
     const { data, error } = await client.storage
       .from("images")
-      .upload(`${userId}/${mediaItem.mediaFile.filename}`, imageBlob, {
-        contentType: mediaItem.mediaFile.mimeType,
-      });
+      .upload(
+        `${userId}/${sessionId}/${mediaItem.mediaFile.filename}`,
+        imageBlob,
+        {
+          contentType: mediaItem.mediaFile.mimeType,
+        }
+      );
     if (error) throw error;
     if (!data) throw new Error("No data returned from storage");
 
@@ -53,7 +59,7 @@ export async function processImage({
     const { data: thumbnailData, error: thumbnailError } = await client.storage
       .from("thumbnails")
       .upload(
-        `${userId}/thumb_${mediaItem.mediaFile.filename}`,
+        `${userId}/${sessionId}/thumb_${mediaItem.mediaFile.filename}`,
         thumbnailBlob,
         {
           contentType: "image/jpeg", // Assuming we convert to JPEG for thumbnails
