@@ -89,6 +89,13 @@ export async function POST(req: NextRequest) {
             { jobId: newJob.id, itemId: item.id },
             "Creating image upload job"
           );
+          if (item.type !== "PHOTO") {
+            logger.info(
+              { jobId: newJob.id, itemId: item.id },
+              "Skipping non-image item"
+            );
+            continue;
+          }
           try {
             await serverApi.createImageUploadJob({
               parentJobId: newJob.id,
