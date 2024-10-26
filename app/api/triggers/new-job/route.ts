@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
       return error;
     }
     if (error && typeof error === "object" && "toString" in error) {
-      return error.toString();
+      try {
+        return JSON.stringify(error);
+      } catch (e) {
+        return error.toString();
+      }
     }
     return "An unknown error occurred";
   }
