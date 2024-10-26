@@ -14,7 +14,7 @@ type ProcessedImage = {
 export default async function UserGallery({
   params,
 }: {
-  params: { site: string };
+  params: Promise<{ site: string }>;
 }) {
   const { site } = await params;
   const supabase = await createServiceClient();
