@@ -12,7 +12,6 @@ export interface BaseJobDto {
   sessionId: string;
   googleAccessToken: string;
   userId: string;
-  parentJobId?: string;
 }
 
 export interface CreateProcessPageJobDto
@@ -37,7 +36,6 @@ export function createServerApi(client: SupabaseClient<Database>) {
             pageSize: data.pageSize,
           },
           user_id: data.userId,
-          parent_job_id: data.parentJobId,
         })
         .select();
       if (res.error) {
@@ -59,7 +57,6 @@ export function createServerApi(client: SupabaseClient<Database>) {
             googleAccessToken: data.googleAccessToken,
           },
           user_id: data.userId,
-          parent_job_id: data.parentJobId,
         })
         .select();
       if (res.error) {
