@@ -132,6 +132,7 @@ export async function POST(req: NextRequest) {
             sessionId: newJob.session_id,
             mediaItem,
             googleAccessToken,
+            thumbnailWidth: 400,
           });
 
           logger.info(
