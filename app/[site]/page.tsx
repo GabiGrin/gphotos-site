@@ -16,14 +16,14 @@ export default async function UserGallery({
 }: {
   params: { site: string };
 }) {
+  const { site } = await params;
   const supabase = await createServiceClient();
-  const userId = params.site;
 
   // Fetch processed images for the user from Supabase
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", site)
     .order("created_at", { ascending: false });
 
   if (error) {
