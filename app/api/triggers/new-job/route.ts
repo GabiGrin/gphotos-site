@@ -1,6 +1,9 @@
+import { Job, JobType } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/server";
+import { createServerApi } from "@/utils/server-lib/server-api";
+import { createServiceClient } from "@/utils/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
+import logger from "@/utils/logger";
 
 type InsertPayload<T> = {
   type: "INSERT";
@@ -11,33 +14,66 @@ type InsertPayload<T> = {
 };
 
 export async function POST(req: NextRequest) {
-  //   if (req.headers.get("x-bob") !== "yolo") {
-  //     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  //   }
-
-  const client = await createClient();
-  const { data, error } = await client.auth.getUser();
-  if (error) {
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
-  }
-
-  if (!data.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-
   const body = await req.json();
 
   const payload = body as InsertPayload<
     Database["public"]["Tables"]["jobs"]["Row"]
   >;
 
-  console.log("got payload", payload);
+  const newJob = payload.record as Job;
 
-  return NextResponse.json({
-    message: "Hello from the API!",
-    userId: data.user.id,
-  });
+  logger.info({ jobId: newJob.id, jobType: newJob.type }, "New job received");
+
+  const client = createServiceClient();
+  const serverApi = createServerApi(client);
+
+  function normalizeError(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return "An unknown error occurred";
+  }
+
+  await serverApi.markJobAsProcessing(newJob.id);
+  logger.debug({ jobId: newJob.id }, "Job marked as processing");
+
+  try {
+    switch (newJob.type) {
+      case JobType.PROCESS_PAGE: {
+        logger.info({ jobId: newJob.id }, "Processing PROCESS_PAGE job");
+        break;
+      }
+      case JobType.UPLOAD_IMAGE: {
+        logger.info({ jobId: newJob.id }, "Processing UPLOAD_IMAGE job");
+        break;
+      }
+      default: {
+        throw new Error("Invalid job type");
+      }
+    }
+    await serverApi.markJobAsCompleted(newJob.id);
+    logger.info({ jobId: newJob.id }, "Job processing completed");
+
+    return NextResponse.json(
+      {
+        message: "Job processing completed",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    const errorMessage = normalizeError(error);
+    await serverApi.markJobAsFailed(newJob.id, errorMessage);
+
+    logger.error(
+      { jobId: newJob.id, error: errorMessage },
+      "Job processing failed"
+    );
+
+    return NextResponse.json(
+      {
+        message: "Job processing failed",
+      },
+      { status: 200 }
+    );
+  }
 }

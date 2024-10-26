@@ -2,6 +2,7 @@ import {
   CreateProcessPageJobData,
   CreateImageUploadJobData,
   JobType,
+  JobStatus,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -67,6 +68,45 @@ export function createServerApi(client: SupabaseClient<Database>) {
         throw new Error("No data returned from insert");
       }
       return res.data[0];
+    },
+    markJobAsProcessing: async (jobId: string) => {
+      const res = await client
+        .from("jobs")
+        .update({
+          status: JobStatus.PROCESSING,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+    },
+    markJobAsCompleted: async (jobId: string) => {
+      const res = await client
+        .from("jobs")
+        .update({
+          status: JobStatus.COMPLETED,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+    },
+    markJobAsFailed: async (jobId: string, errorMessage: string) => {
+      const res = await client
+        .from("jobs")
+        .update({
+          status: JobStatus.FAILED,
+          updated_at: new Date().toISOString(),
+          last_error: errorMessage,
+        })
+        .eq("id", jobId);
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
     },
   };
 }

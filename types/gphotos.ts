@@ -7,6 +7,13 @@ export enum JobType {
   PROCESS_SESSION = "PROCESS_SESSION",
 }
 
+export enum JobStatus {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+}
+
 export interface BaseJobData {
   userId: string;
   parentJobId?: string;
