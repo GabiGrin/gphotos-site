@@ -5,6 +5,7 @@ import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getBaseUrl } from "@/utils/baseUrl";
 import { createClient } from "@/utils/supabase/client";
 import Link from "next/link";
 
@@ -18,7 +19,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     const signin = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `http://localhost:3000/auth/callback`,
+        redirectTo: `${getBaseUrl()}/auth/callback`,
         scopes:
           "https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
       },
