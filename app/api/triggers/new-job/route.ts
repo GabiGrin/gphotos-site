@@ -34,30 +34,31 @@ export async function POST(req: NextRequest) {
     return "An unknown error occurred";
   }
 
-  await serverApi.markJobAsProcessing(newJob.id);
-  logger.debug({ jobId: newJob.id }, "Job marked as processing");
-
   try {
+    await serverApi.markJobAsProcessing(newJob.id);
+    logger.debug({ jobId: newJob.id }, "Job marked as processing");
+
     switch (newJob.type) {
       case JobType.PROCESS_PAGE: {
         logger.info({ jobId: newJob.id }, "Processing PROCESS_PAGE job");
+        // Add your PROCESS_PAGE job logic here
         break;
       }
       case JobType.UPLOAD_IMAGE: {
         logger.info({ jobId: newJob.id }, "Processing UPLOAD_IMAGE job");
+        // Add your UPLOAD_IMAGE job logic here
         break;
       }
       default: {
-        throw new Error("Invalid job type");
+        throw new Error(`Invalid job type: ${newJob.type}`);
       }
     }
+
     await serverApi.markJobAsCompleted(newJob.id);
     logger.info({ jobId: newJob.id }, "Job processing completed");
 
     return NextResponse.json(
-      {
-        message: "Job processing completed",
-      },
+      { message: "Job processing completed" },
       { status: 200 }
     );
   } catch (error) {
@@ -70,9 +71,7 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json(
-      {
-        message: "Job processing failed",
-      },
+      { message: "Job processing failed" },
       { status: 200 }
     );
   }
