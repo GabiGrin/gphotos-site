@@ -62,6 +62,9 @@ importers:
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
     devDependencies:
       '@types/node':
         specifier: 20.10.6
@@ -72,6 +75,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.18
         version: 18.2.18
+      '@types/sharp':
+        specifier: ^0.31.1
+        version: 0.31.1
       postcss:
         specifier: 8.4.33
         version: 8.4.33
@@ -657,6 +663,9 @@ packages:
 
   '@types/scheduler@0.23.0':
     resolution: {integrity: sha512-YIoDCTH3Af6XM5VuwGG/QL/CJqga1Zm3NkU3HZ4ZHK2fRMPYP1VczsTUqtsf43PH/iJNVlPHAo2oWX7BSdB2Hw==}
+
+  '@types/sharp@0.31.1':
+    resolution: {integrity: sha512-5nWwamN9ZFHXaYEincMSuza8nNfOof8nmO+mcI+Agx1uMUk4/pQnNIcix+9rLPXzKrm1pS34+6WRDbDV0Jn7ag==}
 
   '@types/ws@8.5.12':
     resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
@@ -1950,6 +1959,10 @@ snapshots:
 
   '@types/scheduler@0.23.0': {}
 
+  '@types/sharp@0.31.1':
+    dependencies:
+      '@types/node': 20.10.6
+
   '@types/ws@8.5.12':
     dependencies:
       '@types/node': 20.10.6
@@ -2059,13 +2072,11 @@ snapshots:
     dependencies:
       color-name: 1.1.4
       simple-swizzle: 0.2.2
-    optional: true
 
   color@4.2.3:
     dependencies:
       color-convert: 2.0.1
       color-string: 1.9.1
-    optional: true
 
   colorette@2.0.20: {}
 
@@ -2085,8 +2096,7 @@ snapshots:
 
   dateformat@4.6.3: {}
 
-  detect-libc@2.0.3:
-    optional: true
+  detect-libc@2.0.3: {}
 
   detect-node-es@1.1.0: {}
 
@@ -2181,8 +2191,7 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
 
-  is-arrayish@0.3.2:
-    optional: true
+  is-arrayish@0.3.2: {}
 
   is-binary-path@2.1.0:
     dependencies:
@@ -2493,8 +2502,7 @@ snapshots:
 
   secure-json-parse@2.7.0: {}
 
-  semver@7.6.3:
-    optional: true
+  semver@7.6.3: {}
 
   sharp@0.33.5:
     dependencies:
@@ -2521,7 +2529,6 @@ snapshots:
       '@img/sharp-wasm32': 0.33.5
       '@img/sharp-win32-ia32': 0.33.5
       '@img/sharp-win32-x64': 0.33.5
-    optional: true
 
   shebang-command@2.0.0:
     dependencies:
@@ -2534,7 +2541,6 @@ snapshots:
   simple-swizzle@0.2.2:
     dependencies:
       is-arrayish: 0.3.2
-    optional: true
 
   sonic-boom@4.2.0:
     dependencies:

@@ -138,6 +138,8 @@ export async function POST(req: NextRequest) {
                 contentType: mediaItem.mediaFile.mimeType,
               }
             );
+          if (error) throw error;
+          if (!data) throw new Error("No data returned from storage");
 
           // Generate and upload thumbnail
           const thumbnailBlob = await createThumbnail(imageBlob, 200, 200);
@@ -153,41 +155,29 @@ export async function POST(req: NextRequest) {
               );
 
           if (thumbnailError) throw thumbnailError;
+          if (!thumbnailData) throw new Error("No data returned from storage");
 
           logger.info(
             { jobId: newJob.id, mediaItemId: mediaItem.id },
             "Full-size image and thumbnail uploaded successfully"
           );
 
-          if (error) throw error;
+          const imagePublicUrl = client.storage
+            .from("images")
+            .getPublicUrl(data.path).data.publicUrl;
+          const thumbnailPublicUrl = client.storage
+            .from("thumbnails")
+            .getPublicUrl(thumbnailData.path).data.publicUrl;
 
-          logger.info(
-            { jobId: newJob.id, mediaItemId: mediaItem.id },
-            "Image uploaded successfully"
-          );
-
-          // Save metadata about the uploaded image
-          const { data: metadataData, error: metadataError } = await client
-            .from("processed_images")
-            .insert({
-              path: data.path,
-              user_id: newJob.user_id,
-              gphotos_id: mediaItem.id,
-              raw_metadata: JSON.stringify(
-                mediaItem.mediaFile.mediaFileMetadata
-              ),
-              width: mediaItem.mediaFile.mediaFileMetadata.width,
-              height: mediaItem.mediaFile.mediaFileMetadata.height,
-              public_url: client.storage.from("images").getPublicUrl(data.path)
-                .data.publicUrl,
-              thumbnail_url: client.storage
-                .from("thumbnails")
-                .getPublicUrl(thumbnailData.path).data.publicUrl,
-              filename: mediaItem.mediaFile.filename,
-              mime_type: mediaItem.mediaFile.mimeType,
-            });
-
-          if (metadataError) throw metadataError;
+          // Save metadata about the uploaded image using the new method
+          await serverApi.saveProcessedImage({
+            userId: newJob.user_id,
+            mediaItem: mediaItem,
+            imagePath: data.path,
+            thumbnailPath: thumbnailData.path,
+            imagePublicUrl,
+            thumbnailPublicUrl,
+          });
 
           logger.info(
             { jobId: newJob.id, mediaItemId: mediaItem.id },

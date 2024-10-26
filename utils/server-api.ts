@@ -6,6 +6,7 @@ import {
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { MediaItem } from "@/types/google-photos";
 
 export interface BaseJobDto {
   sessionId: string;
@@ -54,7 +55,7 @@ export function createServerApi(client: SupabaseClient<Database>) {
           type: JobType.UPLOAD_IMAGE,
           session_id: data.sessionId,
           job_data: {
-            imageFile: data.imageFile as unknown as Json,
+            mediaItem: data.mediaItem as unknown as Json,
             googleAccessToken: data.googleAccessToken,
           },
           user_id: data.userId,
@@ -107,6 +108,33 @@ export function createServerApi(client: SupabaseClient<Database>) {
       if (res.error) {
         throw new Error(res.error.message);
       }
+    },
+    saveProcessedImage: async (params: {
+      userId: string;
+      mediaItem: MediaItem;
+      imagePath: string;
+      thumbnailPath: string;
+      imagePublicUrl: string;
+      thumbnailPublicUrl: string;
+    }) => {
+      const { data, error } = await client.from("processed_images").insert({
+        path: params.imagePath,
+        user_id: params.userId,
+        gphotos_id: params.mediaItem.id,
+        raw_metadata: JSON.stringify(
+          params.mediaItem.mediaFile.mediaFileMetadata
+        ),
+        width: params.mediaItem.mediaFile.mediaFileMetadata.width,
+        height: params.mediaItem.mediaFile.mediaFileMetadata.height,
+        public_url: params.imagePublicUrl,
+        thumbnail_url: params.thumbnailPublicUrl,
+        filename: params.mediaItem.mediaFile.filename,
+        mime_type: params.mediaItem.mediaFile.mimeType,
+      });
+
+      if (error) throw error;
+
+      return data;
     },
   };
 }
