@@ -67,3 +67,5 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add these styles at the end of your globals.css file */

@@ -34,6 +34,12 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error) {
       return error.message;
     }
+    if (typeof error === "string") {
+      return error;
+    }
+    if (error && typeof error === "object" && "toString" in error) {
+      return error.toString();
+    }
     return "An unknown error occurred";
   }
 
