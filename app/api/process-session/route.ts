@@ -37,41 +37,41 @@ export async function POST(req: NextRequest) {
 
   const serverApi = createServerApi(serviceClient);
 
-  const photosClient = await getGPhotosClient();
+  // const photosClient = await getGPhotosClient();
 
-  const photos = await photosClient.listMediaItems({
-    sessionId,
-    pageSize: 10,
-    googleAccessToken: googleAccessToken,
-  });
+  // const photos = await photosClient.listMediaItems({
+  //   sessionId,
+  //   pageSize: 10,
+  //   googleAccessToken: googleAccessToken,
+  // });
 
-  const first = photos.mediaItems[0];
+  // const first = photos.mediaItems[0];
 
-  const processedImage = await processGPhotosImage({
-    thumbnailWidth: 300,
-    userId: data.user.id,
-    sessionId,
-    mediaItem: first,
-    googleAccessToken,
-  });
+  // const processedImage = await processGPhotosImage({
+  //   thumbnailWidth: 300,
+  //   userId: data.user.id,
+  //   sessionId,
+  //   mediaItem: first,
+  //   googleAccessToken,
+  // });
 
-  return NextResponse.json({ processedImage }, { status: 200 });
+  // return NextResponse.json({ processedImage }, { status: 200 });
 
-  // try {
-  //   const job = await serverApi.createProcessPageJob({
-  //     userId: data.user.id,
-  //     sessionId,
-  //     googleAccessToken,
-  //     pageToken: "",
-  //     pageSize: 10,
-  //   });
+  try {
+    const job = await serverApi.createProcessPageJob({
+      userId: data.user.id,
+      sessionId,
+      googleAccessToken,
+      pageToken: "",
+      pageSize: 10,
+    });
 
-  //   return NextResponse.json({ jobId: job.id }, { status: 200 });
-  // } catch (error) {
-  //   console.error("error creating process page job", error);
-  //   return NextResponse.json(
-  //     { message: "Internal server error" },
-  //     { status: 500 }
-  //   );
-  // }
+    return NextResponse.json({ jobId: job.id }, { status: 200 });
+  } catch (error) {
+    console.error("error creating process page job", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

@@ -51,9 +51,16 @@ export default function ProtectedPage() {
 
   useEffect(() => {
     if (user) {
-      clientApi.getProcessedImages(user.id).then((images) => {
-        setProcessedImages(images);
-      });
+      console.log("Getting processed images");
+      clientApi
+        .getProcessedImages(user.id)
+        .then((images) => {
+          console.log("Images:", images);
+          setProcessedImages(images);
+        })
+        .catch((error) => {
+          console.error("Error getting processed images:", error);
+        });
     }
   }, [user]);
 
