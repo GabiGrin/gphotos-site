@@ -1,6 +1,6 @@
 import { Job, JobType } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
-import { createServerApi } from "@/utils/server-lib/server-api";
+import { createServerApi } from "@/utils/server-api";
 import { createServiceClient } from "@/utils/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
         break;
       }
       default: {
+        //@ts-expect-error
         throw new Error(`Invalid job type: ${newJob.type}`);
       }
     }

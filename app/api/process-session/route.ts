@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { createServerApi } from "@/utils/server-lib/server-api";
+import { createServerApi } from "@/utils/server-api";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();
