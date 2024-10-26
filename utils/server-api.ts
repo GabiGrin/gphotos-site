@@ -119,6 +119,8 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .from("processed_images")
         .insert({
           user_id: params.userId,
+          imported_at: new Date().toISOString(),
+          gphotos_created_at: params.mediaItem.createTime,
           gphotos_id: params.mediaItem.id,
           raw_metadata: JSON.stringify(
             params.mediaItem.mediaFile.mediaFileMetadata
@@ -136,6 +138,14 @@ export function createServerApi(client: SupabaseClient<Database>) {
       }
 
       return data[0] as ProcessedImage;
+    },
+    getProcessedImages: async (userId: string): Promise<ProcessedImage[]> => {
+      const { data, error } = await client
+        .from("processed_images")
+        .select()
+        .eq("user_id", userId);
+      if (error) throw error;
+      return data;
     },
   };
 }

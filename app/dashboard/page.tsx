@@ -1,13 +1,25 @@
 "use client";
 
+import { ProcessedImage } from "@/types/gphotos";
+import { createClientApi } from "@/utils/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { InfoIcon } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export default function ProtectedPage() {
   const supabase = createClient();
+
+  const clientApi = createClientApi(supabase);
 
   const [user, setUser] = useState<User | null>(null);
 
@@ -18,6 +30,8 @@ export default function ProtectedPage() {
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(
     null
   );
+
+  const [processedImages, setProcessedImages] = useState<ProcessedImage[]>();
 
   const router = useRouter();
 
@@ -34,6 +48,14 @@ export default function ProtectedPage() {
 
     getUser();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      clientApi.getProcessedImages(user.id).then((images) => {
+        setProcessedImages(images);
+      });
+    }
+  }, [user]);
 
   async function getGoogleAccessToken() {
     const session = await supabase.auth.getSession();
@@ -117,8 +139,6 @@ export default function ProtectedPage() {
     return "Loading..";
   }
 
-  // const googleAccessToken = await getGoogleAccessToken();
-
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <div className="flex flex-col items-center gap-4">
@@ -141,6 +161,38 @@ export default function ProtectedPage() {
 
         {user && <a href={`/${user.id}`}>View your images</a>}
       </div>
+
+      {processedImages && processedImages.length > 0 ? (
+        <div className="w-full">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">Thumbnail</TableHead>
+                <TableHead>Upload Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {processedImages.map((image, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Avatar className="h-20 w-20">
+                      <AvatarImage
+                        src={image.thumbnail_url}
+                        alt={`Thumbnail ${index + 1}`}
+                      />
+                    </Avatar>
+                  </TableCell>
+                  <TableCell>
+                    {new Date(image.gphotos_created_at).toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <p className="text-gray-600">No processed images available.</p>
+      )}
     </div>
   );
 }

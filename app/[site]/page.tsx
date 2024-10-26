@@ -1,15 +1,6 @@
 import { createServiceClient } from "@/utils/supabase/service";
 import MasonryGallery from "../components/MasonryGallery";
 
-// Define the type for our image data
-type ProcessedImage = {
-  id: string;
-  user_id: string;
-  public_url: string;
-  thumbnail_url: string;
-  created_at: string;
-};
-
 export default async function UserGallery({
   params,
 }: {
@@ -23,7 +14,7 @@ export default async function UserGallery({
     .from("processed_images")
     .select("*")
     .eq("user_id", site)
-    .order("created_at", { ascending: false });
+    .order("gphotos_created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching images:", error);
@@ -37,7 +28,7 @@ export default async function UserGallery({
   return (
     <div className="flex flex-col min-h-screen mx-2">
       <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-5xl mx-auto pb-16">
-        <header className="flex flex-col items-center max-w-2xl ">
+        <header className="flex flex-col items-center max-w-2xl mb-8">
           <h1 className="text-3xl mb-6 px-4">Gabriel's Photography</h1>
           <h3 className="text-center mb-6 text-[#444]">
             Welcome, my name is Gabriel Grinberg and I love taking pictures on

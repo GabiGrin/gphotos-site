@@ -50,10 +50,11 @@ export type Database = {
       }
       processed_images: {
         Row: {
-          created_at: string | null
+          gphotos_created_at: string
           gphotos_id: string | null
           height: number | null
           id: string
+          imported_at: string
           order: number | null
           public_url: string
           raw_metadata: Json | null
@@ -63,10 +64,11 @@ export type Database = {
           width: number | null
         }
         Insert: {
-          created_at?: string | null
+          gphotos_created_at: string
           gphotos_id?: string | null
           height?: number | null
           id?: string
+          imported_at?: string
           order?: number | null
           public_url: string
           raw_metadata?: Json | null
@@ -76,10 +78,11 @@ export type Database = {
           width?: number | null
         }
         Update: {
-          created_at?: string | null
+          gphotos_created_at?: string
           gphotos_id?: string | null
           height?: number | null
           id?: string
+          imported_at?: string
           order?: number | null
           public_url?: string
           raw_metadata?: Json | null

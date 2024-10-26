@@ -9,7 +9,7 @@ const maxWidth = 2048;
 const maxHeight = 2048;
 const thumbnailWidth = 500;
 
-export async function uploadImage({
+export async function processGPhotosImage({
   userId,
   sessionId,
   mediaItem,
