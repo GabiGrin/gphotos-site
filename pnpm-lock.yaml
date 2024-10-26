@@ -72,8 +72,8 @@ importers:
         specifier: ^1.0.16
         version: 1.0.16(react@18.2.0)
       react-responsive-masonry:
-        specifier: ^2.4.1
-        version: 2.4.1
+        specifier: ^2.2.0
+        version: 2.2.0
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
@@ -1226,8 +1226,8 @@ packages:
       '@types/react':
         optional: true
 
-  react-responsive-masonry@2.4.1:
-    resolution: {integrity: sha512-IK7SfU3hB2ZoyYNkRan4jo0gDUdUj1+X1n8INZux1otX1OtDEvL5JRolLlCXOEwVf9wmwJiOLc140UzBpNi9wA==}
+  react-responsive-masonry@2.2.0:
+    resolution: {integrity: sha512-IYbnfe2tWCZ3pvyTLyBWPj7uv5ZmNOULYMcAZi5a47ZLhSotOck1vkkISq6gP2qiyWdMvPfeMhjvYzUYGw9BOQ==}
 
   react-style-singleton@2.2.1:
     resolution: {integrity: sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==}
@@ -2494,7 +2494,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.2.46
 
-  react-responsive-masonry@2.4.1: {}
+  react-responsive-masonry@2.2.0: {}
 
   react-style-singleton@2.2.1(@types/react@18.2.46)(react@18.2.0):
     dependencies:

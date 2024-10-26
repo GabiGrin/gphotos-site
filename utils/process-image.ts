@@ -10,11 +10,13 @@ export async function processImage({
   sessionId,
   mediaItem,
   googleAccessToken,
+  thumbnailWidth,
 }: {
   userId: string;
   sessionId: string;
   mediaItem: MediaItem;
   googleAccessToken: string;
+  thumbnailWidth: number;
 }): Promise<{
   processedImageId: string;
   imagePublicUrl: string;
@@ -55,7 +57,7 @@ export async function processImage({
     if (!data) throw new Error("No data returned from storage");
 
     // Generate and upload thumbnail
-    const thumbnailBlob = await createThumbnail(imageBlob, 200, 200);
+    const thumbnailBlob = await createThumbnail(imageBlob, thumbnailWidth);
     const { data: thumbnailData, error: thumbnailError } = await client.storage
       .from("thumbnails")
       .upload(
@@ -96,7 +98,7 @@ export async function processImage({
     );
 
     return {
-      processedImageId: processedImage.path,
+      processedImageId: processedImage.id,
       imagePublicUrl,
       thumbnailPublicUrl,
     };

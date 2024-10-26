@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
         const items = await gphotos.listMediaItems({
           sessionId: newJob.session_id,
-          token: newJob.job_data.googleAccessToken,
+          googleAccessToken: newJob.job_data.googleAccessToken,
           pageSize: newJob.job_data.pageSize,
           pageToken: newJob.job_data.pageToken,
         });

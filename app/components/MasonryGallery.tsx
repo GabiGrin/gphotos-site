@@ -1,48 +1,29 @@
 "use client";
 
 import React from "react";
-import Masonry from "react-masonry-css";
-import Image from "next/image";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import { ProcessedImage } from "@/types/gphotos";
 
-type ProcessedImage = {
-  user_id: string;
-  public_url: string;
-  thumbnail_url: string;
-  created_at: string;
-  path: string;
-};
-
-interface MasonryGalleryProps {
+export default function MasonryGallery({
+  images,
+}: {
   images: ProcessedImage[];
-}
-
-const MasonryGallery: React.FC<MasonryGalleryProps> = ({ images }) => {
-  const breakpointColumnsObj = {
-    default: 4,
-    1100: 3,
-    700: 2,
-    500: 1,
-  };
-
+}) {
   return (
-    <Masonry
-      breakpointCols={breakpointColumnsObj}
-      className="flex w-auto -ml-4"
-      columnClassName="pl-4 bg-clip-padding"
+    <ResponsiveMasonry
+      columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3 }}
+      className="w-full"
     >
-      {images.map((image) => (
-        <div key={image.path} className="mb-4">
+      <Masonry gutter="2px">
+        {images.map((image) => (
           <img
-            src={image.thumbnail_url || image.public_url}
-            alt={`Processed image ${image.path}`}
-            width={300}
-            height={300}
+            key={image.id}
+            src={image.public_url}
+            alt={image.public_url}
             className="w-full"
           />
-        </div>
-      ))}
-    </Masonry>
+        ))}
+      </Masonry>
+    </ResponsiveMasonry>
   );
-};
-
-export default MasonryGallery;
+}

@@ -37,21 +37,41 @@ export async function POST(req: NextRequest) {
 
   const serverApi = createServerApi(serviceClient);
 
-  try {
-    const job = await serverApi.createProcessPageJob({
-      userId: data.user.id,
-      sessionId,
-      googleAccessToken,
-      pageToken: "",
-      pageSize: 10,
-    });
+  const photosClient = await getGPhotosClient();
 
-    return NextResponse.json({ jobId: job.id }, { status: 200 });
-  } catch (error) {
-    console.error("error creating process page job", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  const photos = await photosClient.listMediaItems({
+    sessionId,
+    pageSize: 10,
+    googleAccessToken: googleAccessToken,
+  });
+
+  const first = photos.mediaItems[0];
+
+  const processedImage = await processImage({
+    thumbnailWidth: 300,
+    userId: data.user.id,
+    sessionId,
+    mediaItem: first,
+    googleAccessToken,
+  });
+
+  return NextResponse.json({ processedImage }, { status: 200 });
+
+  // try {
+  //   const job = await serverApi.createProcessPageJob({
+  //     userId: data.user.id,
+  //     sessionId,
+  //     googleAccessToken,
+  //     pageToken: "",
+  //     pageSize: 10,
+  //   });
+
+  //   return NextResponse.json({ jobId: job.id }, { status: 200 });
+  // } catch (error) {
+  //   console.error("error creating process page job", error);
+  //   return NextResponse.json(
+  //     { message: "Internal server error" },
+  //     { status: 500 }
+  //   );
+  // }
 }

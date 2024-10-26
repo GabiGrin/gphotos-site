@@ -6,12 +6,12 @@ export function getGPhotosClient() {
       sessionId,
       pageToken,
       pageSize,
-      token,
+      googleAccessToken: token,
     }: {
       sessionId: string;
       pageToken?: string;
       pageSize: number;
-      token: string;
+      googleAccessToken: string;
     }): Promise<MediaItemsResponse> => {
       let itemsQuery = `sessionId=${sessionId}&pageSize=${pageSize}`;
       if (pageToken) {

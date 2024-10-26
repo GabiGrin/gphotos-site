@@ -42,3 +42,6 @@ export type ImageUploadJob = DBJob & {
 };
 
 export type Job = ProcessPageJob | ImageUploadJob;
+
+export type ProcessedImage =
+  Database["public"]["Tables"]["processed_images"]["Row"];

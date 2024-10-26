@@ -126,7 +126,7 @@ export default function ProtectedPage() {
           <a
             href={pickerUrl}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             className="text-blue-600 hover:underline"
           >
             Open Google Photos Picker
@@ -138,6 +138,8 @@ export default function ProtectedPage() {
         )}
 
         {imagesSet && <p className="text-green-600">Images are uploading...</p>}
+
+        {user && <a href={`/${user.id}`}>View your images</a>}
       </div>
     </div>
   );

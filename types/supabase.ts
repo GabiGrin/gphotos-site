@@ -53,8 +53,8 @@ export type Database = {
           created_at: string | null
           gphotos_id: string | null
           height: number | null
+          id: string
           order: number | null
-          path: string
           public_url: string
           raw_metadata: Json | null
           thumbnail_url: string | null
@@ -66,8 +66,8 @@ export type Database = {
           created_at?: string | null
           gphotos_id?: string | null
           height?: number | null
+          id?: string
           order?: number | null
-          path: string
           public_url: string
           raw_metadata?: Json | null
           thumbnail_url?: string | null
@@ -79,8 +79,8 @@ export type Database = {
           created_at?: string | null
           gphotos_id?: string | null
           height?: number | null
+          id?: string
           order?: number | null
-          path?: string
           public_url?: string
           raw_metadata?: Json | null
           thumbnail_url?: string | null

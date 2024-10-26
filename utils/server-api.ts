@@ -3,6 +3,7 @@ import {
   CreateImageUploadJobData,
   JobType,
   JobStatus,
+  ProcessedImage,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -113,11 +114,10 @@ export function createServerApi(client: SupabaseClient<Database>) {
       thumbnailPath: string;
       imagePublicUrl: string;
       thumbnailPublicUrl: string;
-    }) => {
+    }): Promise<ProcessedImage> => {
       const { data, error } = await client
         .from("processed_images")
         .insert({
-          path: params.imagePath,
           user_id: params.userId,
           gphotos_id: params.mediaItem.id,
           raw_metadata: JSON.stringify(
@@ -131,9 +131,11 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .select();
 
       if (error) throw error;
-      if (!data) throw new Error("No data returned from insert");
+      if (!data || data.length === 0) {
+        throw new Error("No data returned from insert");
+      }
 
-      return data[0];
+      return data[0] as ProcessedImage;
     },
   };
 }
