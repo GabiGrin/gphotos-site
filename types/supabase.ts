@@ -57,7 +57,7 @@ export type Database = {
           order: number | null
           public_url: string
           raw_metadata: Json | null
-          thumbnail_url: string | null
+          thumbnail_url: string
           user_id: string
           visible: boolean | null
           width: number | null
@@ -70,7 +70,7 @@ export type Database = {
           order?: number | null
           public_url: string
           raw_metadata?: Json | null
-          thumbnail_url?: string | null
+          thumbnail_url: string
           user_id: string
           visible?: boolean | null
           width?: number | null
@@ -83,7 +83,7 @@ export type Database = {
           order?: number | null
           public_url?: string
           raw_metadata?: Json | null
-          thumbnail_url?: string | null
+          thumbnail_url?: string
           user_id?: string
           visible?: boolean | null
           width?: number | null

@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { createThumbnail } from "@/utils/create-thumbnail";
-import { processImage } from "@/utils/process-image";
+import { uploadImage } from "@/utils/process-image";
 
 type InsertPayload<T> = {
   type: "INSERT";
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       case JobType.UPLOAD_IMAGE: {
         const { mediaItem, googleAccessToken } = newJob.job_data;
         try {
-          await processImage({
+          await uploadImage({
             userId: newJob.user_id,
             sessionId: newJob.session_id,
             mediaItem,

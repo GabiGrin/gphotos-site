@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createServerApi } from "@/utils/server-api";
 import { getGPhotosClient } from "@/utils/gphotos";
-import { processImage } from "@/utils/process-image";
+import { uploadImage } from "@/utils/process-image";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();

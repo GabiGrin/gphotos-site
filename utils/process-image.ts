@@ -5,12 +5,15 @@ import { createThumbnail } from "@/utils/create-thumbnail";
 import logger from "@/utils/logger";
 import { MediaItem } from "@/types/google-photos";
 
-export async function processImage({
+const maxWidth = 2048;
+const maxHeight = 2048;
+const thumbnailWidth = 500;
+
+export async function uploadImage({
   userId,
   sessionId,
   mediaItem,
   googleAccessToken,
-  thumbnailWidth,
 }: {
   userId: string;
   sessionId: string;
@@ -27,15 +30,43 @@ export async function processImage({
   const { getImage } = getGPhotosClient();
 
   try {
+    // Calculate reasonable max dimensions for the image
+
+    const originalWidth = mediaItem.mediaFile.mediaFileMetadata.width;
+    const originalHeight = mediaItem.mediaFile.mediaFileMetadata.height;
+    const aspectRatio = originalWidth / originalHeight;
+
+    let requestedWidth, requestedHeight;
+
+    if (aspectRatio > 1) {
+      // Landscape orientation
+      requestedWidth = Math.min(maxWidth, originalWidth);
+      requestedHeight = Math.round(requestedWidth / aspectRatio);
+    } else {
+      // Portrait orientation
+      requestedHeight = Math.min(maxHeight, originalHeight);
+      requestedWidth = Math.round(requestedHeight * aspectRatio);
+    }
+
+    // Ensure both dimensions are within limits
+    if (requestedWidth > maxWidth) {
+      requestedWidth = maxWidth;
+      requestedHeight = Math.round(maxWidth / aspectRatio);
+    }
+    if (requestedHeight > maxHeight) {
+      requestedHeight = maxHeight;
+      requestedWidth = Math.round(maxHeight * aspectRatio);
+    }
+
     logger.info(
-      { userId, mediaItemId: mediaItem.id },
+      { userId, mediaItemId: mediaItem.id, requestedWidth, requestedHeight },
       "Fetching image from Google Photos"
     );
     const imageBlob = await getImage({
       token: googleAccessToken,
       baseUrl: mediaItem.mediaFile.baseUrl,
-      width: mediaItem.mediaFile.mediaFileMetadata.width,
-      height: mediaItem.mediaFile.mediaFileMetadata.height,
+      width: requestedWidth,
+      height: requestedHeight,
     });
 
     logger.info(
