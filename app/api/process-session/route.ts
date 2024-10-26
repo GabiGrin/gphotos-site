@@ -38,35 +38,15 @@ export async function POST(req: NextRequest) {
   const serverApi = createServerApi(serviceClient);
 
   try {
-    const gphotosClient = getGPhotosClient();
-    const images = await gphotosClient.listMediaItems({
+    const job = await serverApi.createProcessPageJob({
+      userId: data.user.id,
       sessionId,
-      token: googleAccessToken,
+      googleAccessToken,
+      pageToken: "",
       pageSize: 10,
     });
 
-    const first = images.mediaItems[0];
-
-    const processedImage = await processImage({
-      googleAccessToken,
-      userId: data.user.id,
-      mediaItem: first,
-    });
-
-    // const job = await serverApi.createProcessPageJob({
-    //   userId: data.user.id,
-    //   sessionId,
-    //   googleAccessToken,
-    //   pageToken: "",
-    //   pageSize: 10,
-    // });
-
-    return NextResponse.json(
-      { processedImageId: processedImage.processedImageId },
-      { status: 200 }
-    );
-    return NextResponse.json({ images }, { status: 200 });
-    // return NextResponse.json({ jobId: job.id }, { status: 200 });
+    return NextResponse.json({ jobId: job.id }, { status: 200 });
   } catch (error) {
     console.error("error creating process page job", error);
     return NextResponse.json(
