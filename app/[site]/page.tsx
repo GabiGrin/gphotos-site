@@ -35,28 +35,30 @@ export default async function UserGallery({
   }
 
   return (
-    <div className="flex flex-col items-center py-4">
-      <header className="flex flex-col items-center max-w-2xl">
-        <h1 className="text-3xl mb-6 px-4">Gabriel's Photography</h1>
-        <h3 className="text-center mb-6 text-[#444]">
-          Welcome, my name is Gabriel Grinberg and I love taking pictures on my
-          phone. Feel free to explore and reach out for more information.
-        </h3>
-      </header>
-      <MasonryGallery images={images} />
-      <footer className="text-center mt-4">
-        Powered by{" "}
-        <a
-          href="https://photos.gphotos.app"
-          target="_blank"
-          className="text-blue-800 font-bold"
-        >
-          GPhotos.site
-        </a>
+    <div className="flex flex-col min-h-screen mx-2">
+      <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-5xl mx-auto pb-16">
+        <header className="flex flex-col items-center max-w-2xl ">
+          <h1 className="text-3xl mb-6 px-4">Gabriel's Photography</h1>
+          <h3 className="text-center mb-6 text-[#444]">
+            Welcome, my name is Gabriel Grinberg and I love taking pictures on
+            my phone. Feel free to explore and reach out for more information.
+          </h3>
+        </header>
+        <MasonryGallery images={images} />
+      </div>
+      <footer className="fixed bottom-0 left-0 w-full py-2 bg-white bg-opacity-80 backdrop-blur-sm shadow-md">
+        <div className="text-center text-xs text-gray-600">
+          Powered by{" "}
+          <a
+            href="https://photos.gphotos.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium"
+          >
+            GPhotos.site
+          </a>
+        </div>
       </footer>
     </div>
-    // <div className="w-full">
-    //   {/* <h1 className="text-3xl font-bold mb-6 px-4">User Gallery</h1> */}
-    // </div>
   );
 }

@@ -21,20 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <main className="flex flex-col items-center">
-            <div className="flex flex-col max-w-5xl p-5 flex-1 w-full">
-              {children}
-            </div>
-          </main>
-        </ThemeProvider>
-      </body>
+      <body className="bg-background text-foreground">{children}</body>
     </html>
   );
 }
