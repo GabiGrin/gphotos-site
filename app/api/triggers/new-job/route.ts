@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { createThumbnail } from "@/utils/create-thumbnail";
+import { processImage } from "@/utils/process-image";
 
 type InsertPayload<T> = {
   type: "INSERT";
@@ -107,81 +108,17 @@ export async function POST(req: NextRequest) {
         break;
       }
       case JobType.UPLOAD_IMAGE: {
-        logger.info({ jobId: newJob.id }, "Processing UPLOAD_IMAGE job");
-        const { getImage } = getGPhotosClient();
         const { mediaItem, googleAccessToken } = newJob.job_data;
-
         try {
-          logger.info(
-            { jobId: newJob.id, mediaItemId: mediaItem.id },
-            "Fetching image from Google Photos"
-          );
-          const imageBlob = await getImage({
-            token: googleAccessToken,
-            baseUrl: mediaItem.mediaFile.baseUrl,
-            width: mediaItem.mediaFile.mediaFileMetadata.width,
-            height: mediaItem.mediaFile.mediaFileMetadata.height,
-          });
-
-          logger.info(
-            { jobId: newJob.id, mediaItemId: mediaItem.id },
-            "Image fetched, preparing for upload"
-          );
-
-          // Upload the image to Supabase storage
-          const { data, error } = await client.storage
-            .from("images")
-            .upload(
-              `${newJob.user_id}/${mediaItem.mediaFile.filename}`,
-              imageBlob,
-              {
-                contentType: mediaItem.mediaFile.mimeType,
-              }
-            );
-          if (error) throw error;
-          if (!data) throw new Error("No data returned from storage");
-
-          // Generate and upload thumbnail
-          const thumbnailBlob = await createThumbnail(imageBlob, 200, 200);
-          const { data: thumbnailData, error: thumbnailError } =
-            await client.storage
-              .from("thumbnails")
-              .upload(
-                `${newJob.user_id}/thumb_${mediaItem.mediaFile.filename}`,
-                thumbnailBlob,
-                {
-                  contentType: "image/jpeg", // Assuming we convert to JPEG for thumbnails
-                }
-              );
-
-          if (thumbnailError) throw thumbnailError;
-          if (!thumbnailData) throw new Error("No data returned from storage");
-
-          logger.info(
-            { jobId: newJob.id, mediaItemId: mediaItem.id },
-            "Full-size image and thumbnail uploaded successfully"
-          );
-
-          const imagePublicUrl = client.storage
-            .from("images")
-            .getPublicUrl(data.path).data.publicUrl;
-          const thumbnailPublicUrl = client.storage
-            .from("thumbnails")
-            .getPublicUrl(thumbnailData.path).data.publicUrl;
-
-          // Save metadata about the uploaded image using the new method
-          await serverApi.saveProcessedImage({
+          await processImage({
             userId: newJob.user_id,
-            mediaItem: mediaItem,
-            imagePath: data.path,
-            thumbnailPath: thumbnailData.path,
-            imagePublicUrl,
-            thumbnailPublicUrl,
+            mediaItem,
+            googleAccessToken,
           });
 
           logger.info(
             { jobId: newJob.id, mediaItemId: mediaItem.id },
-            "Image metadata saved"
+            "Image processed and added to database"
           );
         } catch (error) {
           logger.error(

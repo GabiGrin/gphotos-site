@@ -114,24 +114,26 @@ export function createServerApi(client: SupabaseClient<Database>) {
       imagePublicUrl: string;
       thumbnailPublicUrl: string;
     }) => {
-      const { data, error } = await client.from("processed_images").insert({
-        path: params.imagePath,
-        user_id: params.userId,
-        gphotos_id: params.mediaItem.id,
-        raw_metadata: JSON.stringify(
-          params.mediaItem.mediaFile.mediaFileMetadata
-        ),
-        width: params.mediaItem.mediaFile.mediaFileMetadata.width,
-        height: params.mediaItem.mediaFile.mediaFileMetadata.height,
-        public_url: params.imagePublicUrl,
-        thumbnail_url: params.thumbnailPublicUrl,
-        filename: params.mediaItem.mediaFile.filename,
-        mime_type: params.mediaItem.mediaFile.mimeType,
-      });
+      const { data, error } = await client
+        .from("processed_images")
+        .insert({
+          path: params.imagePath,
+          user_id: params.userId,
+          gphotos_id: params.mediaItem.id,
+          raw_metadata: JSON.stringify(
+            params.mediaItem.mediaFile.mediaFileMetadata
+          ),
+          width: params.mediaItem.mediaFile.mediaFileMetadata.width,
+          height: params.mediaItem.mediaFile.mediaFileMetadata.height,
+          public_url: params.imagePublicUrl,
+          thumbnail_url: params.thumbnailPublicUrl,
+        })
+        .select();
 
       if (error) throw error;
+      if (!data) throw new Error("No data returned from insert");
 
-      return data;
+      return data[0];
     },
   };
 }

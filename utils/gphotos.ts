@@ -10,7 +10,7 @@ export function getGPhotosClient() {
     }: {
       sessionId: string;
       pageToken?: string;
-      pageSize?: number;
+      pageSize: number;
       token: string;
     }): Promise<MediaItemsResponse> => {
       let itemsQuery = `sessionId=${sessionId}&pageSize=${pageSize}`;

@@ -2,6 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createServerApi } from "@/utils/server-api";
+import { getGPhotosClient } from "@/utils/gphotos";
+import { processImage } from "@/utils/process-image";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();
@@ -36,15 +38,35 @@ export async function POST(req: NextRequest) {
   const serverApi = createServerApi(serviceClient);
 
   try {
-    const job = await serverApi.createProcessPageJob({
-      userId: data.user.id,
+    const gphotosClient = getGPhotosClient();
+    const images = await gphotosClient.listMediaItems({
       sessionId,
-      googleAccessToken,
-      pageToken: "",
+      token: googleAccessToken,
       pageSize: 10,
     });
 
-    return NextResponse.json({ jobId: job.id }, { status: 200 });
+    const first = images.mediaItems[0];
+
+    const processedImage = await processImage({
+      googleAccessToken,
+      userId: data.user.id,
+      mediaItem: first,
+    });
+
+    // const job = await serverApi.createProcessPageJob({
+    //   userId: data.user.id,
+    //   sessionId,
+    //   googleAccessToken,
+    //   pageToken: "",
+    //   pageSize: 10,
+    // });
+
+    return NextResponse.json(
+      { processedImageId: processedImage.processedImageId },
+      { status: 200 }
+    );
+    return NextResponse.json({ images }, { status: 200 });
+    // return NextResponse.json({ jobId: job.id }, { status: 200 });
   } catch (error) {
     console.error("error creating process page job", error);
     return NextResponse.json(
