@@ -55,8 +55,9 @@ export type Database = {
           height: number | null
           order: number | null
           path: string
+          public_url: string
           raw_metadata: Json | null
-          thumbnail_path: string | null
+          thumbnail_url: string | null
           user_id: string
           visible: boolean | null
           width: number | null
@@ -67,8 +68,9 @@ export type Database = {
           height?: number | null
           order?: number | null
           path: string
+          public_url: string
           raw_metadata?: Json | null
-          thumbnail_path?: string | null
+          thumbnail_url?: string | null
           user_id: string
           visible?: boolean | null
           width?: number | null
@@ -79,8 +81,9 @@ export type Database = {
           height?: number | null
           order?: number | null
           path?: string
+          public_url?: string
           raw_metadata?: Json | null
-          thumbnail_path?: string | null
+          thumbnail_url?: string | null
           user_id?: string
           visible?: boolean | null
           width?: number | null
