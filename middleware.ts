@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { updateSession } from "@/utils/supabase/middleware";
+import logger from "./utils/logger";
 
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl;
@@ -11,6 +12,8 @@ export async function middleware(req: NextRequest) {
       ".local-gphotos.site:3000",
       `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     );
+
+  logger.info({ hostname }, "Middleware hostname");
 
   const searchParams = req.nextUrl.searchParams.toString();
   // Get the pathname of the request (e.g. /, /about, /blog/first-post)

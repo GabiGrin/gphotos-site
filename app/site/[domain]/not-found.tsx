@@ -10,7 +10,7 @@ export default function NotFound({ domain }: { domain: string }) {
           Create your own beautiful photo gallery with GPhotos.site in minutes.
         </p>
         <Link
-          href="/sign-up"
+          href="/sign-in"
           className="bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors duration-200"
         >
           Sign Up Now
