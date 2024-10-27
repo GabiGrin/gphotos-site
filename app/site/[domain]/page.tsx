@@ -1,28 +1,46 @@
 import { createServiceClient } from "@/utils/supabase/service";
-import MasonryGallery from "../components/MasonryGallery";
+import MasonryGallery from "../../components/MasonryGallery";
+import Link from "next/link";
+import { createServerApi } from "@/utils/server-api";
+import logger from "@/utils/logger";
+import NotFound from "./not-found";
 
 export default async function UserGallery({
   params,
 }: {
-  params: Promise<{ site: string }>;
+  params: Promise<{ domain: string }>;
 }) {
-  const { site } = await params;
+  const { domain } = await params;
   const supabase = await createServiceClient();
 
+  const serverApi = createServerApi(supabase);
+
   // Fetch processed images for the user from Supabase
+
+  const host = domain.replace(".gphotos.site", "");
+
+  console.log(42, host);
+
+  const site = await serverApi.getUserSite(host).catch((e) => {
+    logger.error(e);
+    return null;
+  });
+
+  console.log(42, site);
+
+  if (!site) {
+    return <NotFound domain={domain} />;
+  }
+
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
-    .eq("user_id", site)
+    .eq("user_id", site.user_id)
     .order("gphotos_created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching images:", error);
+    logger.error(error);
     return <div>Error loading images. Please try again later.</div>;
-  }
-
-  if (!images || images.length === 0) {
-    return <div>No images found for this user.</div>;
   }
 
   return (

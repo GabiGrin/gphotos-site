@@ -4,6 +4,7 @@ import {
   JobType,
   JobStatus,
   ProcessedImage,
+  Site,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -146,6 +147,28 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .eq("user_id", userId);
       if (error) throw error;
       return data;
+    },
+    getUserSite: async (username: string): Promise<Site> => {
+      const { data, error } = await client
+        .from("sites")
+        .select()
+        .eq("username", username);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("No data returned from select");
+      }
+      return data[0] as Site;
+    },
+    createUserSite: async (site: Site) => {
+      const { data, error } = await client.from("sites").insert(site);
+      if (error) throw error;
+    },
+    updateUserSite: async (site: Site) => {
+      const { data, error } = await client
+        .from("sites")
+        .update(site)
+        .eq("user_id", site.user_id);
+      if (error) throw error;
     },
   };
 }
