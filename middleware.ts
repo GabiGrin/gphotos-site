@@ -25,7 +25,7 @@ export async function middleware(req: NextRequest) {
   if (hostname == `app.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
     await updateSession(req);
 
-    if (path.startsWith("/sign-")) {
+    if (path.startsWith("/sign-") || path.startsWith("/auth")) {
       return NextResponse.next();
     }
 
