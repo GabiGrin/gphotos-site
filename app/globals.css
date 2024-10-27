@@ -69,3 +69,7 @@
 }
 
 /* Add these styles at the end of your globals.css file */
+
+.main-btn {
+  @apply bg-white border-gray-200 border px-3 py-[3px] flex flex-row gap-3 items-center text-sm rounded-[5px];
+}

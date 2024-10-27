@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getSiteUrl } from "@/utils/baseUrl";
-import SettingsPanel from "./SettingsPanel";
-import UserSite from "@/app/components/UserSite";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -154,21 +152,8 @@ export default function DashboardPage() {
     return "Loading..";
   }
 
-  console.log("Site:", site);
-
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <SettingsPanel
-        site={site ?? ({} as any)}
-        onChange={(config) => {
-          console.log("Config changed:", config);
-        }}
-      />
-
-      <UserSite
-        layoutConfig={site?.layout_config ?? ({} as any)}
-        images={processedImages || []}
-      />
       <div className="flex flex-col items-center gap-4">
         {pickerUrl && (
           <a
