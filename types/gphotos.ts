@@ -48,13 +48,25 @@ export type ProcessedImage =
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"];
 
-export type LayoutConfig = Site["layout_config"] & {
+export type LayoutConfig = {
   content?: {
     title?: string;
     description?: string;
   };
-  links?: {
-    email?: string;
+  buttons?: {
+    email?: {
+      show: boolean;
+      value?: string;
+    };
+    share?: {
+      show: boolean;
+      value?: string;
+    };
+    website?: {
+      show: boolean;
+      value?: string;
+    };
   };
   maxColumns?: number;
+  sort?: "newest" | "oldest";
 };

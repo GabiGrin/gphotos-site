@@ -22,9 +22,19 @@ import Link from "next/link";
 export default function SettingsPanel(props: {
   site: Site;
   onChange: (config: LayoutConfig) => void;
+  defaultEmail: string;
 }) {
+  const config = (props.site.layout_config as LayoutConfig) ?? {};
+
+  const updateConfig = (updates: Partial<LayoutConfig>) => {
+    props.onChange({
+      ...config,
+      ...updates,
+    });
+  };
+
   return (
-    <div className="bg-zinc-50 w-full antialiased">
+    <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
       <div className="max-w-5xl mx-auto px-4 py-1 flex flex-col items-center justify-between gap-5 py-8">
         <h1 className="text-2xl font-medium tracking-tight text-center">
           Edit your gallery
@@ -60,21 +70,58 @@ export default function SettingsPanel(props: {
 
             <div className="grid grid-cols-[auto_auto_1fr_auto] gap-x-2 gap-y-1 grid-flow-row-dense	grid-rows-3 p-2 items-center">
               <ShareIcon />
-              <Switch id="share-button" />
+              <Switch
+                id="share-button"
+                checked={config.buttons?.share?.show}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      share: { ...config?.buttons?.share, show: checked },
+                    },
+                  })
+                }
+              />
               <Label htmlFor="share-button" className="text-sm font-normal">
                 Share
               </Label>
               <button className="main-btn">Edit</button>
 
               <EmailIcon />
-              <Switch id="email-button" />
+              <Switch
+                id="email-button"
+                checked={Boolean(config.buttons?.email)}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      email: checked
+                        ? { show: true, value: props.defaultEmail }
+                        : undefined,
+                    },
+                  })
+                }
+              />
               <Label htmlFor="email-button" className="text-sm font-normal">
                 Email
               </Label>
               <button className="main-btn">Edit</button>
 
               <WebsiteIcon />
-              <Switch id="website-button" />
+              <Switch
+                id="website-button"
+                checked={Boolean(config.buttons?.website)}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      website: checked
+                        ? { show: true, value: "https://www.example.com" }
+                        : undefined,
+                    },
+                  })
+                }
+              />
               <Label htmlFor="website-button" className="text-sm font-normal">
                 Website
               </Label>
@@ -85,7 +132,18 @@ export default function SettingsPanel(props: {
             <h2 className="text-sm font-medium mb-1">Display</h2>
             <div className="grid grid-cols-[auto_auto_1fr_auto] gap-x-2 gap-y-1 grid-flow-row-dense	grid-rows-3 p-2 items-center">
               <HeadingIcon className="col-span-[20px]" />
-              <Switch id="heading-button" />
+              <Switch
+                id="heading-button"
+                checked={Boolean(config.content?.title)}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    content: {
+                      ...config.content,
+                      title: checked ? "" : undefined,
+                    },
+                  })
+                }
+              />
               <Label htmlFor="heading-button" className="text-sm font-normal">
                 Heading
               </Label>
@@ -94,7 +152,18 @@ export default function SettingsPanel(props: {
               </div>
 
               <TextIcon />
-              <Switch id="text-button" />
+              <Switch
+                id="text-button"
+                checked={Boolean(config.content?.description)}
+                onCheckedChange={(checked) =>
+                  updateConfig({
+                    content: {
+                      ...config.content,
+                      description: checked ? "" : undefined,
+                    },
+                  })
+                }
+              />
               <Label htmlFor="text-button" className="text-sm font-normal">
                 Description
               </Label>
@@ -112,7 +181,7 @@ export default function SettingsPanel(props: {
               </div>
               <ColumnsIcon />
               <Label htmlFor="columns-button" className="text-sm font-normal">
-                Columns
+                Max. Columns
               </Label>
               <div />
               <div className="flex flex-row gap-1">

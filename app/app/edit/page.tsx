@@ -1,6 +1,6 @@
 "use client";
 
-import { ProcessedImage, Site } from "@/types/gphotos";
+import { LayoutConfig, ProcessedImage, Site } from "@/types/gphotos";
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -150,18 +150,22 @@ export default function DashboardPage() {
     }
   }, [imagesSet]);
 
+  const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(
+    site?.layout_config ?? ({} as any)
+  );
+
   if (!user) {
     return "Loading..";
   }
 
-  console.log("Site:", site);
-
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <SettingsPanel
-        site={site ?? ({} as any)}
+        defaultEmail={user?.email ?? ""}
+        site={{ ...site, layout_config: layoutConfig } as Site}
         onChange={(config) => {
           console.log("Config changed:", config);
+          setLayoutConfig(config);
         }}
       />
 
