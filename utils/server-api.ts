@@ -148,7 +148,7 @@ export function createServerApi(client: SupabaseClient<Database>) {
       if (error) throw error;
       return data;
     },
-    getUserSite: async (username: string): Promise<Site> => {
+    getSiteByUsername: async (username: string): Promise<Site> => {
       const { data, error } = await client
         .from("sites")
         .select()
@@ -157,6 +157,14 @@ export function createServerApi(client: SupabaseClient<Database>) {
       if (!data || data.length === 0) {
         throw new Error("No data returned from select");
       }
+      return data[0] as Site;
+    },
+    getSiteByUserId: async (userId: string): Promise<Site> => {
+      const { data, error } = await client
+        .from("sites")
+        .select()
+        .eq("user_id", userId);
+      if (error) throw error;
       return data[0] as Site;
     },
     createUserSite: async (site: Site) => {
@@ -169,6 +177,29 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .update(site)
         .eq("user_id", site.user_id);
       if (error) throw error;
+    },
+    createSite: async (params: {
+      userId: string;
+      username: string;
+      siteName: string;
+    }): Promise<Site> => {
+      const { data, error } = await client
+        .from("sites")
+        .insert({
+          user_id: params.userId,
+          username: params.username,
+          layout_config: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select();
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error("No data returned from insert");
+      }
+
+      return data[0] as Site;
     },
   };
 }

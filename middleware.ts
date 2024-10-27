@@ -18,9 +18,19 @@ export async function middleware(req: NextRequest) {
     searchParams.length > 0 ? `?${searchParams}` : ""
   }`;
 
-  await updateSession(req);
+  // rewrites for app pages
+  if (hostname == `app.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`) {
+    await updateSession(req);
 
-  console.log(42, hostname);
+    if (path.startsWith("/auth")) {
+      return NextResponse.next();
+    }
+
+    return NextResponse.rewrite(
+      new URL(`/app${path === "/" ? "" : path}`, req.url)
+    );
+  }
+
   // rewrite everything else to `/[domain]/[slug] dynamic route
   return NextResponse.rewrite(new URL(`/site/${hostname}${path}`, req.url));
 }

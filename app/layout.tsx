@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { CSPostHogProvider } from "./posthog-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="bg-background text-foreground">{children}</body>
+      <CSPostHogProvider>
+        <body className="bg-background text-foreground">{children}</body>
+      </CSPostHogProvider>
     </html>
   );
 }

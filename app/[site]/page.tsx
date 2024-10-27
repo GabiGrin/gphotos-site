@@ -1,54 +1,48 @@
 import { createServiceClient } from "@/utils/supabase/service";
-import MasonryGallery from "../../components/MasonryGallery";
+import MasonryGallery from "../components/MasonryGallery";
 import Link from "next/link";
-import { createServerApi } from "@/utils/server-api";
-import logger from "@/utils/logger";
-import NotFound from "./not-found";
-import posthogServer from "@/utils/posthog";
 
 export default async function UserGallery({
   params,
 }: {
-  params: Promise<{ domain: string }>;
+  params: Promise<{ site: string }>;
 }) {
-  const { domain } = await params;
+  const { site } = await params;
   const supabase = await createServiceClient();
 
-  const serverApi = createServerApi(supabase);
-
   // Fetch processed images for the user from Supabase
-
-  const host = domain.replace(".gphotos.site", "");
-
-  logger.info({ host }, "UserGallery host");
-
-  const site = await serverApi.getSiteByUsername(host).catch((e) => {
-    logger.error(e, "UserGallery getSiteByUsername error");
-    return null;
-  });
-
-  if (!site) {
-    return <NotFound domain={domain} />;
-  }
 
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
-    .eq("user_id", site.user_id)
+    .eq("user_id", site)
     .order("gphotos_created_at", { ascending: false });
 
-  if (error) {
-    logger.error(error, "UserGallery getProcessedImages error");
-    return <div>Error loading images. Please try again later.</div>;
-  }
+  // if (error) {
+  //   console.error("Error fetching images:", error);
+  //   return <div>Error loading images. Please try again later.</div>;
+  // }
 
-  posthogServer.capture({
-    event: "view_site",
-    distinctId: site.user_id,
-    properties: {
-      domain,
-    },
-  });
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800">
+        <div className="max-w-md text-center px-4">
+          <h1 className="text-4xl font-bold mb-4">Site Not Found</h1>
+          <p className="text-xl mb-8">{site}.gphotos.site is available!</p>
+          <p className="text-lg mb-8">
+            Create your own beautiful photo gallery with GPhotos.site in
+            minutes.
+          </p>
+          <Link
+            href="/sign-up"
+            className="bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors duration-200"
+          >
+            Sign Up Now
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen mx-2">

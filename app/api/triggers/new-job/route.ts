@@ -1,4 +1,4 @@
-import { Job, JobType } from "@/types/gphotos";
+import { CreateImageUploadJobData, Job, JobType } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
 import { createServerApi } from "@/utils/server-api";
 import { createServiceClient } from "@/utils/supabase/service";
@@ -7,6 +7,7 @@ import logger from "@/utils/logger";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { createThumbnail } from "@/utils/create-thumbnail";
 import { processGPhotosImage } from "@/utils/process-gphotos-image";
+import posthogServer from "@/utils/posthog";
 
 type InsertPayload<T> = {
   type: "INSERT";
@@ -26,6 +27,14 @@ export async function POST(req: NextRequest) {
   const newJob = payload.record as Job;
 
   logger.info({ jobId: newJob.id, jobType: newJob.type }, "New job received");
+  posthogServer.capture({
+    distinctId: newJob.user_id,
+    event: "job_started",
+    properties: {
+      jobId: newJob.id,
+      jobType: newJob.type,
+    },
+  });
 
   const client = createServiceClient();
   const serverApi = createServerApi(client);
@@ -121,6 +130,16 @@ export async function POST(req: NextRequest) {
           logger.info({ jobId: newJob.id }, "Marking job as completed");
           await serverApi.markJobAsCompleted(newJob.id);
           logger.info({ jobId: newJob.id }, "Job marked as completed");
+
+          posthogServer.capture({
+            distinctId: newJob.user_id,
+            event: "process_page_completed",
+            properties: {
+              jobId: newJob.id,
+              itemsCount: items.mediaItems.length,
+              hasNextPage: !!items.nextPageToken,
+            },
+          });
         }
         break;
       }
@@ -146,6 +165,16 @@ export async function POST(req: NextRequest) {
           );
           throw error;
         }
+
+        posthogServer.capture({
+          distinctId: newJob.user_id,
+          event: "image_upload_completed",
+          properties: {
+            jobId: newJob.id,
+            mediaItemId: mediaItem.id,
+          },
+        });
+
         break;
       }
       default: {
@@ -156,6 +185,15 @@ export async function POST(req: NextRequest) {
 
     await serverApi.markJobAsCompleted(newJob.id);
     logger.info({ jobId: newJob.id }, "Job processing completed");
+
+    posthogServer.capture({
+      distinctId: newJob.user_id,
+      event: "job_completed",
+      properties: {
+        jobId: newJob.id,
+        jobType: newJob.type,
+      },
+    });
 
     return NextResponse.json(
       { message: "Job processing completed" },
@@ -169,6 +207,16 @@ export async function POST(req: NextRequest) {
       { jobId: newJob.id, error: errorMessage },
       "Job processing failed"
     );
+
+    posthogServer.capture({
+      distinctId: newJob.user_id,
+      event: "job_failed",
+      properties: {
+        jobId: newJob.id,
+        jobType: newJob.type,
+        error: errorMessage,
+      },
+    });
 
     return NextResponse.json(
       { message: "Job processing failed" },

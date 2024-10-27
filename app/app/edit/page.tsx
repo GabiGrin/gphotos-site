@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
-export default function ProtectedPage() {
+export default function DashboardPage() {
   const supabase = createClient();
 
   const clientApi = createClientApi(supabase);

@@ -12,6 +12,9 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import Image from "next/image";
 import logo from "../logo.png";
+import posthogServer from "@/utils/posthog";
+import { redirect } from "next/navigation";
+import { PosthogIdentifier } from "./posthog-identifier";
 
 export default async function DashboardLayout({
   children,
@@ -23,16 +26,35 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (!user) {
+    return redirect("/sign-in");
+  }
+
+  if (!user.app_metadata.identified) {
+    posthogServer.identify({
+      distinctId: user.id,
+      properties: {
+        email: user.email,
+      },
+    });
+    await supabase.auth.updateUser({
+      data: {
+        app_metadata: {
+          identified: true,
+        },
+      },
+    });
+  }
+
   const userName = user?.user_metadata?.full_name || "User";
   const userEmail = user?.email || "";
   const userImage = user?.user_metadata?.avatar_url;
-
-  console.log(user);
 
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b">
         <div className="max-w-5xl mx-auto px-4 py-1 flex items-center justify-between">
+          <PosthogIdentifier user={user} />
           <Link href="/dashboard" className="text-lg font-semibold">
             <Image src={logo} alt="Logo" width={130} height={30} />
           </Link>
