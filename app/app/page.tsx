@@ -1,4 +1,4 @@
-import { createServerApi } from "@/utils/server-api";
+import { createServerApi } from "@/utils/dal/server-api";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 

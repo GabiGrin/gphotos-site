@@ -1,6 +1,6 @@
 import { CreateImageUploadJobData, Job, JobType } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
-import { createServerApi } from "@/utils/server-api";
+import { createServerApi } from "@/utils/dal/server-api";
 import { createServiceClient } from "@/utils/supabase/service";
 import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";

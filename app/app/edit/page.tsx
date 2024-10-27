@@ -1,7 +1,7 @@
 "use client";
 
-import { ProcessedImage } from "@/types/gphotos";
-import { createClientApi } from "@/utils/client-api";
+import { ProcessedImage, Site } from "@/types/gphotos";
+import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { getSiteUrl } from "@/utils/baseUrl";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -35,6 +36,8 @@ export default function DashboardPage() {
 
   const router = useRouter();
 
+  const [site, setSite] = useState<Site | null>(null);
+
   useEffect(() => {
     const getUser = async () => {
       const user = await supabase.auth.getUser();
@@ -43,6 +46,9 @@ export default function DashboardPage() {
         router.push("/sign-in");
       } else {
         getGoogleAccessToken();
+
+        const site = await clientApi.getSiteByUserId(user.data.user.id);
+        setSite(site);
       }
     };
 
@@ -166,7 +172,7 @@ export default function DashboardPage() {
 
         {imagesSet && <p className="text-green-600">Images are uploading...</p>}
 
-        {user && <a href={`/${user.id}`}>View your images</a>}
+        {site && <a href={getSiteUrl(site.username)}>View your images</a>}
       </div>
 
       {processedImages && processedImages.length > 0 ? (

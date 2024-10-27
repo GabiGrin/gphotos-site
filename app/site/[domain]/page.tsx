@@ -1,7 +1,7 @@
 import { createServiceClient } from "@/utils/supabase/service";
 import MasonryGallery from "../../components/MasonryGallery";
 import Link from "next/link";
-import { createServerApi } from "@/utils/server-api";
+import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
@@ -54,8 +54,10 @@ export default async function UserGallery({
     <div className="flex flex-col min-h-screen mx-2">
       <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-5xl mx-auto pb-16">
         <header className="flex flex-col items-center max-w-2xl mb-8">
-          <h1 className="text-3xl mb-6 px-4">Gabriel's Photography</h1>
-          <h3 className="text-center mb-6 text-[#444]">
+          <h1 className="text-3xl mb-6 px-4 tracking-tight	">
+            Gabriel's Photography
+          </h1>
+          <h3 className="text-center mb-6 text-[#444] tracking-tight	">
             Welcome, my name is Gabriel Grinberg and I love taking pictures on
             my phone. Feel free to explore and reach out for more information.
           </h3>
