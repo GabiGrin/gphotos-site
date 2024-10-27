@@ -5,6 +5,37 @@ import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
+import { LayoutConfig } from "@/types/gphotos";
+import { Metadata } from "next";
+
+// Add this function to generate metadata
+export async function generateMetadata({
+  params,
+}: {
+  params: { domain: string };
+}): Promise<Metadata> {
+  const { domain } = params;
+  const supabase = await createServiceClient();
+  const serverApi = createServerApi(supabase);
+  const host = domain.replace(".gphotos.site", "");
+
+  const site = await serverApi.getSiteByUsername(host).catch((e) => {
+    logger.error(e, "generateMetadata getSiteByUsername error");
+    return null;
+  });
+
+  if (!site) {
+    return {
+      title: "Not Found",
+    };
+  }
+
+  const layoutConfig = site.layout_config as LayoutConfig;
+
+  return {
+    title: layoutConfig.content?.title || "Photo Gallery",
+  };
+}
 
 export default async function UserGallery({
   params,
@@ -31,6 +62,8 @@ export default async function UserGallery({
     return <NotFound domain={domain} />;
   }
 
+  const layoutConfig = site.layout_config as LayoutConfig;
+
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
@@ -52,14 +85,13 @@ export default async function UserGallery({
 
   return (
     <div className="flex flex-col min-h-screen mx-2">
-      <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-5xl mx-auto pb-16">
-        <header className="flex flex-col items-center max-w-2xl mb-8">
+      <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16">
+        <header className="flex flex-col items-center max-w-4xl mb-8">
           <h1 className="text-3xl mb-6 px-4 tracking-tight	">
-            Gabriel's Photography
+            {layoutConfig.content?.title}
           </h1>
           <h3 className="text-center mb-6 text-[#444] tracking-tight	">
-            Welcome, my name is Gabriel Grinberg and I love taking pictures on
-            my phone. Feel free to explore and reach out for more information.
+            {layoutConfig.content?.description}
           </h3>
         </header>
         <MasonryGallery images={images} />

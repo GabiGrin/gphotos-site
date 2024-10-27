@@ -47,3 +47,14 @@ export type ProcessedImage =
   Database["public"]["Tables"]["processed_images"]["Row"];
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"];
+
+export type LayoutConfig = Site["layout_config"] & {
+  content?: {
+    title?: string;
+    description?: string;
+  };
+  links?: {
+    email?: string;
+  };
+  maxColumns?: number;
+};
