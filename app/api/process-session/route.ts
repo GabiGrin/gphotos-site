@@ -1,9 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
-import { createServerApi } from "@/utils/server-api";
-import { getGPhotosClient } from "@/utils/gphotos";
-import { processGPhotosImage } from "@/utils/process-gphotos-image";
+import { createServerApi } from "@/utils/dal/server-api";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();
@@ -37,26 +35,6 @@ export async function POST(req: NextRequest) {
 
   const serverApi = createServerApi(serviceClient);
 
-  // const photosClient = await getGPhotosClient();
-
-  // const photos = await photosClient.listMediaItems({
-  //   sessionId,
-  //   pageSize: 10,
-  //   googleAccessToken: googleAccessToken,
-  // });
-
-  // const first = photos.mediaItems[0];
-
-  // const processedImage = await processGPhotosImage({
-  //   thumbnailWidth: 300,
-  //   userId: data.user.id,
-  //   sessionId,
-  //   mediaItem: first,
-  //   googleAccessToken,
-  // });
-
-  // return NextResponse.json({ processedImage }, { status: 200 });
-
   try {
     const job = await serverApi.createProcessPageJob({
       userId: data.user.id,
@@ -75,3 +53,26 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+/*
+Code to easily test the process-session endpoint:
+// const photosClient = await getGPhotosClient();
+
+  // const photos = await photosClient.listMediaItems({
+  //   sessionId,
+  //   pageSize: 10,
+  //   googleAccessToken: googleAccessToken,
+  // });
+
+  // const first = photos.mediaItems[0];
+
+  // const processedImage = await processGPhotosImage({
+  //   thumbnailWidth: 300,
+  //   userId: data.user.id,
+  //   sessionId,
+  //   mediaItem: first,
+  //   googleAccessToken,
+  // });
+
+  // return NextResponse.json({ processedImage }, { status: 200 });
+*/

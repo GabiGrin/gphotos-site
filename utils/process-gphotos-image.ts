@@ -1,5 +1,5 @@
 import { createServiceClient } from "@/utils/supabase/service";
-import { createServerApi } from "@/utils/server-api";
+import { createServerApi } from "@/utils/dal/server-api";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { createThumbnail } from "@/utils/create-thumbnail";
 import logger from "@/utils/logger";
