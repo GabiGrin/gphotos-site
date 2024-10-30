@@ -23,6 +23,7 @@ export default function SettingsPanel(props: {
   site: Site;
   onChange: (config: LayoutConfig) => void;
   defaultEmail: string;
+  onManageImages: () => void;
 }) {
   const config = (props.site.layout_config as LayoutConfig) ?? {};
 
@@ -35,7 +36,7 @@ export default function SettingsPanel(props: {
 
   return (
     <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
-      <div className="max-w-5xl mx-auto px-4 py-1 flex flex-col items-center justify-between gap-5 py-8">
+      <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-between gap-5 py-8">
         <h1 className="text-2xl font-medium tracking-tight text-center">
           Edit your gallery
         </h1>
@@ -61,7 +62,9 @@ export default function SettingsPanel(props: {
                 <ImagesIcon /> Images{" "}
               </span>
 
-              <button className="main-btn">Manage images</button>
+              <button className="main-btn" onClick={props.onManageImages}>
+                Manage images
+              </button>
             </div>
           </div>
 

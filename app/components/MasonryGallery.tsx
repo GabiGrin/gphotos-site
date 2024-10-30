@@ -2,15 +2,11 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { ProcessedImage } from "@/types/gphotos";
+import { Photo, ProcessedImage } from "@/types/gphotos";
 
 const DESKTOP_BREAKPOINT = 768; // Define the breakpoint for desktop screens
 
-export default function MasonryGallery({
-  images,
-}: {
-  images: ProcessedImage[];
-}) {
+export default function MasonryGallery({ images }: { images: Photo[] }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [isDesktop, setIsDesktop] = useState(false);
@@ -88,8 +84,8 @@ export default function MasonryGallery({
           {images.map((image, index) => (
             <img
               key={image.id}
-              src={image.thumbnail_url}
-              alt={image.thumbnail_url}
+              src={image.thumbnailUrl}
+              alt={image.thumbnailUrl}
               className="w-full cursor-pointer"
               onClick={() => openLightbox(index)}
               loading="lazy"
@@ -114,15 +110,15 @@ export default function MasonryGallery({
           </button>
           <div className="relative">
             <img
-              src={images[lightboxIndex].thumbnail_url}
-              alt={images[lightboxIndex].public_url}
+              src={images[lightboxIndex].thumbnailUrl}
+              alt={images[lightboxIndex].thumbnailUrl}
               className={`h-[90vh] max-w-[90vw] object-contain ${
                 loadedImages.has(lightboxIndex) ? "hidden" : ""
               }`}
             />
             <img
-              src={images[lightboxIndex].public_url}
-              alt={images[lightboxIndex].public_url}
+              src={images[lightboxIndex].imageUrl}
+              alt={images[lightboxIndex].imageUrl}
               className={`h-[90vh] max-w-[90vw] object-contain ${
                 loadedImages.has(lightboxIndex) ? "" : "hidden"
               }`}

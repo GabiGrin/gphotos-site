@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CSPostHogProvider } from "./posthog-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <CSPostHogProvider>
-        <body className="bg-background text-foreground">{children}</body>
+        <body className="bg-background text-foreground">
+          {children}
+          <Toaster />
+        </body>
       </CSPostHogProvider>
     </html>
   );

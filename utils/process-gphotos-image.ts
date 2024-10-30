@@ -119,8 +119,6 @@ export async function processGPhotosImage({
       mediaItem,
       imagePath: data.path,
       thumbnailPath: thumbnailData.path,
-      imagePublicUrl,
-      thumbnailPublicUrl,
     });
 
     logger.info(

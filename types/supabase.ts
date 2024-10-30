@@ -54,11 +54,11 @@ export type Database = {
           gphotos_id: string | null
           height: number | null
           id: string
+          image_path: string
+          image_thumbnail_path: string
           imported_at: string
           order: number | null
-          public_url: string
           raw_metadata: Json | null
-          thumbnail_url: string
           user_id: string
           visible: boolean | null
           width: number | null
@@ -68,11 +68,11 @@ export type Database = {
           gphotos_id?: string | null
           height?: number | null
           id?: string
+          image_path: string
+          image_thumbnail_path: string
           imported_at?: string
           order?: number | null
-          public_url: string
           raw_metadata?: Json | null
-          thumbnail_url: string
           user_id: string
           visible?: boolean | null
           width?: number | null
@@ -82,11 +82,11 @@ export type Database = {
           gphotos_id?: string | null
           height?: number | null
           id?: string
+          image_path?: string
+          image_thumbnail_path?: string
           imported_at?: string
           order?: number | null
-          public_url?: string
           raw_metadata?: Json | null
-          thumbnail_url?: string
           user_id?: string
           visible?: boolean | null
           width?: number | null

@@ -5,7 +5,7 @@ import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
-import { LayoutConfig } from "@/types/gphotos";
+import { LayoutConfig, Photo } from "@/types/gphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 
@@ -84,5 +84,14 @@ export default async function UserGallery({
     },
   });
 
-  return <UserSite layoutConfig={layoutConfig} images={images} />;
+  const photos: Photo[] = images.map((image) => ({
+    imageUrl: supabase.storage.from("images").getPublicUrl(image.image_path)
+      .data.publicUrl,
+    thumbnailUrl: supabase.storage
+      .from("images")
+      .getPublicUrl(image.image_thumbnail_path).data.publicUrl,
+    ...image,
+  }));
+
+  return <UserSite layoutConfig={layoutConfig} images={photos} />;
 }

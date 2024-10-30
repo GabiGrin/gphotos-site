@@ -4,6 +4,7 @@ import { Database } from "./supabase";
 export enum JobType {
   PROCESS_PAGE = "PROCESS_PAGE",
   UPLOAD_IMAGE = "UPLOAD_IMAGE",
+  DELETE_IMAGE = "DELETE_IMAGE",
   PROCESS_SESSION = "PROCESS_SESSION",
 }
 
@@ -29,6 +30,11 @@ export interface CreateImageUploadJobData extends BaseJobData {
   mediaItem: MediaItem;
 }
 
+export interface DeleteImageJobData {
+  imagePath: string;
+  thumbnailPath: string;
+}
+
 type DBJob = Database["public"]["Tables"]["jobs"]["Row"];
 
 export type ProcessPageJob = DBJob & {
@@ -41,10 +47,20 @@ export type ImageUploadJob = DBJob & {
   job_data: CreateImageUploadJobData;
 };
 
-export type Job = ProcessPageJob | ImageUploadJob;
+export type DeleteImageJob = DBJob & {
+  type: JobType.DELETE_IMAGE;
+  job_data: DeleteImageJobData;
+};
+
+export type Job = ProcessPageJob | ImageUploadJob | DeleteImageJob;
 
 export type ProcessedImage =
   Database["public"]["Tables"]["processed_images"]["Row"];
+
+export type Photo = ProcessedImage & {
+  imageUrl: string;
+  thumbnailUrl: string;
+};
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"];
 

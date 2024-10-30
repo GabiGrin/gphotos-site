@@ -1,23 +1,20 @@
 "use client";
 
-import { LayoutConfig, ProcessedImage, Site } from "@/types/gphotos";
+import { LayoutConfig, Photo, ProcessedImage, Site } from "@/types/gphotos";
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { getSiteUrl } from "@/utils/baseUrl";
 import SettingsPanel from "./SettingsPanel";
 import UserSite from "@/app/components/UserSite";
+import { ManageImagesModal } from "@/app/components/modals/ManageImagesModal";
+import { ImportImagesModal } from "@/app/components/modals/ImportImagesModal";
+import { Button } from "@/components/ui/button";
+import { ImageIcon } from "lucide-react";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -34,11 +31,15 @@ export default function DashboardPage() {
     null
   );
 
-  const [processedImages, setProcessedImages] = useState<ProcessedImage[]>();
+  const [processedImages, setProcessedImages] = useState<Photo[]>();
 
   const router = useRouter();
 
   const [site, setSite] = useState<Site | null>(null);
+
+  const [isManageImagesOpen, setIsManageImagesOpen] = useState(false);
+
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -57,18 +58,22 @@ export default function DashboardPage() {
     getUser();
   }, []);
 
-  useEffect(() => {
+  const fetchProcessedImages = async () => {
     if (user) {
       console.log("Getting processed images");
-      clientApi
-        .getProcessedImages(user.id)
-        .then((images) => {
-          console.log("Images:", images);
-          setProcessedImages(images);
-        })
-        .catch((error) => {
-          console.error("Error getting processed images:", error);
-        });
+      try {
+        const images = await clientApi.getProcessedImages(user.id);
+        console.log("Images:", images);
+        setProcessedImages(images);
+      } catch (error) {
+        console.error("Error getting processed images:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchProcessedImages();
     }
   }, [user]);
 
@@ -154,6 +159,14 @@ export default function DashboardPage() {
     site?.layout_config ?? ({} as any)
   );
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("modal") === "import") {
+      setIsImportModalOpen(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   if (!user) {
     return "Loading..";
   }
@@ -167,63 +180,41 @@ export default function DashboardPage() {
           console.log("Config changed:", config);
           setLayoutConfig(config);
         }}
+        onManageImages={() => setIsManageImagesOpen(true)}
       />
 
-      <UserSite
-        layoutConfig={site?.layout_config ?? ({} as any)}
-        images={processedImages || []}
+      <ManageImagesModal
+        isOpen={isManageImagesOpen}
+        onClose={() => setIsManageImagesOpen(false)}
+        photos={processedImages || []}
+        onImagesDeleted={fetchProcessedImages}
+        onImportImages={() => setIsImportModalOpen(true)}
       />
-      <div className="flex flex-col items-center gap-4">
-        {pickerUrl && (
-          <a
-            href={pickerUrl}
-            target="_blank"
-            rel="noopener"
-            className="text-blue-600 hover:underline"
-          >
-            Open Google Photos Picker
-          </a>
-        )}
 
-        {!imagesSet && pickerUrl && (
-          <p className="text-gray-600">Waiting for user selection...</p>
-        )}
+      <ImportImagesModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+      />
 
-        {imagesSet && <p className="text-green-600">Images are uploading...</p>}
-
-        {site && <a href={getSiteUrl(site.username)}>View your images</a>}
-      </div>
-
-      {processedImages && processedImages.length > 0 ? (
-        <div className="w-full">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Thumbnail</TableHead>
-                <TableHead>Upload Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {processedImages.map((image, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Avatar className="h-20 w-20">
-                      <AvatarImage
-                        src={image.thumbnail_url}
-                        alt={`Thumbnail ${index + 1}`}
-                      />
-                    </Avatar>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(image.gphotos_created_at).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      {!processedImages || processedImages.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+            <ImageIcon className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold">No images yet</h3>
+          <p className="text-gray-600 text-center max-w-md">
+            Start by importing some images from Google Photos to create your
+            gallery
+          </p>
+          <Button onClick={() => setIsImportModalOpen(true)} className="mt-4">
+            Import Images
+          </Button>
         </div>
       ) : (
-        <p className="text-gray-600">No processed images available.</p>
+        <UserSite
+          layoutConfig={site?.layout_config ?? ({} as any)}
+          images={processedImages}
+        />
       )}
     </div>
   );

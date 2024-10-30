@@ -189,10 +189,10 @@ export default function DashboardPage() {
                 <TableRow key={index}>
                   <TableCell>
                     <Avatar className="h-20 w-20">
-                      <AvatarImage
+                      {/* <AvatarImage
                         src={image.thumbnail_url}
                         alt={`Thumbnail ${index + 1}`}
-                      />
+                      /> */}
                     </Avatar>
                   </TableCell>
                   <TableCell>

@@ -177,6 +177,58 @@ export async function POST(req: NextRequest) {
 
         break;
       }
+      case JobType.DELETE_IMAGE: {
+        const { thumbnailPath, imagePath } = newJob.job_data;
+
+        logger.info(
+          { jobId: newJob.id, imagePath, thumbnailPath },
+          "Processing DELETE_IMAGE job"
+        );
+
+        try {
+          const promises = [
+            client.storage.from("images").remove([imagePath]),
+            client.storage.from("thumbnails").remove([thumbnailPath]),
+          ];
+
+          const results = await Promise.all(promises);
+
+          // Check for errors
+          const errors = results
+            .map((res, index) =>
+              res.error ? `File ${index}: ${res.error.message}` : null
+            )
+            .filter(Boolean);
+
+          if (errors.length > 0) {
+            throw new Error(
+              `Failed to delete some files: ${errors.join(", ")}`
+            );
+          }
+
+          logger.info(
+            { jobId: newJob.id, imagePath, thumbnailPath },
+            "Successfully deleted image"
+          );
+
+          posthogServer.capture({
+            distinctId: newJob.user_id,
+            event: "image_deletion_completed",
+            properties: {
+              jobId: newJob.id,
+              imagePath,
+              thumbnailPath,
+            },
+          });
+        } catch (error) {
+          logger.error(
+            { jobId: newJob.id, imagePath, thumbnailPath, error },
+            "Error deleting image files"
+          );
+          throw error;
+        }
+        break;
+      }
       default: {
         //@ts-expect-error
         throw new Error(`Invalid job type: ${newJob.type}`);

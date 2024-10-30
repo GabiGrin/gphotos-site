@@ -5,27 +5,32 @@ import {
   JobStatus,
   ProcessedImage,
   Site,
+  DeleteImageJobData,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MediaItem } from "@/types/google-photos";
 
-export interface BaseJobDto {
+export interface BaseUploadJobDto {
   sessionId: string;
   googleAccessToken: string;
   userId: string;
 }
 
 export interface CreateProcessPageJobDto
-  extends BaseJobDto,
+  extends BaseUploadJobDto,
     CreateProcessPageJobData {}
 
 export interface CreateImageUploadJobDto
-  extends BaseJobDto,
+  extends BaseUploadJobDto,
     CreateImageUploadJobData {}
 
+export interface CreateDeleteImageJobDto extends DeleteImageJobData {
+  userId: string;
+}
+
 export function createServerApi(client: SupabaseClient<Database>) {
-  return {
+  const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
       const res = await client
         .from("jobs")
@@ -60,6 +65,29 @@ export function createServerApi(client: SupabaseClient<Database>) {
           },
           user_id: data.userId,
         })
+        .select();
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+      if (!res.data) {
+        throw new Error("No data returned from insert");
+      }
+      return res.data[0];
+    },
+    createDeleteImageJobs: async (data: CreateDeleteImageJobDto[]) => {
+      const res = await client
+        .from("jobs")
+        .insert(
+          data.map((job) => ({
+            type: JobType.DELETE_IMAGE,
+            session_id: "n/a",
+            job_data: {
+              imagePath: job.imagePath,
+              thumbnailPath: job.thumbnailPath,
+            },
+            user_id: job.userId,
+          }))
+        )
         .select();
       if (res.error) {
         throw new Error(res.error.message);
@@ -113,8 +141,6 @@ export function createServerApi(client: SupabaseClient<Database>) {
       mediaItem: MediaItem;
       imagePath: string;
       thumbnailPath: string;
-      imagePublicUrl: string;
-      thumbnailPublicUrl: string;
     }): Promise<ProcessedImage> => {
       const { data, error } = await client
         .from("processed_images")
@@ -128,8 +154,8 @@ export function createServerApi(client: SupabaseClient<Database>) {
           ),
           width: params.mediaItem.mediaFile.mediaFileMetadata.width,
           height: params.mediaItem.mediaFile.mediaFileMetadata.height,
-          public_url: params.imagePublicUrl,
-          thumbnail_url: params.thumbnailPublicUrl,
+          image_path: params.imagePath,
+          image_thumbnail_path: params.thumbnailPath,
         })
         .select();
 
@@ -201,5 +227,45 @@ export function createServerApi(client: SupabaseClient<Database>) {
 
       return data[0] as Site;
     },
+    deleteProcessedImages: async (imageIds: string[]): Promise<void> => {
+      // First get the images to be deleted
+      const { data: images, error: fetchError } = await client
+        .from("processed_images")
+        .select()
+        .in("id", imageIds);
+
+      if (fetchError) throw fetchError;
+      if (!images) throw new Error("No images found");
+
+      // Process images in batches of 20
+      const BATCH_SIZE = 20;
+      const imageFiles = images.map((image) => ({
+        imagePath: image.image_path,
+        thumbnailPath: image.image_thumbnail_path,
+      }));
+
+      // Split into batches
+      for (let i = 0; i < imageFiles.length; i += BATCH_SIZE) {
+        const batch = imageFiles.slice(i, i + BATCH_SIZE);
+        const isLastPage = i + BATCH_SIZE >= imageFiles.length;
+
+        // await api.createDeleteImageJobs (
+        //   batch.map((file) => ({
+
+        //     ...file,
+        //   }))
+        // });
+      }
+
+      // Delete the database records
+      const { error } = await client
+        .from("processed_images")
+        .delete()
+        .in("id", imageIds);
+
+      if (error) throw error;
+    },
   };
+
+  return api;
 }

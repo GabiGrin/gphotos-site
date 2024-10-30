@@ -64,5 +64,20 @@ export function getGPhotosClient() {
         }
       ).then((response) => response.json());
     },
+    createPickerSession: async (
+      token: string
+    ): Promise<{ id: string; pickerUri: string }> => {
+      const response = await fetch(
+        "https://photospicker.googleapis.com/v1/sessions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.json();
+    },
   };
 }

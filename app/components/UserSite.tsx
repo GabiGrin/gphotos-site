@@ -1,4 +1,4 @@
-import { LayoutConfig, ProcessedImage } from "@/types/gphotos";
+import { LayoutConfig, Photo, ProcessedImage } from "@/types/gphotos";
 import MasonryGallery from "./MasonryGallery";
 
 export default function UserSite({
@@ -6,7 +6,7 @@ export default function UserSite({
   images,
 }: {
   layoutConfig: LayoutConfig;
-  images: ProcessedImage[];
+  images: Photo[];
 }) {
   return (
     <div className="flex flex-col min-h-screen mx-2 w-full">
