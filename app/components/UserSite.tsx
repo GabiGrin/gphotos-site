@@ -12,12 +12,16 @@ export default function UserSite({
     <div className="flex flex-col min-h-screen mx-2 w-full">
       <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16">
         <header className="flex flex-col items-center max-w-4xl mb-8">
-          <h1 className="text-3xl mb-6 px-4 tracking-tight	">
-            {layoutConfig.content?.title}
-          </h1>
-          <h3 className="text-center mb-6 text-[#444] tracking-tight	">
-            {layoutConfig.content?.description}
-          </h3>
+          {layoutConfig.content?.title?.show && (
+            <h1 className="text-3xl mb-6 px-4 tracking-tight">
+              {layoutConfig.content.title.value}
+            </h1>
+          )}
+          {layoutConfig.content?.description?.show && (
+            <h3 className="text-center mb-6 text-[#444] tracking-tight">
+              {layoutConfig.content.description.value}
+            </h3>
+          )}
         </header>
         <MasonryGallery images={images} />
       </div>

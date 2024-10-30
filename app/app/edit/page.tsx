@@ -1,20 +1,19 @@
 "use client";
 
-import { LayoutConfig, Photo, ProcessedImage, Site } from "@/types/gphotos";
+import { LayoutConfig, Photo, Site } from "@/types/gphotos";
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { getSiteUrl } from "@/utils/baseUrl";
 import SettingsPanel from "./SettingsPanel";
 import UserSite from "@/app/components/UserSite";
 import { ManageImagesModal } from "@/app/components/modals/ManageImagesModal";
 import { ImportImagesModal } from "@/app/components/modals/ImportImagesModal";
 import { Button } from "@/components/ui/button";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Loader2 } from "lucide-react";
+import { toast, useToast } from "@/hooks/use-toast";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -22,14 +21,6 @@ export default function DashboardPage() {
   const clientApi = createClientApi(supabase);
 
   const [user, setUser] = useState<User | null>(null);
-
-  const [pickerUrl, setPickerUrl] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-
-  const [imagesSet, setImagesSet] = useState(false);
-  const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(
-    null
-  );
 
   const [processedImages, setProcessedImages] = useState<Photo[]>();
 
@@ -41,6 +32,16 @@ export default function DashboardPage() {
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(
+    site?.layout_config ?? ({} as any)
+  );
+
+  useEffect(() => {
+    if (site?.layout_config) {
+      setLayoutConfig(site.layout_config as LayoutConfig);
+    }
+  }, [site]);
+
   useEffect(() => {
     const getUser = async () => {
       const user = await supabase.auth.getUser();
@@ -48,10 +49,18 @@ export default function DashboardPage() {
       if (!user.data.user) {
         router.push("/sign-in");
       } else {
-        getGoogleAccessToken();
-
-        const site = await clientApi.getSiteByUserId(user.data.user.id);
-        setSite(site);
+        try {
+          const site = await clientApi.getSiteByUserId(user.data.user.id);
+          console.log("Site:", site);
+          setSite(site);
+        } catch (error) {
+          toast({
+            title: "Site not found",
+            description: "Redirecting to create page",
+          });
+          console.error("Error getting site:", error);
+          router.push("/create");
+        }
       }
     };
 
@@ -77,88 +86,6 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  async function getGoogleAccessToken() {
-    const session = await supabase.auth.getSession();
-
-    if (!session || !session.data.session) {
-      console.error("User is not logged in");
-      return;
-    }
-
-    console.log("Session:", session);
-
-    const googleAccessToken = session.data.session.provider_token;
-    if (!googleAccessToken) {
-      console.error("User is not logged in");
-      return;
-    }
-    setGoogleAccessToken(googleAccessToken);
-
-    const response = await fetch(
-      "https://photospicker.googleapis.com/v1/sessions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + googleAccessToken,
-        },
-      }
-    )
-      .then((response) => response.json())
-      .then((responseData) => {
-        console.log("Session created:", responseData);
-        setSessionId(responseData.id);
-        setPickerUrl(responseData.pickerUri);
-        return responseData;
-      });
-
-    console.log("Google Access Token:", googleAccessToken);
-    return googleAccessToken;
-  }
-
-  useEffect(() => {
-    if (pickerUrl && !imagesSet) {
-      const timer = setInterval(async () => {
-        console.log("Checking if images are set");
-
-        const session_url = "https://photospicker.googleapis.com/v1/sessions/";
-
-        const sessionResponse = await fetch(session_url + sessionId, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + googleAccessToken,
-          },
-        }).then((response) => response.json());
-
-        if (sessionResponse.mediaItemsSet) {
-          setImagesSet(true);
-        }
-
-        console.log("Session response:", sessionResponse);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [pickerUrl, imagesSet]);
-
-  useEffect(() => {
-    if (imagesSet) {
-      const processSession = async () => {
-        const res = await fetch("/api/process-session", {
-          method: "POST",
-          body: JSON.stringify({ sessionId }),
-        }).then((res) => res.json());
-        console.log("Process session response:", res);
-      };
-
-      processSession();
-    }
-  }, [imagesSet]);
-
-  const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(
-    site?.layout_config ?? ({} as any)
-  );
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("modal") === "import") {
@@ -167,20 +94,35 @@ export default function DashboardPage() {
     }
   }, []);
 
-  if (!user) {
-    return "Loading..";
+  const siteWithLayoutConfig = useMemo(() => {
+    return { ...site, layout_config: layoutConfig } as Site;
+  }, [site, layoutConfig]);
+
+  console.log("Site with layout config:", siteWithLayoutConfig);
+
+  if (!user || !site) {
+    return (
+      <div className="flex-1 w-full flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <SettingsPanel
         defaultEmail={user?.email ?? ""}
-        site={{ ...site, layout_config: layoutConfig } as Site}
+        site={siteWithLayoutConfig}
         onChange={(config) => {
           console.log("Config changed:", config);
           setLayoutConfig(config);
         }}
         onManageImages={() => setIsManageImagesOpen(true)}
+        onImportImages={() => setIsImportModalOpen(true)}
+        images={processedImages}
       />
 
       <ManageImagesModal
@@ -189,15 +131,17 @@ export default function DashboardPage() {
         photos={processedImages || []}
         onImagesDeleted={fetchProcessedImages}
         onImportImages={() => setIsImportModalOpen(true)}
+        userId={user.id}
       />
 
       <ImportImagesModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
+        onImagesImported={fetchProcessedImages}
       />
 
       {!processedImages || processedImages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-12">
+        <div className="flex flex-col items-center justify-center gap-4 py-2">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
             <ImageIcon className="w-8 h-8 text-gray-400" />
           </div>
@@ -206,15 +150,15 @@ export default function DashboardPage() {
             Start by importing some images from Google Photos to create your
             gallery
           </p>
-          <Button onClick={() => setIsImportModalOpen(true)} className="mt-4">
+          <Button
+            onClick={() => setIsImportModalOpen(true)}
+            className="mt-4 bg-blue-500"
+          >
             Import Images
           </Button>
         </div>
       ) : (
-        <UserSite
-          layoutConfig={site?.layout_config ?? ({} as any)}
-          images={processedImages}
-        />
+        <UserSite layoutConfig={layoutConfig} images={processedImages} />
       )}
     </div>
   );

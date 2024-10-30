@@ -64,25 +64,16 @@ export type Photo = ProcessedImage & {
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"];
 
-export type LayoutConfig = {
-  content?: {
-    title?: string;
-    description?: string;
-  };
+export interface LayoutConfig {
   buttons?: {
-    email?: {
-      show: boolean;
-      value?: string;
-    };
-    share?: {
-      show: boolean;
-      value?: string;
-    };
-    website?: {
-      show: boolean;
-      value?: string;
-    };
+    share?: { show: boolean; value?: string };
+    email?: { show: boolean; value: string };
+    website?: { show: boolean; value: string };
   };
-  maxColumns?: number;
+  content?: {
+    title?: { show: boolean; value: string };
+    description?: { show: boolean; value: string };
+  };
   sort?: "newest" | "oldest";
-};
+  maxColumns?: 1 | 2 | 3;
+}

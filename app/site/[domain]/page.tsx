@@ -34,7 +34,7 @@ export async function generateMetadata({
   const layoutConfig = site.layout_config as LayoutConfig;
 
   return {
-    title: layoutConfig.content?.title || "Photo Gallery",
+    title: layoutConfig.content?.title?.value || "Photo Gallery",
   };
 }
 

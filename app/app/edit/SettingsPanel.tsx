@@ -15,17 +15,35 @@ import {
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LayoutConfig, Site } from "@/types/gphotos";
+import { LayoutConfig, ProcessedImage, Site } from "@/types/gphotos";
 import { getSiteHost, getSiteUrl } from "@/utils/baseUrl";
 import Link from "next/link";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPanel(props: {
   site: Site;
   onChange: (config: LayoutConfig) => void;
   defaultEmail: string;
   onManageImages: () => void;
+  onImportImages: () => void;
+  images: ProcessedImage[] | undefined;
 }) {
   const config = (props.site.layout_config as LayoutConfig) ?? {};
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  console.log("Site:", props.site);
 
   const updateConfig = (updates: Partial<LayoutConfig>) => {
     props.onChange({
@@ -33,6 +51,75 @@ export default function SettingsPanel(props: {
       ...updates,
     });
   };
+
+  const EditButton = ({
+    show,
+    field,
+    value,
+    type = "text",
+    onSave,
+  }: {
+    show?: boolean;
+    field: string;
+    value?: string;
+    type?: "text" | "email" | "url" | "textarea";
+    onSave: (value: string) => void;
+  }) => {
+    const [tempValue, setTempValue] = useState(value || "");
+    const [open, setOpen] = useState(false);
+
+    useEffect(() => {
+      if (editingField === field) {
+        setOpen(true);
+        setEditingField(null);
+      }
+    }, [editingField, field]);
+
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            className={`main-btn ${!show ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={!show}
+          >
+            Edit
+          </button>
+        </PopoverTrigger>
+        {show && (
+          <PopoverContent className="w-80">
+            <div className="flex flex-col gap-2">
+              {type === "textarea" ? (
+                <textarea
+                  className="w-full p-2 border rounded"
+                  value={tempValue}
+                  onChange={(e) => setTempValue(e.target.value)}
+                  rows={4}
+                />
+              ) : (
+                <input
+                  type={type}
+                  className="w-full p-2 border rounded"
+                  value={tempValue}
+                  onChange={(e) => setTempValue(e.target.value)}
+                />
+              )}
+              <button
+                className="main-btn !bg-blue-500 text-white"
+                onClick={() => {
+                  onSave(tempValue);
+                  setOpen(false);
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </PopoverContent>
+        )}
+      </Popover>
+    );
+  };
+
+  const currentMaxColumns = config.maxColumns ?? 3;
 
   return (
     <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
@@ -62,9 +149,20 @@ export default function SettingsPanel(props: {
                 <ImagesIcon /> Images{" "}
               </span>
 
-              <button className="main-btn" onClick={props.onManageImages}>
-                Manage images
-              </button>
+              {props.images ? (
+                <button
+                  className={`main-btn ${props.images.length === 0 ? "!bg-blue-500 text-white" : ""}`}
+                  onClick={
+                    props.images.length === 0
+                      ? props.onImportImages
+                      : props.onManageImages
+                  }
+                >
+                  {props.images.length === 0
+                    ? "Import images"
+                    : "Manage images"}
+                </button>
+              ) : null}
             </div>
           </div>
 
@@ -88,19 +186,34 @@ export default function SettingsPanel(props: {
               <Label htmlFor="share-button" className="text-sm font-normal">
                 Share
               </Label>
-              <button className="main-btn">Edit</button>
+              <EditButton
+                show={Boolean(config.buttons?.share?.show)}
+                field="share"
+                value={config.buttons?.share?.value}
+                type="url"
+                onSave={(value) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      share: { show: true, value },
+                    },
+                  })
+                }
+              />
 
               <EmailIcon />
               <Switch
                 id="email-button"
-                checked={Boolean(config.buttons?.email)}
+                checked={Boolean(config.buttons?.email?.show)}
                 onCheckedChange={(checked) =>
                   updateConfig({
                     buttons: {
                       ...config.buttons,
-                      email: checked
-                        ? { show: true, value: props.defaultEmail }
-                        : undefined,
+                      email: {
+                        show: checked,
+                        value:
+                          config.buttons?.email?.value || props.defaultEmail,
+                      },
                     },
                   })
                 }
@@ -108,19 +221,35 @@ export default function SettingsPanel(props: {
               <Label htmlFor="email-button" className="text-sm font-normal">
                 Email
               </Label>
-              <button className="main-btn">Edit</button>
+              <EditButton
+                show={Boolean(config.buttons?.email?.show)}
+                field="email"
+                value={config.buttons?.email?.value}
+                type="email"
+                onSave={(value) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      email: { show: true, value },
+                    },
+                  })
+                }
+              />
 
               <WebsiteIcon />
               <Switch
                 id="website-button"
-                checked={Boolean(config.buttons?.website)}
+                checked={Boolean(config.buttons?.website?.show)}
                 onCheckedChange={(checked) =>
                   updateConfig({
                     buttons: {
                       ...config.buttons,
-                      website: checked
-                        ? { show: true, value: "https://www.example.com" }
-                        : undefined,
+                      website: {
+                        show: checked,
+                        value:
+                          config.buttons?.website?.value ||
+                          "https://www.example.com",
+                      },
                     },
                   })
                 }
@@ -128,7 +257,20 @@ export default function SettingsPanel(props: {
               <Label htmlFor="website-button" className="text-sm font-normal">
                 Website
               </Label>
-              <button className="main-btn">Edit</button>
+              <EditButton
+                show={Boolean(config.buttons?.website?.show)}
+                field="website"
+                value={config.buttons?.website?.value}
+                type="url"
+                onSave={(value) =>
+                  updateConfig({
+                    buttons: {
+                      ...config.buttons,
+                      website: { show: true, value },
+                    },
+                  })
+                }
+              />
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -137,60 +279,119 @@ export default function SettingsPanel(props: {
               <HeadingIcon className="col-span-[20px]" />
               <Switch
                 id="heading-button"
-                checked={Boolean(config.content?.title)}
-                onCheckedChange={(checked) =>
+                checked={Boolean(config.content?.title?.show)}
+                onCheckedChange={(checked) => {
                   updateConfig({
                     content: {
                       ...config.content,
-                      title: checked ? "" : undefined,
+                      title: {
+                        show: checked,
+                        value: config.content?.title?.value || "",
+                      },
                     },
-                  })
-                }
+                  });
+                  if (checked && !config.content?.title?.value) {
+                    setEditingField("title");
+                  }
+                }}
               />
               <Label htmlFor="heading-button" className="text-sm font-normal">
                 Heading
               </Label>
-              <div>
-                <button className="main-btn">Edit</button>
-              </div>
+              <EditButton
+                show={config.content?.title?.show}
+                field="title"
+                value={config.content?.title?.value}
+                onSave={(value) => {
+                  setEditingField(null);
+                  updateConfig({
+                    content: {
+                      ...config.content,
+                      title: {
+                        show: true,
+                        value: value,
+                      },
+                    },
+                  });
+                }}
+              />
 
               <TextIcon />
               <Switch
                 id="text-button"
-                checked={Boolean(config.content?.description)}
-                onCheckedChange={(checked) =>
+                checked={config.content?.description?.show}
+                onCheckedChange={(checked) => {
                   updateConfig({
                     content: {
                       ...config.content,
-                      description: checked ? "" : undefined,
+                      description: {
+                        show: checked,
+                        value: config.content?.description?.value || "",
+                      },
                     },
-                  })
-                }
+                  });
+                  if (checked && !config.content?.description?.value) {
+                    setEditingField("description");
+                  }
+                }}
               />
               <Label htmlFor="text-button" className="text-sm font-normal">
                 Description
               </Label>
-              <div>
-                <button className="main-btn">Edit</button>
-              </div>
+              <EditButton
+                show={config.content?.description?.show}
+                field="description"
+                value={config.content?.description?.value}
+                type="textarea"
+                onSave={(value) => {
+                  setEditingField(null);
+                  updateConfig({
+                    content: {
+                      ...config.content,
+                      description: {
+                        show: true,
+                        value: value,
+                      },
+                    },
+                  });
+                }}
+              />
 
               <SortIcon />
               <Label htmlFor="sort-button" className="text-sm font-normal">
                 Sort
               </Label>
               <div />
-              <div>
-                <button className="main-btn">Newest first</button>
-              </div>
+              <Select
+                value={config.sort ?? "newest"}
+                onValueChange={(value) => updateConfig({ sort: value as any })}
+              >
+                <SelectTrigger className="!w-[130px] !p-0 !px-3 !py-[3px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="oldest">Oldest first</SelectItem>
+                </SelectContent>
+              </Select>
+
               <ColumnsIcon />
               <Label htmlFor="columns-button" className="text-sm font-normal">
                 Max. Columns
               </Label>
               <div />
               <div className="flex flex-row gap-1">
-                <button className="main-btn">1</button>
-                <button className="main-btn">2</button>
-                <button className="main-btn">3</button>
+                {[1, 2, 3].map((num) => (
+                  <button
+                    key={num}
+                    className={`main-btn ${
+                      currentMaxColumns === num ? "!bg-blue-500 text-white" : ""
+                    }`}
+                    onClick={() => updateConfig({ maxColumns: num as any })}
+                  >
+                    {num}
+                  </button>
+                ))}
               </div>
             </div>
           </div>

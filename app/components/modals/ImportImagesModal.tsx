@@ -9,13 +9,21 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { getGPhotosClient } from "@/utils/gphotos";
+import { useToast } from "@/hooks/use-toast";
+import { processGPhotosSession } from "@/utils/dal/client-api";
+import { getBaseUrl } from "@/utils/baseUrl";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onImagesImported?: () => void;
 }
 
-export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
+export function ImportImagesModal({
+  isOpen,
+  onClose,
+  onImagesImported,
+}: ImportImagesModalProps) {
   const [pickerUrl, setPickerUrl] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(
@@ -26,6 +34,8 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
     "initial"
   );
   const [needsReauth, setNeedsReauth] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const { toast } = useToast();
 
   const supabase = createClient();
   const router = useRouter();
@@ -33,6 +43,7 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
   useEffect(() => {
     if (isOpen) {
       // Reset states when modal opens
+      setIsInitializing(true);
       setNeedsReauth(false);
       setPickerUrl(null);
       setSessionId(null);
@@ -44,16 +55,24 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
   }, [isOpen]);
 
   const checkAndGetGoogleToken = async () => {
-    const session = await supabase.auth.getSession();
-    const token = session.data.session?.provider_token;
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.provider_token;
 
-    if (!token) {
+      if (!token) {
+        setNeedsReauth(true);
+        setIsInitializing(false);
+        return;
+      }
+
+      setGoogleAccessToken(token);
+      await createPickerSession(token);
+      setIsInitializing(false);
+    } catch (error) {
+      console.error("Error during initialization:", error);
+      setIsInitializing(false);
       setNeedsReauth(true);
-      return;
     }
-
-    setGoogleAccessToken(token);
-    createPickerSession(token);
   };
 
   const createPickerSession = async (token: string) => {
@@ -87,22 +106,33 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
             setImagesSet(true);
             setStatus("importing");
 
-            // Add import job
             try {
-              const response = await fetch("/api/process-session", {
-                method: "POST",
-                body: JSON.stringify({ sessionId }),
-              });
-              const result = await response.json();
+              const result = await processGPhotosSession(sessionId);
               console.log("Process session response:", result);
+
+              if (result.count) {
+                toast({
+                  title: "Images imported successfully",
+                  description: `${result.count} ${
+                    result.count === 1 ? "image" : "images"
+                  } imported from Google Photos`,
+                  duration: 5000,
+                });
+              }
             } catch (error) {
               console.error("Error processing session:", error);
+              toast({
+                title: "Error importing images",
+                description:
+                  "There was a problem importing your images. Please try again.",
+                variant: "destructive",
+              });
             }
 
-            // Wait 15 seconds then close
+            // Wait 15 seconds then close and refresh
             setTimeout(() => {
               onClose();
-              // Refresh the page to show new images
+              onImagesImported?.();
               router.refresh();
             }, 15000);
           }
@@ -113,13 +143,36 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
 
       return () => clearInterval(timer);
     }
-  }, [pickerUrl, status, sessionId, googleAccessToken]);
+  }, [
+    pickerUrl,
+    status,
+    sessionId,
+    googleAccessToken,
+    onClose,
+    onImagesImported,
+    toast,
+  ]);
 
-  const handleReauth = () => {
-    const currentPath = window.location.pathname;
-    const returnUrl = `${currentPath}?modal=import`;
-    router.push(`/sign-in?returnUrl=${encodeURIComponent(returnUrl)}`);
-    onClose();
+  const handleReauth = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${getBaseUrl()}/auth/callback`,
+          scopes:
+            "https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
+        },
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+      toast({
+        title: "Error signing in",
+        description:
+          "There was a problem signing in with Google. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -129,7 +182,12 @@ export function ImportImagesModal({ isOpen, onClose }: ImportImagesModalProps) {
           <DialogTitle>Import Images</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-8">
-          {needsReauth ? (
+          {isInitializing ? (
+            <div className="flex items-center gap-2 text-gray-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
+              Initializing...
+            </div>
+          ) : needsReauth ? (
             <div className="flex flex-col items-center gap-4">
               <p className="text-sm text-gray-600 text-center">
                 Your Google Photos access has expired. You'll need to sign in

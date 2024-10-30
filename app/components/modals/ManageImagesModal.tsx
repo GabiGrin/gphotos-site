@@ -18,6 +18,7 @@ interface ManageImagesModalProps {
   photos: Photo[];
   onImagesDeleted: () => void;
   onImportImages: () => void;
+  userId: string;
 }
 
 export function ManageImagesModal({
@@ -26,6 +27,7 @@ export function ManageImagesModal({
   photos,
   onImagesDeleted,
   onImportImages,
+  userId,
 }: ManageImagesModalProps) {
   const { toast } = useToast();
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
@@ -49,7 +51,7 @@ export function ManageImagesModal({
   const handleDelete = async () => {
     if (!selectedPhotos.length) return;
 
-    const result = await deleteImages(selectedPhotos);
+    const result = await deleteImages(userId, selectedPhotos);
     if (result.success) {
       setSelectedPhotos([]);
       onImagesDeleted?.();
@@ -57,6 +59,10 @@ export function ManageImagesModal({
         title: "Success",
         description: `${selectedPhotos.length} image${selectedPhotos.length > 1 ? "s" : ""} deleted successfully`,
       });
+
+      if (selectedPhotos.length === photos.length) {
+        onClose();
+      }
     } else {
       toast({
         title: "Error",

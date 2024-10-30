@@ -25,7 +25,23 @@ export function createClientApi(client: SupabaseClient<Database>) {
         .select()
         .eq("user_id", userId);
       if (error) throw error;
+      if (data.length === 0) {
+        throw new Error("Site not found");
+      }
       return data[0] as Site;
     },
   };
+}
+
+export async function processGPhotosSession(sessionId: string) {
+  const response = await fetch("/api/process-session", {
+    method: "POST",
+    body: JSON.stringify({ sessionId }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to process Google Photos session");
+  }
+
+  return response.json();
 }

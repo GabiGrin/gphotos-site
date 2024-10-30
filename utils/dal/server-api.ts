@@ -10,6 +10,8 @@ import {
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MediaItem } from "@/types/google-photos";
+import { logger } from "../logger";
+import { NormalizeError } from "next/dist/shared/lib/utils";
 
 export interface BaseUploadJobDto {
   sessionId: string;
@@ -227,43 +229,132 @@ export function createServerApi(client: SupabaseClient<Database>) {
 
       return data[0] as Site;
     },
-    deleteProcessedImages: async (imageIds: string[]): Promise<void> => {
-      // First get the images to be deleted
-      const { data: images, error: fetchError } = await client
-        .from("processed_images")
-        .select()
-        .in("id", imageIds);
+    deleteProcessedImages: async (dto: {
+      userId: string;
+      imageIds: string[];
+    }): Promise<void> => {
+      logger.info(
+        {
+          userId: dto.userId,
+          imageIds: dto.imageIds,
+        },
+        `Starting deletion of ${dto.imageIds.length} images`
+      );
 
-      if (fetchError) throw fetchError;
-      if (!images) throw new Error("No images found");
+      try {
+        // First get the images to be deleted
+        const { data: images, error: fetchError } = await client
+          .from("processed_images")
+          .select()
+          .in("id", dto.imageIds)
+          .eq("user_id", dto.userId); // Add user check for security
 
-      // Process images in batches of 20
-      const BATCH_SIZE = 20;
-      const imageFiles = images.map((image) => ({
-        imagePath: image.image_path,
-        thumbnailPath: image.image_thumbnail_path,
-      }));
+        if (fetchError) {
+          logger.error(
+            {
+              error: fetchError,
+              userId: dto.userId,
+              imageIds: dto.imageIds,
+            },
+            "Failed to fetch images for deletion"
+          );
+          throw new Error("Failed to fetch images for deletion", fetchError);
+        }
 
-      // Split into batches
-      for (let i = 0; i < imageFiles.length; i += BATCH_SIZE) {
-        const batch = imageFiles.slice(i, i + BATCH_SIZE);
-        const isLastPage = i + BATCH_SIZE >= imageFiles.length;
+        if (!images || images.length === 0) {
+          logger.warn(
+            {
+              error: fetchError,
+              userId: dto.userId,
+              imageIds: dto.imageIds,
+            },
+            "No images found for deletion"
+          );
+          return; // Early return if no images found
+        }
 
-        // await api.createDeleteImageJobs (
-        //   batch.map((file) => ({
+        // Log if not all requested images were found
+        if (images.length !== dto.imageIds.length) {
+          logger.warn(
+            {
+              userId: dto.userId,
+              requestedCount: dto.imageIds.length,
+              foundCount: images.length,
+            },
+            "Some requested images were not found"
+          );
+        }
 
-        //     ...file,
-        //   }))
-        // });
+        // Process images in batches of 20
+        const BATCH_SIZE = 20;
+        const imageFiles = images.map((image) => ({
+          imagePath: image.image_path,
+          thumbnailPath: image.image_thumbnail_path,
+        }));
+
+        // Split into batches
+        for (let i = 0; i < imageFiles.length; i += BATCH_SIZE) {
+          const batch = imageFiles.slice(i, i + BATCH_SIZE);
+          logger.debug(
+            {
+              batchSize: batch.length,
+            },
+            `Processing deletion batch ${i / BATCH_SIZE + 1}`
+          );
+
+          try {
+            await api.createDeleteImageJobs(
+              batch.map((file) => ({
+                userId: dto.userId,
+                ...file,
+              }))
+            );
+          } catch (error) {
+            console.error(error);
+            logger.error(
+              {
+                batchIndex: i / BATCH_SIZE,
+                userId: dto.userId,
+              },
+              "Failed to create delete jobs"
+            );
+            throw new Error("Failed to create delete jobs");
+          }
+        }
+
+        // Delete the database records
+        const { error } = await client
+          .from("processed_images")
+          .delete()
+          .in("id", dto.imageIds)
+          .eq("user_id", dto.userId); // Add user check for security
+
+        if (error) {
+          logger.error(
+            {
+              error,
+              userId: dto.userId,
+              imageIds: dto.imageIds,
+            },
+            "Failed to delete image records"
+          );
+          throw new Error("Failed to delete image records");
+        }
+
+        logger.info(
+          {
+            userId: dto.userId,
+          },
+          "Successfully deleted images"
+        );
+      } catch (error) {
+        logger.error({
+          error,
+          userId: dto.userId,
+          imageIds: dto.imageIds,
+        });
+        throw error;
       }
-
-      // Delete the database records
-      const { error } = await client
-        .from("processed_images")
-        .delete()
-        .in("id", imageIds);
-
-      if (error) throw error;
     },
   };
 
