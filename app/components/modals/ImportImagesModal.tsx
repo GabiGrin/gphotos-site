@@ -241,7 +241,7 @@ export function ImportImagesModal({
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(pathname)}`,
+          redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(pathname)}?import=true`,
           scopes:
             "https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
         },
