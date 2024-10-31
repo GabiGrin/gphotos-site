@@ -9,6 +9,7 @@ export function createClientApi(client: SupabaseClient<Database>) {
       const { data, error } = await client
         .from("processed_images")
         .select()
+        .order("gphotos_created_at", { ascending: false })
         .eq("user_id", userId);
       if (error) throw error;
       return data.map((image) => ({

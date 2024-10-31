@@ -1,17 +1,22 @@
+const isLocalhost = process.env.NEXT_PUBLIC_VERCEL_URL === undefined;
+
 export function getBaseUrl() {
-  return process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://app.gphotos.site`
-    : "http://app.local-gphotos.site:3000";
+  if (isLocalhost) {
+    return "http://localhost:3000/app";
+  }
+  return "https://app.gphotos.site";
 }
 
 export function getSiteHost(username: string) {
-  return process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `${username}.gphotos.site`
-    : `${username}.local-gphotos.site:3000`;
+  if (isLocalhost) {
+    return `localhost:3000/${username}`;
+  }
+  return `${username}.gphotos.site`;
 }
 
 export function getSiteUrl(username: string) {
-  return process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${getSiteHost(username)}`
-    : `http://${getSiteHost(username)}`;
+  if (isLocalhost) {
+    return `http://localhost:3000/${username}`;
+  }
+  return `https://${getSiteHost(username)}`;
 }

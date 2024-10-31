@@ -3,11 +3,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { useToast } from "@/hooks/use-toast";
 import { processGPhotosSession } from "@/utils/dal/client-api";
@@ -43,9 +44,11 @@ export function ImportImagesModal({
   const [isInitializing, setIsInitializing] = useState(true);
   const [hasCompleted, setHasCompleted] = useState(false);
   const { toast } = useToast();
+  const [showConfirmClose, setShowConfirmClose] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
+  const pathname = usePathname();
 
   const sessionStatus = useSessionStatus({
     sessionId: sessionId ?? "",
@@ -238,7 +241,7 @@ export function ImportImagesModal({
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${getBaseUrl()}/auth/callback`,
+          redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(pathname)}`,
           scopes:
             "https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
         },
@@ -255,64 +258,116 @@ export function ImportImagesModal({
     }
   };
 
+  const handleCloseAttempt = (open: boolean) => {
+    // If trying to close (open becomes false) and import is in progress
+    if (!open && (status === "processing" || status === "waiting")) {
+      setShowConfirmClose(true);
+      return;
+    }
+    // Otherwise, allow normal close
+    onClose();
+  };
+
+  const handleConfirmedClose = () => {
+    setShowConfirmClose(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <div className="flex flex-col items-center gap-4 py-8">
-          {isInitializing ? (
-            <div className="flex items-center gap-2 text-gray-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
-              <span className="font-bold">Setting up secure connection...</span>
-            </div>
-          ) : needsReauth ? (
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-sm text-gray-600 text-center">
-                <span className="font-bold">Your privacy matters.</span> Please
-                verify your Google Photos access to ensure only you can access
-                your photos.
-              </p>
-              <Button
-                onClick={handleReauth}
-                className="bg-blue-500 text-white hover:bg-blue-600"
-              >
-                Connect with Google Photos
-              </Button>
-            </div>
-          ) : (
-            <>
-              {status === "initial" && pickerUrl && (
-                <>
-                  <p className="text-sm text-gray-600 text-center mb-4">
-                    <span className="font-bold">Your photos, your choice.</span>{" "}
-                    Select exactly which photos you want to import from your
-                    private Google Photos collection.
-                  </p>
-                  <a
-                    href={pickerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                    onClick={handlePickerClick}
-                  >
-                    Select Photos
-                  </a>
-                </>
-              )}
+    <>
+      <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
+        <DialogContent
+          className="sm:max-w-md"
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
+          <div className="flex flex-col items-center gap-4 py-8">
+            {isInitializing ? (
+              <div className="flex items-center gap-2 text-gray-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
+                <span className="font-bold">
+                  Setting up secure connection...
+                </span>
+              </div>
+            ) : needsReauth ? (
+              <div className="flex flex-col items-center gap-4">
+                <p className="text-sm text-gray-600 text-center">
+                  <span className="font-bold">Your privacy matters.</span>{" "}
+                  Please verify your Google Photos access to ensure only you can
+                  access your photos.
+                </p>
+                <Button
+                  onClick={handleReauth}
+                  className="bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  Connect with Google Photos
+                </Button>
+              </div>
+            ) : (
+              <>
+                {status === "initial" && pickerUrl && (
+                  <>
+                    <p className="text-sm text-gray-600 text-center mb-4">
+                      <span className="font-bold">
+                        Your photos, your choice.
+                      </span>{" "}
+                      Select exactly which photos you want to import from your
+                      private Google Photos collection.
+                    </p>
+                    <a
+                      href={pickerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                      onClick={handlePickerClick}
+                    >
+                      Select Photos
+                    </a>
+                  </>
+                )}
 
-              {status === "waiting" && (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
-                  <span className="font-bold">
-                    Take your time selecting photos...
-                  </span>
-                </div>
-              )}
+                {status === "waiting" && (
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
+                    <span className="font-bold">
+                      Take your time selecting photos...
+                    </span>
+                  </div>
+                )}
 
-              {status === "processing" && renderStatusMessage()}
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+                {status === "processing" && renderStatusMessage()}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
+        <DialogContent
+          className="sm:max-w-[425px]"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>Cancel Import?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel the import? This process cannot be
+              resumed and you'll need to start over.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmClose(false)}
+            >
+              Continue Import
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmedClose}>
+              Cancel Import
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
