@@ -1,6 +1,7 @@
 import { Photo, ProcessedImage, Site } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { JobStatusCounts } from "./server-api";
 
 export function createClientApi(client: SupabaseClient<Database>) {
   return {
@@ -29,6 +30,15 @@ export function createClientApi(client: SupabaseClient<Database>) {
         throw new Error("Site not found");
       }
       return data[0] as Site;
+    },
+    getSessionStatus: async (sessionId: string): Promise<JobStatusCounts> => {
+      const response = await fetch(`/api/session-status/${sessionId}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch session status");
+      }
+
+      return response.json();
     },
   };
 }

@@ -136,7 +136,10 @@ export default function DashboardPage() {
 
       <ImportImagesModal
         isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
+        onClose={() => {
+          setIsImportModalOpen(false);
+          fetchProcessedImages();
+        }}
         onImagesImported={fetchProcessedImages}
       />
 

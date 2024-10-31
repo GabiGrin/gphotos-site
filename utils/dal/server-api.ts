@@ -31,6 +31,23 @@ export interface CreateDeleteImageJobDto extends DeleteImageJobData {
   userId: string;
 }
 
+export interface JobStatusCounts {
+  processPageJobs: {
+    pending: number;
+    processing: number;
+    completed: number;
+    failed: number;
+    total: number;
+  };
+  imageUploadJobs: {
+    pending: number;
+    processing: number;
+    completed: number;
+    failed: number;
+    total: number;
+  };
+}
+
 export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
@@ -355,6 +372,59 @@ export function createServerApi(client: SupabaseClient<Database>) {
         });
         throw error;
       }
+    },
+    getSessionJobsStatus: async (
+      sessionId: string
+    ): Promise<JobStatusCounts> => {
+      const [processPageResults, imageUploadResults] = await Promise.all([
+        client
+          .from("jobs")
+          .select()
+          .eq("session_id", sessionId)
+          .eq("type", JobType.PROCESS_PAGE),
+
+        client
+          .from("jobs")
+          .select()
+          .eq("session_id", sessionId)
+          .eq("type", JobType.UPLOAD_IMAGE),
+      ]);
+
+      if (processPageResults.error) throw processPageResults.error;
+      if (imageUploadResults.error) throw imageUploadResults.error;
+
+      return {
+        processPageJobs: {
+          pending: processPageResults.data.filter(
+            (job) => job.status === JobStatus.PENDING
+          ).length,
+          processing: processPageResults.data.filter(
+            (job) => job.status === JobStatus.PROCESSING
+          ).length,
+          completed: processPageResults.data.filter(
+            (job) => job.status === JobStatus.COMPLETED
+          ).length,
+          failed: processPageResults.data.filter(
+            (job) => job.status === JobStatus.FAILED
+          ).length,
+          total: processPageResults.data.length,
+        },
+        imageUploadJobs: {
+          pending: imageUploadResults.data.filter(
+            (job) => job.status === JobStatus.PENDING
+          ).length,
+          processing: imageUploadResults.data.filter(
+            (job) => job.status === JobStatus.PROCESSING
+          ).length,
+          completed: imageUploadResults.data.filter(
+            (job) => job.status === JobStatus.COMPLETED
+          ).length,
+          failed: imageUploadResults.data.filter(
+            (job) => job.status === JobStatus.FAILED
+          ).length,
+          total: imageUploadResults.data.length,
+        },
+      };
     },
   };
 

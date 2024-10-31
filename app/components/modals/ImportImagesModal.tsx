@@ -12,12 +12,20 @@ import { getGPhotosClient } from "@/utils/gphotos";
 import { useToast } from "@/hooks/use-toast";
 import { processGPhotosSession } from "@/utils/dal/client-api";
 import { getBaseUrl } from "@/utils/baseUrl";
+import { useSessionStatus } from "@/hooks/use-session-status";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImagesImported?: () => void;
 }
+
+type ImportStatus =
+  | "initial"
+  | "waiting"
+  | "processing"
+  | "completed"
+  | "failed";
 
 export function ImportImagesModal({
   isOpen,
@@ -30,15 +38,39 @@ export function ImportImagesModal({
     null
   );
   const [imagesSet, setImagesSet] = useState(false);
-  const [status, setStatus] = useState<"initial" | "waiting" | "importing">(
-    "initial"
-  );
+  const [status, setStatus] = useState<ImportStatus>("initial");
   const [needsReauth, setNeedsReauth] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const { toast } = useToast();
 
   const supabase = createClient();
   const router = useRouter();
+
+  const sessionStatus = useSessionStatus({
+    sessionId: sessionId ?? "",
+    onComplete: (sessionStatus) => {
+      setStatus("completed");
+      if (onImagesImported) {
+        onImagesImported();
+      }
+      const failedTotal =
+        sessionStatus.type === "complete"
+          ? sessionStatus.scanning.failed + sessionStatus.uploading.failed
+          : 0;
+
+      if (failedTotal > 0) {
+        toast({
+          description: `${sessionStatus.scanning.succeeded + sessionStatus.uploading.succeeded} photos imported. ${failedTotal} couldn't be transferred.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          description: `${sessionStatus.scanning.succeeded + sessionStatus.uploading.succeeded} photos imported successfully!`,
+        });
+      }
+      onClose();
+    },
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -104,23 +136,15 @@ export function ImportImagesModal({
 
           if (data.mediaItemsSet) {
             setImagesSet(true);
-            setStatus("importing");
+            setStatus("processing");
+            clearInterval(timer);
 
             try {
               const result = await processGPhotosSession(sessionId);
               console.log("Process session response:", result);
-
-              if (result.count) {
-                toast({
-                  title: "Images imported successfully",
-                  description: `${result.count} ${
-                    result.count === 1 ? "image" : "images"
-                  } imported from Google Photos`,
-                  duration: 5000,
-                });
-              }
             } catch (error) {
               console.error("Error processing session:", error);
+              setStatus("failed");
               toast({
                 title: "Error importing images",
                 description:
@@ -128,13 +152,6 @@ export function ImportImagesModal({
                 variant: "destructive",
               });
             }
-
-            // Wait 15 seconds then close and refresh
-            setTimeout(() => {
-              onClose();
-              onImagesImported?.();
-              router.refresh();
-            }, 15000);
           }
         } catch (error) {
           console.error("Error checking session:", error);
@@ -143,15 +160,71 @@ export function ImportImagesModal({
 
       return () => clearInterval(timer);
     }
-  }, [
-    pickerUrl,
-    status,
-    sessionId,
-    googleAccessToken,
-    onClose,
-    onImagesImported,
-    toast,
-  ]);
+  }, [pickerUrl, status, sessionId, googleAccessToken]);
+
+  const renderStatusMessage = () => {
+    if (!sessionId) return null;
+
+    switch (sessionStatus.type) {
+      case "scanning":
+        return (
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2 text-blue-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+              <div className="flex flex-col">
+                <span className="font-bold">Preparing your photos...</span>
+                <span className="text-sm text-gray-600">
+                  We're securely processing your selection
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      case "uploading":
+        return (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-full max-w-md bg-gray-100 rounded-full h-2.5">
+              <div
+                className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
+                style={{
+                  width: `${(sessionStatus.succeeded / sessionStatus.total) * 100}%`,
+                }}
+              ></div>
+            </div>
+            <div className="flex items-center gap-2 text-green-600">
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
+              <div className="flex flex-col">
+                <span className="font-bold">Almost there!</span>
+                <span className="text-sm text-gray-600">
+                  {sessionStatus.succeeded} of {sessionStatus.total} photos
+                  secured
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      case "complete":
+        const failedTotal =
+          sessionStatus.scanning.failed + sessionStatus.uploading.failed;
+        if (failedTotal > 0) {
+          return (
+            <div className="flex items-center gap-2 text-amber-600">
+              <span className="font-bold">
+                {failedTotal} photos couldn't be transferred, but the rest are
+                safe and ready!
+              </span>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center gap-2 text-green-600">
+            <span className="font-bold">Success! Your photos are ready.</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   const handleReauth = async () => {
     try {
@@ -178,26 +251,24 @@ export function ImportImagesModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Import Images</DialogTitle>
-        </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-8">
           {isInitializing ? (
             <div className="flex items-center gap-2 text-gray-600">
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
-              Initializing...
+              <span className="font-bold">Setting up secure connection...</span>
             </div>
           ) : needsReauth ? (
             <div className="flex flex-col items-center gap-4">
               <p className="text-sm text-gray-600 text-center">
-                Your Google Photos access has expired. You'll need to sign in
-                again to continue importing photos.
+                <span className="font-bold">Your privacy matters.</span> Please
+                verify your Google Photos access to ensure only you can access
+                your photos.
               </p>
               <Button
                 onClick={handleReauth}
                 className="bg-blue-500 text-white hover:bg-blue-600"
               >
-                Sign in with Google
+                Connect with Google Photos
               </Button>
             </div>
           ) : (
@@ -205,9 +276,9 @@ export function ImportImagesModal({
               {status === "initial" && pickerUrl && (
                 <>
                   <p className="text-sm text-gray-600 text-center mb-4">
-                    Click the button below to open Google Photos in a new tab.
-                    Select your images there and return to this page to continue
-                    the import process.
+                    <span className="font-bold">Your photos, your choice.</span>{" "}
+                    Select exactly which photos you want to import from your
+                    private Google Photos collection.
                   </p>
                   <a
                     href={pickerUrl}
@@ -216,7 +287,7 @@ export function ImportImagesModal({
                     className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
                     onClick={handlePickerClick}
                   >
-                    Select Photos from Google Photos
+                    Select Photos
                   </a>
                 </>
               )}
@@ -224,16 +295,13 @@ export function ImportImagesModal({
               {status === "waiting" && (
                 <div className="flex items-center gap-2 text-gray-600">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
-                  Waiting for photo selection...
+                  <span className="font-bold">
+                    Take your time selecting photos...
+                  </span>
                 </div>
               )}
 
-              {status === "importing" && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
-                  Importing selected photos...
-                </div>
-              )}
+              {status === "processing" && renderStatusMessage()}
             </>
           )}
         </div>
