@@ -41,6 +41,7 @@ export function ImportImagesModal({
   const [status, setStatus] = useState<ImportStatus>("initial");
   const [needsReauth, setNeedsReauth] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [hasCompleted, setHasCompleted] = useState(false);
   const { toast } = useToast();
 
   const supabase = createClient();
@@ -49,10 +50,15 @@ export function ImportImagesModal({
   const sessionStatus = useSessionStatus({
     sessionId: sessionId ?? "",
     onComplete: (sessionStatus) => {
+      if (hasCompleted) return;
+
       setStatus("completed");
+      setHasCompleted(true);
+
       if (onImagesImported) {
         onImagesImported();
       }
+
       const failedTotal =
         sessionStatus.type === "complete"
           ? sessionStatus.scanning.failed + sessionStatus.uploading.failed
@@ -81,6 +87,7 @@ export function ImportImagesModal({
       setSessionId(null);
       setImagesSet(false);
       setStatus("initial");
+      setHasCompleted(false);
 
       checkAndGetGoogleToken();
     }

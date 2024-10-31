@@ -88,7 +88,7 @@ export default async function UserGallery({
     imageUrl: supabase.storage.from("images").getPublicUrl(image.image_path)
       .data.publicUrl,
     thumbnailUrl: supabase.storage
-      .from("images")
+      .from("thumbnails")
       .getPublicUrl(image.image_thumbnail_path).data.publicUrl,
     ...image,
   }));

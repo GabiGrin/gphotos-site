@@ -5,7 +5,7 @@ import { createServerApi } from "@/utils/dal/server-api";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { sessionId: string } }
+  { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const client = await createClient();
   const { data: userData, error: authError } = await client.auth.getUser();
@@ -14,7 +14,7 @@ export async function GET(
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const { sessionId } = params;
+  const { sessionId } = await params;
   if (!sessionId) {
     return NextResponse.json(
       { message: "Session ID is required" },
