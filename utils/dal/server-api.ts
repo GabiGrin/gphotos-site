@@ -426,6 +426,46 @@ export function createServerApi(client: SupabaseClient<Database>) {
         },
       };
     },
+    updateSiteLayout: async (params: {
+      userId: string;
+      layoutConfig: Json;
+    }): Promise<void> => {
+      // First verify the user owns the site
+      const { data: site, error: siteError } = await client
+        .from("sites")
+        .select()
+        .eq("user_id", params.userId)
+        .single();
+
+      if (siteError) {
+        logger.error(
+          { error: siteError, userId: params.userId },
+          "Failed to fetch site for layout update"
+        );
+        throw new Error("Failed to fetch site");
+      }
+
+      if (!site) {
+        throw new Error("Site not found");
+      }
+
+      // Update the layout config
+      const { error } = await client
+        .from("sites")
+        .update({
+          layout_config: params.layoutConfig,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", params.userId);
+
+      if (error) {
+        logger.error(
+          { error, userId: params.userId },
+          "Failed to update site layout"
+        );
+        throw new Error("Failed to update site layout");
+      }
+    },
   };
 
   return api;

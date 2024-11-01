@@ -41,6 +41,18 @@ export function createClientApi(client: SupabaseClient<Database>) {
 
       return response.json();
     },
+    saveLayoutConfig: async (layoutConfig: any) => {
+      const response = await fetch("/api/save-layout", {
+        method: "POST",
+        body: JSON.stringify({ layoutConfig }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save layout configuration");
+      }
+
+      return response.json();
+    },
   };
 }
 

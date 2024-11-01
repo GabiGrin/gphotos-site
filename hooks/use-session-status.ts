@@ -21,7 +21,7 @@ interface SessionProgressUploading extends StatusCounts {
   type: "uploading";
 }
 
-interface SessionProgressComplete {
+export interface SessionProgressComplete {
   type: "complete";
   scanning: StatusCounts;
   uploading: StatusCounts;
@@ -34,7 +34,7 @@ export type SessionProgress =
 
 export function useSessionStatus({
   sessionId,
-  pollingInterval = 1000,
+  pollingInterval = 5000,
   onComplete,
 }: UseSessionStatusProps): SessionProgress {
   const [status, setStatus] = useState<SessionProgress>({
@@ -45,9 +45,11 @@ export function useSessionStatus({
   });
 
   useEffect(() => {
-    if (!sessionId || status.type === "complete") return;
+    if (!sessionId) return;
+    let intervalId: NodeJS.Timeout;
 
     const pollStatus = async () => {
+      console.log("Polling status");
       try {
         const response = await fetch(`/api/session-status/${sessionId}`);
         if (!response.ok) {
@@ -101,6 +103,7 @@ export function useSessionStatus({
           setStatus(status);
           if (onComplete) {
             onComplete(status);
+            clearInterval(intervalId);
           }
           return;
         }
@@ -137,6 +140,7 @@ export function useSessionStatus({
           };
           setStatus(status);
           onComplete(status);
+          clearInterval(intervalId);
         }
       } catch (error) {
         // In case of error, maintain the current status type but add error information
@@ -147,11 +151,11 @@ export function useSessionStatus({
       }
     };
 
-    const intervalId = setInterval(pollStatus, pollingInterval);
-    pollStatus(); // Initial poll
+    pollStatus();
+    intervalId = setInterval(pollStatus, pollingInterval);
 
     return () => clearInterval(intervalId);
-  }, [sessionId, pollingInterval, onComplete, status.type]);
+  }, [sessionId, pollingInterval, onComplete]);
 
   return status;
 }

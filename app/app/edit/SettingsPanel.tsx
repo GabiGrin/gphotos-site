@@ -4,6 +4,7 @@ import {
   EmailIcon,
   WebsiteIcon,
   SortIcon,
+  SaveDeployIcon,
 } from "@/app/components/icons/icons";
 import {
   ImagesIcon,
@@ -31,6 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createClientApi } from "@/utils/dal/client-api";
+import { createClient } from "@/utils/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export default function SettingsPanel(props: {
   site: Site;
@@ -42,8 +46,7 @@ export default function SettingsPanel(props: {
 }) {
   const config = (props.site.layout_config as LayoutConfig) ?? {};
   const [editingField, setEditingField] = useState<string | null>(null);
-
-  console.log("Site:", props.site);
+  const [isSaving, setIsSaving] = useState(false);
 
   const updateConfig = (updates: Partial<LayoutConfig>) => {
     props.onChange({
@@ -120,6 +123,28 @@ export default function SettingsPanel(props: {
   };
 
   const currentMaxColumns = config.maxColumns ?? 3;
+
+  const handleSaveAndPublish = async () => {
+    setIsSaving(true);
+    try {
+      const client = createClient();
+      const clientApi = createClientApi(client);
+
+      await clientApi.saveLayoutConfig(config);
+
+      toast({
+        description: "Changes saved successfully!",
+      });
+    } catch (error) {
+      console.error("Failed to save layout:", error);
+      toast({
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
@@ -394,6 +419,25 @@ export default function SettingsPanel(props: {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 justify-center">
+            <button
+              className={`main-btn flex flex-row gap-2 items-center ${
+                isSaving ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              onClick={handleSaveAndPublish}
+              disabled={isSaving}
+            >
+              <SaveDeployIcon />
+              {isSaving ? "Saving..." : "Save and publish"}
+            </button>
+          </div>
+          <div className="text-sm text-neutral-500">
+            Changes appear on your public gallery only after you save and
+            publish.
           </div>
         </div>
       </div>

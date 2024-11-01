@@ -5,12 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Photo, ProcessedImage } from "@/types/gphotos";
+import { Photo } from "@/types/gphotos";
 
 import { useEffect, useState } from "react";
 import { deleteImages } from "@/app/actions/images";
 import { useToast } from "@/hooks/use-toast";
-import { ImportImagesModal } from "./ImportImagesModal";
 import {
   Select,
   SelectContent,
@@ -139,7 +138,7 @@ export function ManageImagesModal({
               {/* Image Management Controls */}
               <div className="flex items-center gap-2">
                 <Button variant="default" onClick={onImportImages}>
-                  Import more
+                  Import More Photos
                 </Button>
               </div>
 

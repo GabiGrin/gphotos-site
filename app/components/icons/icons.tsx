@@ -212,3 +212,29 @@ export function ColumnsIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function SaveDeployIcon({ className }: IconProps) {
+  return (
+    <svg
+      width="21"
+      height="20"
+      viewBox="0 0 21 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M4.87303 15.7416C3.30068 15.1044 2.19019 13.5491 2.19019 11.7315C2.19019 9.544 3.79872 7.73636 5.88504 7.45196C6.5776 5.41891 8.48604 3.95825 10.7319 3.95825C12.9777 3.95825 14.8861 5.41891 15.5787 7.45196C17.665 7.73636 19.2735 9.544 19.2735 11.7315C19.2735 13.5491 18.163 15.1044 16.5907 15.7416"
+        stroke="black"
+        strokeWidth="1.25"
+        strokeLinecap="square"
+      />
+      <path
+        d="M8.02344 14.1667L10.1068 16.4583L14.2734 11.875"
+        stroke="black"
+        strokeWidth="1.25"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}

@@ -2,7 +2,7 @@ const isLocalhost = process.env.NEXT_PUBLIC_VERCEL_URL === undefined;
 
 export function getBaseUrl() {
   if (isLocalhost) {
-    return "http://localhost:3000/app";
+    return "http://app.local-gphotos.site:3000";
   }
   return "https://app.gphotos.site";
 }

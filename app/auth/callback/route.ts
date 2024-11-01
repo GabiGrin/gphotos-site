@@ -17,11 +17,12 @@ export async function GET(request: Request) {
       const isLocalEnv = process.env.NODE_ENV === "development";
 
       const redirectUrl = isLocalEnv
-        ? `${origin}${sanitizedNext}`
+        ? `http://app.local-gphotos.site:3000${sanitizedNext}`
         : forwardedHost
           ? `https://${forwardedHost}${sanitizedNext}`
           : `${origin}${sanitizedNext}`;
 
+      console.log({ redirectUrl, origin, forwardedHost, isLocalEnv });
       return NextResponse.redirect(redirectUrl);
     }
   }

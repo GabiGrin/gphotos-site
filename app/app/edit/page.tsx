@@ -89,6 +89,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("modal") === "import") {
+      setIsManageImagesOpen(true);
       setIsImportModalOpen(true);
       window.history.replaceState({}, "", window.location.pathname);
     }
@@ -97,8 +98,6 @@ export default function DashboardPage() {
   const siteWithLayoutConfig = useMemo(() => {
     return { ...site, layout_config: layoutConfig } as Site;
   }, [site, layoutConfig]);
-
-  console.log("Site with layout config:", siteWithLayoutConfig);
 
   if (!user || !site) {
     return (

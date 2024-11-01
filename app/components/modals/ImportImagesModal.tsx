@@ -6,14 +6,18 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, usePathname } from "next/navigation";
 import { getGPhotosClient } from "@/utils/gphotos";
 import { useToast } from "@/hooks/use-toast";
 import { processGPhotosSession } from "@/utils/dal/client-api";
 import { getBaseUrl } from "@/utils/baseUrl";
-import { useSessionStatus } from "@/hooks/use-session-status";
+import {
+  SessionProgress,
+  SessionProgressComplete,
+  useSessionStatus,
+} from "@/hooks/use-session-status";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
@@ -42,21 +46,15 @@ export function ImportImagesModal({
   const [status, setStatus] = useState<ImportStatus>("initial");
   const [needsReauth, setNeedsReauth] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [hasCompleted, setHasCompleted] = useState(false);
   const { toast } = useToast();
   const [showConfirmClose, setShowConfirmClose] = useState(false);
 
   const supabase = createClient();
-  const router = useRouter();
   const pathname = usePathname();
 
-  const sessionStatus = useSessionStatus({
-    sessionId: sessionId ?? "",
-    onComplete: (sessionStatus) => {
-      if (hasCompleted) return;
-
+  const onSessionComplete = useCallback(
+    (sessionStatus: SessionProgressComplete) => {
       setStatus("completed");
-      setHasCompleted(true);
 
       if (onImagesImported) {
         onImagesImported();
@@ -79,6 +77,12 @@ export function ImportImagesModal({
       }
       onClose();
     },
+    []
+  );
+
+  const sessionStatus = useSessionStatus({
+    sessionId: sessionId ?? "",
+    onComplete: onSessionComplete,
   });
 
   useEffect(() => {
@@ -90,7 +94,6 @@ export function ImportImagesModal({
       setSessionId(null);
       setImagesSet(false);
       setStatus("initial");
-      setHasCompleted(false);
 
       checkAndGetGoogleToken();
     }
@@ -207,7 +210,7 @@ export function ImportImagesModal({
                 <span className="font-bold">Almost there!</span>
                 <span className="text-sm text-gray-600">
                   {sessionStatus.succeeded} of {sessionStatus.total} photos
-                  secured
+                  uploaded securely
                 </span>
               </div>
             </div>
@@ -241,7 +244,7 @@ export function ImportImagesModal({
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(pathname)}?import=true`,
+          redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(pathname)}?modal=import`,
           scopes:
             "https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile, https://www.googleapis.com/auth/photospicker.mediaitems.readonly",
         },
@@ -313,6 +316,14 @@ export function ImportImagesModal({
                       Select exactly which photos you want to import from your
                       private Google Photos collection.
                     </p>
+
+                    <p className="text-xs text-gray-600 mb-4">
+                      Clicking below will open Google Photos in a new tab. This
+                      secure method ensures we only access the specific photos
+                      you choose to share. After selecting your photos, click
+                      the "Done" button in Google Photos and return to this tab
+                      to begin the import.
+                    </p>
                     <a
                       href={pickerUrl}
                       target="_blank"
@@ -326,11 +337,25 @@ export function ImportImagesModal({
                 )}
 
                 {status === "waiting" && (
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
-                    <span className="font-bold">
-                      Take your time selecting photos...
-                    </span>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600 border-t-transparent"></div>
+                      <span className="font-bold">
+                        Take your time selecting photos...
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 text-center">
+                      If you accidentally closed the Google Photos tab, you can{" "}
+                      <a
+                        href={pickerUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline"
+                      >
+                        click here
+                      </a>{" "}
+                      to reopen it.
+                    </p>
                   </div>
                 )}
 
