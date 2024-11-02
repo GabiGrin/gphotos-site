@@ -19,7 +19,7 @@ export function SimpleTooltip({
   side?: "bottom" | "top" | "right" | "left";
 }) {
   return (
-    <Tooltip delayDuration={delayDuration} p>
+    <Tooltip delayDuration={delayDuration}>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent side={side}>
         <p>{content}</p>
