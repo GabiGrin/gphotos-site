@@ -16,7 +16,7 @@ export default function UserSite({
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen mx-4">
-        <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative">
+        <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
           {/* Action buttons container - mobile: centered row, desktop: split to corners */}
           <div className="w-full flex justify-center md:justify-between items-center mb-8 md:mb-0">
             {/* Email and Website buttons */}

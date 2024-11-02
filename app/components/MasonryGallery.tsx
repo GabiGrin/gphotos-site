@@ -10,6 +10,10 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [isDesktop, setIsDesktop] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<Set<number>>(
+    new Set()
+  );
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const checkIsDesktop = () => {
@@ -74,10 +78,41 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lightboxIndex, moveNext, movePrev, closeLightbox]);
 
+  const preloadImage = useCallback(
+    (index: number) => {
+      if (preloadedImages.has(index)) return;
+
+      const img = new Image();
+      img.src = images[index].imageUrl;
+      img.onload = () => {
+        setPreloadedImages((prev) => new Set(prev).add(index));
+        setLoadedImages((prev) => new Set(prev).add(index));
+      };
+    },
+    [images, preloadedImages]
+  );
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+
+    // Preload next 2 images
+    const next1 = (lightboxIndex + 1) % images.length;
+
+    // Preload previous 2 images
+    const prev1 = (lightboxIndex - 1 + images.length) % images.length;
+
+    [next1, prev1].forEach(preloadImage);
+  }, [lightboxIndex, images.length, preloadImage]);
+
+  useEffect(() => {
+    if (hoveredIndex === null) return;
+    preloadImage(hoveredIndex);
+  }, [hoveredIndex, preloadImage]);
+
   return (
     <>
       <ResponsiveMasonry
-        columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3 }}
+        columnsCountBreakPoints={{ 350: 2, 750: 2, 900: 3 }}
         className="w-full"
       >
         <Masonry gutter="2px">
@@ -86,8 +121,10 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
               key={image.id}
               src={image.thumbnailUrl}
               alt={image.thumbnailUrl}
-              className="w-full cursor-pointer"
+              className="w-full cursor-pointer transition-all duration-200 hover:opacity-[0.98] hover:scale-[1.002]"
               onClick={() => openLightbox(index)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
               loading="lazy"
             />
           ))}
