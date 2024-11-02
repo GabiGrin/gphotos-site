@@ -18,13 +18,24 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-50 px-4">
+      {/* Hero Section */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-3">
+          Welcome to GPhotos.site
+        </h1>
+        <p className="text-gray-600">
+          Create and share your beautiful photos with the world
+        </p>
+      </div>
+
+      {/* Main CTA */}
       <button
-        className="flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 rounded-md px-6 py-3 text-md font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+        className="flex items-center justify-center gap-2 bg-white text-gray-800 border border-gray-300 rounded-lg px-6 py-3 text-md font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out shadow-sm"
         onClick={signInWithGoogle}
       >
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -45,10 +56,32 @@ export default function Login() {
             fill="#EA4335"
           />
         </svg>
-        Sign in with Google
+        Continue with Google
       </button>
+
+      {/* Features */}
+      <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500">
+        <span>✨ Free to use</span>
+        <span>🔒 Secure</span>
+        <span>🎨 Customizable</span>
+      </div>
+
+      {/* Terms */}
       <p className="mt-8 text-sm text-gray-500">
-        By signing in, you agree to our Terms of Service and Privacy Policy.
+        By continuing, you agree to our{" "}
+        <a
+          href="https://www.gphotos.site/tos"
+          className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+        >
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a
+          href="https://www.gphotos.site/privacy-policy"
+          className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
+        >
+          Privacy Policy
+        </a>
       </p>
     </div>
   );
