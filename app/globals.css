@@ -76,3 +76,7 @@
 .main-btn:hover:not(:disabled) {
   @apply opacity-95 border-gray-300 shadow-sm scale-[1.01] transform;
 }
+
+.main-btn.icon-btn {
+  @apply px-[5.5px] py-[6px];
+}
