@@ -64,6 +64,8 @@ export type Photo = ProcessedImage & {
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"];
 
+export type Album = Database["public"]["Tables"]["albums"]["Row"];
+
 export interface LayoutConfig {
   buttons?: {
     share?: { show: boolean; value?: string };

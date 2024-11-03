@@ -99,7 +99,7 @@ export default function DashboardPage() {
     return { ...site, layout_config: layoutConfig } as Site;
   }, [site, layoutConfig]);
 
-  if (!user || !site) {
+  if (!user || !site || !processedImages) {
     return (
       <div className="flex-1 w-full flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-4">

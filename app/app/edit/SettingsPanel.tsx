@@ -16,7 +16,7 @@ import {
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LayoutConfig, ProcessedImage, Site } from "@/types/gphotos";
+import { LayoutConfig, Photo, ProcessedImage, Site } from "@/types/gphotos";
 import { getSiteHost, getSiteUrl } from "@/utils/baseUrl";
 import Link from "next/link";
 import {
@@ -35,6 +35,8 @@ import {
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { AlbumIcon } from "@/app/components/icons/icons";
+import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
 
 export default function SettingsPanel(props: {
   site: Site;
@@ -42,11 +44,12 @@ export default function SettingsPanel(props: {
   defaultEmail: string;
   onManageImages: () => void;
   onImportImages: () => void;
-  images: ProcessedImage[] | undefined;
+  images: Photo[];
 }) {
   const config = (props.site.layout_config as LayoutConfig) ?? {};
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showAlbumsModal, setShowAlbumsModal] = useState(false);
 
   const updateConfig = (updates: Partial<LayoutConfig>) => {
     props.onChange({
@@ -188,6 +191,17 @@ export default function SettingsPanel(props: {
                     : "Manage images"}
                 </button>
               ) : null}
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <span className="text-sm inline-flex items-center gap-3 text-neutral-700">
+                <AlbumIcon /> Albums
+              </span>
+              <button
+                className="main-btn"
+                onClick={() => setShowAlbumsModal(true)}
+              >
+                Manage albums
+              </button>
             </div>
           </div>
 
@@ -441,6 +455,12 @@ export default function SettingsPanel(props: {
           </div>
         </div>
       </div>
+      <ManageAlbumsModal
+        open={showAlbumsModal}
+        onOpenChange={setShowAlbumsModal}
+        images={props.images || []}
+        userId={props.site.user_id}
+      />
     </div>
   );
 }

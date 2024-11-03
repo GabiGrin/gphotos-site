@@ -1,4 +1,4 @@
-import { Photo, ProcessedImage, Site } from "@/types/gphotos";
+import { Album, Photo, ProcessedImage, Site } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { JobStatusCounts } from "./server-api";
@@ -52,6 +52,42 @@ export function createClientApi(client: SupabaseClient<Database>) {
       }
 
       return response.json();
+    },
+
+    createAlbum: async (
+      album: Omit<Album, "id" | "created_at" | "updated_at">
+    ) => {
+      const response = await client.from("albums").insert(album).select();
+      if (response.error) throw response.error;
+      return response.data[0];
+    },
+
+    getAlbums: async (userId: string): Promise<Album[]> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+
+    updateAlbum: async (albumId: string, updates: Partial<Album>) => {
+      const { data, error } = await client
+        .from("albums")
+        .update(updates)
+        .eq("id", albumId)
+        .select();
+
+      if (error) throw error;
+      return data[0];
+    },
+
+    deleteAlbum: async (albumId: string) => {
+      const { error } = await client.from("albums").delete().eq("id", albumId);
+
+      if (error) throw error;
     },
   };
 }

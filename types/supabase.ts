@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      albums: {
+        Row: {
+          cover_image_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cover_image_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cover_image_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "albums_cover_image_id_fkey"
+            columns: ["cover_image_id"]
+            isOneToOne: false
+            referencedRelation: "processed_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           created_at: string | null
@@ -50,6 +88,7 @@ export type Database = {
       }
       processed_images: {
         Row: {
+          album_id: string | null
           gphotos_created_at: string
           gphotos_id: string | null
           height: number | null
@@ -64,6 +103,7 @@ export type Database = {
           width: number | null
         }
         Insert: {
+          album_id?: string | null
           gphotos_created_at: string
           gphotos_id?: string | null
           height?: number | null
@@ -78,6 +118,7 @@ export type Database = {
           width?: number | null
         }
         Update: {
+          album_id?: string | null
           gphotos_created_at?: string
           gphotos_id?: string | null
           height?: number | null
@@ -91,7 +132,15 @@ export type Database = {
           visible?: boolean | null
           width?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_album"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "albums"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sites: {
         Row: {
