@@ -1,16 +1,17 @@
-import { Album, LayoutConfig } from "@/types/gphotos";
+import { Album, AlbumWithCoverPhoto, LayoutConfig } from "@/types/gphotos";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { EmailIcon, WebsiteIcon } from "./icons/icons";
 import Link from "next/link";
 import ShareButton from "./buttons/ShareButton";
+import BrandingFooter from "./BrandingFooter";
 
 export default function UserAlbums({
   layoutConfig,
   albums,
 }: {
   layoutConfig: LayoutConfig;
-  albums: Album[];
+  albums: AlbumWithCoverPhoto[];
 }) {
   return (
     <TooltipProvider>
@@ -67,35 +68,37 @@ export default function UserAlbums({
             )}
           </header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+          <div className="w-full gap-3 flex flex-wrap flex-row">
             {albums.map((album) => (
               <Link
                 key={album.id}
                 href={`/${album.id}`}
-                className="group relative aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                className="w-[406px] group flex flex-col bg-white rounded-sm overflow-hidden border border-stone-200 hover:border-gray-300 transition-all"
               >
-                {/* {album.cover_image && (
-                  <img
-                    src={album.cover_image}
-                    alt={album.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                )} */}
-                <div className="absolute inset-0 bg-black bg-opacity-40 group-hover:bg-opacity-50 transition-all flex items-end">
-                  <div className="p-4 w-full">
-                    <h3 className="text-white text-xl font-semibold">
-                      {album.title}
-                    </h3>
-                    <p className="text-white/80 text-sm">
-                      {/* {album.photo_count} photos */}
+                <div className="h-[393px] max-w-full relative shadow-lg">
+                  {album.coverPhoto && (
+                    <img
+                      src={album.coverPhoto.thumbnailUrl}
+                      alt={album.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="p-4 antialiased">
+                  <h3 className="text-[32px] tracking-tighter letter font-medium  group-hover:text-gray-700 line-clamp-1">
+                    {album.title}
+                  </h3>
+                  {album.description && (
+                    <p className="text-[16px] font-normal tracking-tight line-clamp-2 overflow-hidden">
+                      {album.description}
                     </p>
-                  </div>
+                  )}
                 </div>
               </Link>
             ))}
           </div>
         </div>
-        {/* Footer remains the same as UserSite */}
+        <BrandingFooter />
       </div>
     </TooltipProvider>
   );

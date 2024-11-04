@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Photo } from "@/types/gphotos";
+import { Photo, Album } from "@/types/gphotos";
 
 import { useEffect, useState } from "react";
 import { deleteImages } from "@/app/actions/images";
@@ -23,8 +23,10 @@ interface ManageImagesModalProps {
   isOpen: boolean;
   onClose: () => void;
   photos: Photo[];
+  albums: Album[];
   onImagesDeleted: () => void;
   onImportImages: () => void;
+  onAssignToAlbum: (photoIds: string[], albumId: string) => Promise<void>;
   userId: string;
 }
 
@@ -49,14 +51,17 @@ export function ManageImagesModal({
   isOpen,
   onClose,
   photos,
+  albums,
   onImagesDeleted,
   onImportImages,
+  onAssignToAlbum,
   userId,
 }: ManageImagesModalProps) {
   const { toast } = useToast();
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [thumbnailSize, setThumbnailSize] = useState<ThumbnailSize>("small");
+  const [isAssigning, setIsAssigning] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,6 +115,31 @@ export function ManageImagesModal({
     }
   };
 
+  const handleAssignToAlbum = async (albumId: string) => {
+    if (!selectedPhotos.length) return;
+
+    setIsAssigning(true);
+    try {
+      await onAssignToAlbum(selectedPhotos, albumId);
+      toast({
+        title: "Success",
+        description: `${selectedPhotos.length} image${
+          selectedPhotos.length > 1 ? "s" : ""
+        } assigned to album`,
+      });
+      setSelectedPhotos([]);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign images to album",
+        variant: "destructive",
+      });
+      console.error("Failed to assign images to album:", error);
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -150,16 +180,34 @@ export function ManageImagesModal({
                     : "Select All"}
                 </button>
                 {selectedPhotos.length > 0 && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleDelete}
-                    size="sm"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting
-                      ? "Deleting..."
-                      : `Delete selected (${selectedPhotos.length})`}
-                  </Button>
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDelete}
+                      size="sm"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting
+                        ? "Deleting..."
+                        : `Delete selected (${selectedPhotos.length})`}
+                    </Button>
+
+                    <Select
+                      disabled={isAssigning}
+                      onValueChange={handleAssignToAlbum}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Assign to album..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {albums.map((album) => (
+                          <SelectItem key={album.id} value={album.id}>
+                            {album.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </>
                 )}
               </div>
 

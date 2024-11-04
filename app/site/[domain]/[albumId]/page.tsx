@@ -5,11 +5,12 @@ import NotFound from "../not-found";
 import { LayoutConfig, Photo } from "@/types/gphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
+import { processedImageToPhoto } from "@/utils/dal/api-utils";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { domain: string; albumId: string };
+  params: Promise<{ domain: string; albumId: string }>;
 }): Promise<Metadata> {
   const { domain, albumId } = await params;
   const supabase = await createServiceClient();
@@ -38,7 +39,7 @@ export async function generateMetadata({
 export default async function AlbumPage({
   params,
 }: {
-  params: { domain: string; albumId: string };
+  params: Promise<{ domain: string; albumId: string }>;
 }) {
   const { domain, albumId } = await params;
   const supabase = await createServiceClient();
@@ -76,14 +77,9 @@ export default async function AlbumPage({
     return <div>Error loading images. Please try again later.</div>;
   }
 
-  const photos: Photo[] = images.map((image) => ({
-    imageUrl: supabase.storage.from("images").getPublicUrl(image.image_path)
-      .data.publicUrl,
-    thumbnailUrl: supabase.storage
-      .from("thumbnails")
-      .getPublicUrl(image.image_thumbnail_path).data.publicUrl,
-    ...image,
-  }));
+  const photos: Photo[] = images.map((image) =>
+    processedImageToPhoto(supabase, image)
+  );
 
   return (
     <UserSite
