@@ -33,7 +33,7 @@ export default function BrandingFooter() {
             href="https://app.gphotos.site?utm_source=gphotos.site"
             target="_blank"
             rel="noopener"
-            className="text-xs px-3 py-1 rounded-full bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"
+            className="text-xs px-3 py-1 rounded-[10px] bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"
           >
             Create yours for free
           </a>

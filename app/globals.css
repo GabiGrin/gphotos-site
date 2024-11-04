@@ -70,11 +70,11 @@
 
 /* Add these styles at the end of your globals.css file */
 .main-btn {
-  @apply bg-white border-gray-200 border px-3 py-[3px] flex flex-row gap-3 items-center text-sm rounded-[5px] transition-all duration-200;
+  @apply bg-white border-gray-200 border px-3 py-[3px] flex flex-row gap-3 items-center text-sm rounded-[5px] transition-all duration-100;
 }
 
 .main-btn:hover:not(:disabled) {
-  @apply opacity-95 border-gray-300 shadow-sm scale-[1.01] transform;
+  @apply opacity-95 border-gray-300 shadow-sm bg-neutral-100;
 }
 
 .main-btn.icon-btn {
