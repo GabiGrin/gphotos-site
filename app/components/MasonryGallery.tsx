@@ -6,7 +6,13 @@ import { Photo, ProcessedImage } from "@/types/gphotos";
 
 const DESKTOP_BREAKPOINT = 768; // Define the breakpoint for desktop screens
 
-export default function MasonryGallery({ images }: { images: Photo[] }) {
+export default function MasonryGallery({
+  images,
+  maxColumns,
+}: {
+  images: Photo[];
+  maxColumns: number;
+}) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [isDesktop, setIsDesktop] = useState(false);
@@ -112,7 +118,11 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
   return (
     <>
       <ResponsiveMasonry
-        columnsCountBreakPoints={{ 350: 2, 750: 2, 900: 3 }}
+        columnsCountBreakPoints={{
+          350: Math.min(maxColumns, 2),
+          750: Math.min(maxColumns, 2),
+          900: Math.min(maxColumns, 3),
+        }}
         className="w-full masonry-gallery"
       >
         <Masonry gutter="2px">

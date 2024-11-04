@@ -56,6 +56,7 @@ export default async function AlbumPage({
   }
 
   const layoutConfig = site.layout_config as LayoutConfig;
+  const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
 
   const album = await serverApi.getAlbumById(albumId).catch((e) => {
     logger.error(e, "AlbumPage getAlbumById error");
@@ -70,7 +71,7 @@ export default async function AlbumPage({
     .from("processed_images")
     .select("*")
     .eq("album_id", albumId)
-    .order("gphotos_created_at", { ascending: false });
+    .order("gphotos_created_at", { ascending: sortOrder });
 
   if (error) {
     logger.error(error, "AlbumPage getProcessedImages error");

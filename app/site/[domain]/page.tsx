@@ -66,12 +66,13 @@ export default async function UserGallery({
   }
 
   const layoutConfig = site.layout_config as LayoutConfig;
+  const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
 
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
     .eq("user_id", site.user_id)
-    .order("gphotos_created_at", { ascending: false });
+    .order("gphotos_created_at", { ascending: sortOrder });
 
   if (error) {
     logger.error(error, "UserGallery getProcessedImages error");

@@ -19,6 +19,15 @@ export default function UserSite({
   album?: Album;
   domain?: string;
 }) {
+  // Sort images based on layoutConfig.sort
+  const sortedImages = [...images].sort((a, b) => {
+    const aDate = new Date(a.gphotos_created_at).getTime();
+    const bDate = new Date(b.gphotos_created_at).getTime();
+    return layoutConfig.sort === "oldest"
+      ? aDate - bDate // oldest first
+      : bDate - aDate; // newest first
+  });
+
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen mx-4">
@@ -101,7 +110,10 @@ export default function UserSite({
               </h3>
             )}
           </header>
-          <MasonryGallery images={images} />
+          <MasonryGallery
+            images={sortedImages}
+            maxColumns={layoutConfig.maxColumns || 3}
+          />
         </div>
         <BrandingFooter />
       </div>
