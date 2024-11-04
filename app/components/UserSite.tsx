@@ -23,31 +23,30 @@ export default function UserSite({
     <TooltipProvider>
       <div className="flex flex-col min-h-screen mx-4">
         <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
-          {/* Action buttons container */}
-          <div className="w-full flex justify-center md:justify-between items-center mb-8 md:mb-0">
-            {/* Back to albums link when viewing an album */}
-            {album && (
-              <Link
-                href={`/`}
-                className="absolute left-0 top-0 flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+          {/* Back to albums link when viewing an album */}
+          {album && (
+            <Link
+              href={`/`}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors relative mb-4"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Back to albums
-              </Link>
-            )}
-
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Back to albums
+            </Link>
+          )}
+          {/* Action buttons container */}
+          <div className="w-full flex justify-center md:justify-between items-start mb-8 md:mb-0 md:absolute z-0">
             {/* Email and Website buttons */}
             <div className="flex flex-row md:flex-col gap-2">
               {layoutConfig.buttons?.email?.show && (
@@ -76,7 +75,7 @@ export default function UserSite({
 
             {/* Share button */}
             {layoutConfig.buttons?.share?.show && (
-              <div className="md:absolute md:right-0 md:top-4">
+              <div className="md:absolute md:right-0 ">
                 <ShareButton
                   title={layoutConfig.content?.title?.value || "Photo Gallery"}
                 />

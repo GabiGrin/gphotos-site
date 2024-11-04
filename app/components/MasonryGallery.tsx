@@ -113,7 +113,7 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
     <>
       <ResponsiveMasonry
         columnsCountBreakPoints={{ 350: 2, 750: 2, 900: 3 }}
-        className="w-full"
+        className="w-full masonry-gallery"
       >
         <Masonry gutter="2px">
           {images.map((image, index) => (
@@ -121,7 +121,7 @@ export default function MasonryGallery({ images }: { images: Photo[] }) {
               key={image.id}
               src={image.thumbnailUrl}
               alt={image.thumbnailUrl}
-              className="w-full cursor-pointer transition-all duration-200 hover:opacity-[0.98] hover:scale-[1.002]"
+              className="w-full cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75"
               onClick={() => openLightbox(index)}
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}

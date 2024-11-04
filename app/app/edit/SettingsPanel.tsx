@@ -37,6 +37,9 @@ import { createClient } from "@/utils/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { AlbumIcon } from "@/app/components/icons/icons";
 import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
+import { useDebounce } from "@/hooks/useDebounce";
+import { CheckIcon } from "@/app/components/icons/icons";
+import { EyeIcon, Loader2 } from "lucide-react";
 
 export default function SettingsPanel(props: {
   site: Site;
@@ -50,6 +53,33 @@ export default function SettingsPanel(props: {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showAlbumsModal, setShowAlbumsModal] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle"
+  );
+
+  const debouncedConfig = useDebounce(config, 1500);
+
+  useEffect(() => {
+    setSaveStatus("saving");
+
+    let timeout: NodeJS.Timeout;
+
+    const save = async () => {
+      const client = createClient();
+      const clientApi = createClientApi(client);
+      await clientApi.saveLayoutConfig(config);
+      setSaveStatus("saved");
+      const _timeout = setTimeout(() => {
+        setSaveStatus("idle");
+      }, 4000);
+
+      timeout = _timeout;
+    };
+
+    save();
+
+    return () => clearTimeout(timeout);
+  }, [debouncedConfig]);
 
   const updateConfig = (updates: Partial<LayoutConfig>) => {
     props.onChange({
@@ -126,28 +156,6 @@ export default function SettingsPanel(props: {
   };
 
   const currentMaxColumns = config.maxColumns ?? 3;
-
-  const handleSaveAndPublish = async () => {
-    setIsSaving(true);
-    try {
-      const client = createClient();
-      const clientApi = createClientApi(client);
-
-      await clientApi.saveLayoutConfig(config);
-
-      toast({
-        description: "Changes saved successfully!",
-      });
-    } catch (error) {
-      console.error("Failed to save layout:", error);
-      toast({
-        description: "Failed to save changes. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
@@ -436,23 +444,34 @@ export default function SettingsPanel(props: {
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-2">
           <div className="flex flex-row gap-2 justify-center">
-            <button
-              className={`main-btn flex flex-row gap-2 items-center ${
-                isSaving ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              onClick={handleSaveAndPublish}
-              disabled={isSaving}
-            >
-              <SaveDeployIcon />
-              {isSaving ? "Saving..." : "Save and publish"}
-            </button>
+            {saveStatus === "saving" && (
+              <div className="text-sm text-neutral-500 flex items-center gap-1">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving and publishing changes...
+              </div>
+            )}
+            {saveStatus === "saved" && (
+              <div className="text-sm text-green-600 flex items-center gap-1">
+                <CheckIcon className="w-4 h-4" />
+                Changes saved and published
+              </div>
+            )}
+            {saveStatus === "idle" && (
+              <div className="text-sm text-neutral-500 flex items-center gap-1">
+                <SaveDeployIcon className="w-4 h-4" />
+                Changes will be published automatically
+              </div>
+            )}
           </div>
-          <div className="text-sm text-neutral-500">
-            Changes appear on your public gallery only after you save and
-            publish.
-          </div>
+          <a
+            className="main-btn"
+            href={getSiteUrl(props.site.username)}
+            target="_blank"
+          >
+            <EyeIcon className="w-4 h-4" /> View Gallery Website
+          </a>
         </div>
       </div>
       <ManageAlbumsModal
