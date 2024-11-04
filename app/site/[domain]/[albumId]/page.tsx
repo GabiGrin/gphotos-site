@@ -1,22 +1,17 @@
 import { createServiceClient } from "@/utils/supabase/service";
-import MasonryGallery from "../../components/MasonryGallery";
-import Link from "next/link";
 import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
-import NotFound from "./not-found";
-import posthogServer from "@/utils/posthog";
+import NotFound from "../not-found";
 import { LayoutConfig, Photo } from "@/types/gphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
-import UserAlbums from "@/app/components/UserAlbums";
 
-// Add this function to generate metadata
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ domain: string }>;
+  params: { domain: string; albumId: string };
 }): Promise<Metadata> {
-  const { domain } = await params;
+  const { domain, albumId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".gphotos.site", "");
@@ -27,36 +22,31 @@ export async function generateMetadata({
   });
 
   if (!site) {
-    return {
-      title: "Not Found",
-    };
+    return { title: "Not Found" };
   }
 
-  const layoutConfig = site.layout_config as LayoutConfig;
+  const album = await serverApi.getAlbumById(albumId).catch((e) => {
+    logger.error(e, "generateMetadata getAlbumById error");
+    return null;
+  });
 
   return {
-    title: layoutConfig.content?.title?.value || "Photo Gallery",
+    title: album?.title || "Album Not Found",
   };
 }
 
-export default async function UserGallery({
+export default async function AlbumPage({
   params,
 }: {
-  params: Promise<{ domain: string }>;
+  params: { domain: string; albumId: string };
 }) {
-  const { domain } = await params;
+  const { domain, albumId } = await params;
   const supabase = await createServiceClient();
-
   const serverApi = createServerApi(supabase);
-
-  // Fetch processed images for the user from Supabase
-
   const host = domain.replace(".gphotos.site", "");
 
-  logger.info({ host }, "UserGallery host");
-
   const site = await serverApi.getSiteByUsername(host).catch((e) => {
-    logger.error(e, "UserGallery getSiteByUsername error");
+    logger.error(e, "AlbumPage getSiteByUsername error");
     return null;
   });
 
@@ -66,24 +56,25 @@ export default async function UserGallery({
 
   const layoutConfig = site.layout_config as LayoutConfig;
 
+  const album = await serverApi.getAlbumById(albumId).catch((e) => {
+    logger.error(e, "AlbumPage getAlbumById error");
+    return null;
+  });
+
+  if (!album) {
+    return <NotFound domain={domain} />;
+  }
+
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
-    .eq("user_id", site.user_id)
+    .eq("album_id", albumId)
     .order("gphotos_created_at", { ascending: false });
 
   if (error) {
-    logger.error(error, "UserGallery getProcessedImages error");
+    logger.error(error, "AlbumPage getProcessedImages error");
     return <div>Error loading images. Please try again later.</div>;
   }
-
-  posthogServer.capture({
-    event: "view_site",
-    distinctId: site.user_id,
-    properties: {
-      domain,
-    },
-  });
 
   const photos: Photo[] = images.map((image) => ({
     imageUrl: supabase.storage.from("images").getPublicUrl(image.image_path)
@@ -94,17 +85,12 @@ export default async function UserGallery({
     ...image,
   }));
 
-  // Fetch albums
-  const albums = await serverApi.getAlbumsByUserId(site.user_id).catch((e) => {
-    logger.error(e, "UserGallery getAlbumsByUserId error");
-    return [];
-  });
-
-  // If albums exist, show the albums view
-  if (albums && albums.length > 0) {
-    return <UserAlbums layoutConfig={layoutConfig} albums={albums} />;
-  }
-
-  // Otherwise, show the regular photo gallery
-  return <UserSite layoutConfig={layoutConfig} images={photos} />;
+  return (
+    <UserSite
+      layoutConfig={layoutConfig}
+      images={photos}
+      album={album}
+      domain={domain}
+    />
+  );
 }

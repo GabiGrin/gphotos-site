@@ -6,6 +6,7 @@ import {
   ProcessedImage,
   Site,
   DeleteImageJobData,
+  Album,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -465,6 +466,22 @@ export function createServerApi(client: SupabaseClient<Database>) {
         );
         throw new Error("Failed to update site layout");
       }
+    },
+    getAlbumsByUserId: async (userId: string): Promise<Album[]> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("user_id", userId);
+      if (error) throw error;
+      return data;
+    },
+    getAlbumById: async (albumId: string): Promise<Album> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("id", albumId);
+      if (error) throw error;
+      return data[0];
     },
   };
 

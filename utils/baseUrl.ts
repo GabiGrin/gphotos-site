@@ -9,14 +9,14 @@ export function getBaseUrl() {
 
 export function getSiteHost(username: string) {
   if (isLocalhost) {
-    return `localhost:3000/${username}`;
+    return `${username}.local-gphotos.site:3000`;
   }
   return `${username}.gphotos.site`;
 }
 
 export function getSiteUrl(username: string) {
   if (isLocalhost) {
-    return `http://localhost:3000/${username}`;
+    return `http://${getSiteHost(username)}`;
   }
   return `https://${getSiteHost(username)}`;
 }

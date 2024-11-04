@@ -16,7 +16,7 @@ import {
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LayoutConfig, Photo, ProcessedImage, Site } from "@/types/gphotos";
+import { LayoutConfig, Photo, Site } from "@/types/gphotos";
 import { getSiteHost, getSiteUrl } from "@/utils/baseUrl";
 import Link from "next/link";
 import {
