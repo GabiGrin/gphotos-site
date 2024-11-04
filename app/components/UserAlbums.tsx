@@ -1,53 +1,24 @@
-import { LayoutConfig, Photo, Album } from "@/types/gphotos";
-import MasonryGallery from "./MasonryGallery";
-import { Mail, Globe } from "lucide-react";
-import ShareButton from "./buttons/ShareButton";
+import { Album, AlbumWithCoverPhoto, LayoutConfig } from "@/types/gphotos";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { EmailIcon, WebsiteIcon } from "./icons/icons";
 import Link from "next/link";
+import ShareButton from "./buttons/ShareButton";
 import BrandingFooter from "./BrandingFooter";
 
-export default function UserSite({
+export default function UserAlbums({
   layoutConfig,
-  images,
-  album,
-  domain,
+  albums,
 }: {
   layoutConfig: LayoutConfig;
-  images: Photo[];
-  album?: Album;
-  domain?: string;
+  albums: AlbumWithCoverPhoto[];
 }) {
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen mx-4">
         <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
-          {/* Action buttons container */}
+          {/* Action buttons container - mobile: centered row, desktop: split to corners */}
           <div className="w-full flex justify-center md:justify-between items-center mb-8 md:mb-0">
-            {/* Back to albums link when viewing an album */}
-            {album && (
-              <Link
-                href={`/`}
-                className="absolute left-0 top-0 flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Back to albums
-              </Link>
-            )}
-
             {/* Email and Website buttons */}
             <div className="flex flex-row md:flex-col gap-2">
               {layoutConfig.buttons?.email?.show && (
@@ -85,24 +56,47 @@ export default function UserSite({
           </div>
 
           <header className="flex flex-col items-center max-w-4xl mb-8">
-            {album ? (
+            {layoutConfig.content?.title?.show && (
               <h1 className="text-3xl mb-6 px-4 tracking-tight">
-                {album.title}
+                {layoutConfig.content.title.value}
               </h1>
-            ) : (
-              layoutConfig.content?.title?.show && (
-                <h1 className="text-3xl mb-6 px-4 tracking-tight">
-                  {layoutConfig.content.title.value}
-                </h1>
-              )
             )}
             {layoutConfig.content?.description?.show && (
               <h3 className="text-center mb-6 text-[#444] tracking-tight">
-                {album?.description ?? layoutConfig.content.description.value}
+                {layoutConfig.content.description.value}
               </h3>
             )}
           </header>
-          <MasonryGallery images={images} />
+
+          <div className="w-full gap-3 flex flex-wrap flex-row">
+            {albums.map((album) => (
+              <Link
+                key={album.id}
+                href={`/${album.id}`}
+                className="w-[406px] group flex flex-col bg-white rounded-sm overflow-hidden border border-stone-200 hover:border-gray-300 transition-all"
+              >
+                <div className="h-[393px] max-w-full relative shadow-lg">
+                  {album.coverPhoto && (
+                    <img
+                      src={album.coverPhoto.thumbnailUrl}
+                      alt={album.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="p-4 antialiased">
+                  <h3 className="text-[32px] tracking-tighter letter font-medium  group-hover:text-gray-700 line-clamp-1">
+                    {album.title}
+                  </h3>
+                  {album.description && (
+                    <p className="text-[16px] font-normal tracking-tight line-clamp-2 overflow-hidden">
+                      {album.description}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
         <BrandingFooter />
       </div>

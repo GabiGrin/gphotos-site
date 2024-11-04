@@ -2,6 +2,7 @@ import { Album, Photo, ProcessedImage, Site } from "@/types/gphotos";
 import { Database } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { JobStatusCounts } from "./server-api";
+import { processedImageToPhoto } from "./api-utils";
 
 export function createClientApi(client: SupabaseClient<Database>) {
   return {
@@ -12,14 +13,7 @@ export function createClientApi(client: SupabaseClient<Database>) {
         .order("gphotos_created_at", { ascending: false })
         .eq("user_id", userId);
       if (error) throw error;
-      return data.map((image) => ({
-        ...image,
-        imageUrl: client.storage.from("images").getPublicUrl(image.image_path)
-          .data.publicUrl,
-        thumbnailUrl: client.storage
-          .from("thumbnails")
-          .getPublicUrl(image.image_thumbnail_path).data.publicUrl,
-      }));
+      return data.map((image) => processedImageToPhoto(client, image));
     },
     getSiteByUserId: async (userId: string): Promise<Site> => {
       const { data, error } = await client
@@ -55,7 +49,7 @@ export function createClientApi(client: SupabaseClient<Database>) {
     },
 
     createAlbum: async (
-      album: Omit<Album, "id" | "created_at" | "updated_at">
+      album: Omit<Album, "id" | "created_at" | "updated_at" | "coverPhoto">
     ) => {
       const response = await client.from("albums").insert(album).select();
       if (response.error) throw response.error;
@@ -65,12 +59,15 @@ export function createClientApi(client: SupabaseClient<Database>) {
     getAlbums: async (userId: string): Promise<Album[]> => {
       const { data, error } = await client
         .from("albums")
-        .select()
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+        .select("*")
+        .eq("user_id", userId);
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching albums:", error);
+        throw error;
+      }
+
+      return data as Album[];
     },
 
     updateAlbum: async (albumId: string, updates: Partial<Album>) => {
@@ -87,6 +84,14 @@ export function createClientApi(client: SupabaseClient<Database>) {
     deleteAlbum: async (albumId: string) => {
       const { error } = await client.from("albums").delete().eq("id", albumId);
 
+      if (error) throw error;
+    },
+
+    async assignPhotosToAlbum(photoIds: string[], albumId: string) {
+      const { error } = await client
+        .from("processed_images")
+        .update({ album_id: albumId })
+        .in("id", photoIds);
       if (error) throw error;
     },
   };

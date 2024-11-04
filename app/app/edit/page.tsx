@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutConfig, Photo, Site } from "@/types/gphotos";
+import { Album, LayoutConfig, Photo, Site } from "@/types/gphotos";
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -35,6 +35,8 @@ export default function DashboardPage() {
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(
     site?.layout_config ?? ({} as any)
   );
+
+  const [albums, setAlbums] = useState<Album[]>([]);
 
   useEffect(() => {
     if (site?.layout_config) {
@@ -99,6 +101,36 @@ export default function DashboardPage() {
     return { ...site, layout_config: layoutConfig } as Site;
   }, [site, layoutConfig]);
 
+  const handleAssignToAlbum = async (photoIds: string[], albumId: string) => {
+    try {
+      await clientApi.assignPhotosToAlbum(photoIds, albumId);
+      // Refresh the photos/albums data
+      await fetchProcessedImages();
+    } catch (error) {
+      console.error("Failed to assign photos to album:", error);
+      throw error; // Let the modal handle the error display
+    }
+  };
+
+  const fetchAlbums = async () => {
+    if (user) {
+      console.log("Getting albums");
+      try {
+        const albums = await clientApi.getAlbums(user.id);
+        console.log("Albums:", albums);
+        setAlbums(albums);
+      } catch (error) {
+        console.error("Error getting albums:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchAlbums();
+    }
+  }, [user]);
+
   if (!user || !site || !processedImages) {
     return (
       <div className="flex-1 w-full flex items-center justify-center py-20">
@@ -125,11 +157,13 @@ export default function DashboardPage() {
       />
 
       <ManageImagesModal
+        albums={albums}
         isOpen={isManageImagesOpen}
         onClose={() => setIsManageImagesOpen(false)}
         photos={processedImages || []}
         onImagesDeleted={fetchProcessedImages}
         onImportImages={() => setIsImportModalOpen(true)}
+        onAssignToAlbum={handleAssignToAlbum}
         userId={user.id}
       />
 

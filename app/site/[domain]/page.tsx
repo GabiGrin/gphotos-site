@@ -5,9 +5,11 @@ import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
-import { LayoutConfig, Photo } from "@/types/gphotos";
+import { AlbumWithCoverPhoto, LayoutConfig, Photo } from "@/types/gphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
+import UserAlbums from "@/app/components/UserAlbums";
+import { processedImageToPhoto } from "@/utils/dal/api-utils";
 
 // Add this function to generate metadata
 export async function generateMetadata({
@@ -84,14 +86,31 @@ export default async function UserGallery({
     },
   });
 
-  const photos: Photo[] = images.map((image) => ({
-    imageUrl: supabase.storage.from("images").getPublicUrl(image.image_path)
-      .data.publicUrl,
-    thumbnailUrl: supabase.storage
-      .from("thumbnails")
-      .getPublicUrl(image.image_thumbnail_path).data.publicUrl,
-    ...image,
-  }));
+  const photos: Photo[] = images.map((image) =>
+    processedImageToPhoto(supabase, image)
+  );
 
+  // Fetch albums
+  const rawAlbums = await serverApi.getAlbumsByUserId(site.user_id);
+
+  const albumPhotos =
+    rawAlbums.length > 0
+      ? await serverApi.getImageByIds(
+          rawAlbums.map((album) => album.cover_image_id!)
+        )
+      : [];
+  const albums = rawAlbums.map((album) => ({
+    ...album,
+    coverPhoto: albumPhotos.find((photo) => photo.id === album.cover_image_id),
+  })) as AlbumWithCoverPhoto[];
+
+  console.log(42, albumPhotos);
+
+  // If albums exist, show the albums view
+  if (rawAlbums && albums.length > 0) {
+    return <UserAlbums layoutConfig={layoutConfig} albums={albums} />;
+  }
+
+  // Otherwise, show the regular photo gallery
   return <UserSite layoutConfig={layoutConfig} images={photos} />;
 }

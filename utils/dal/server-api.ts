@@ -6,12 +6,15 @@ import {
   ProcessedImage,
   Site,
   DeleteImageJobData,
+  Album,
+  Photo,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MediaItem } from "@/types/google-photos";
 import { logger } from "../logger";
 import { NormalizeError } from "next/dist/shared/lib/utils";
+import { processedImageToPhoto } from "./api-utils";
 
 export interface BaseUploadJobDto {
   sessionId: string;
@@ -465,6 +468,32 @@ export function createServerApi(client: SupabaseClient<Database>) {
         );
         throw new Error("Failed to update site layout");
       }
+    },
+    getAlbumsByUserId: async (userId: string): Promise<Album[]> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return data;
+    },
+    getImageByIds: async (imageIds: string[]): Promise<Photo[]> => {
+      const { data, error } = await client
+        .from("processed_images")
+        .select()
+        .in("id", imageIds);
+
+      if (error) throw error;
+      return data.map((image) => processedImageToPhoto(client, image));
+    },
+    getAlbumById: async (albumId: string): Promise<Album> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("id", albumId);
+      if (error) throw error;
+      return data[0];
     },
   };
 
