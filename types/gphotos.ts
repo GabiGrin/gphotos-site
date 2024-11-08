@@ -1,3 +1,4 @@
+import { PremiumPlanType } from "@/premium/plans";
 import { MediaItem } from "./google-photos";
 import { Database } from "./supabase";
 
@@ -62,7 +63,9 @@ export type Photo = ProcessedImage & {
   thumbnailUrl: string;
 };
 
-export type Site = Database["public"]["Tables"]["sites"]["Row"];
+export type Site = Database["public"]["Tables"]["sites"]["Row"] & {
+  premium_plan: PremiumPlanType;
+};
 
 export type Album = Database["public"]["Tables"]["albums"]["Row"];
 

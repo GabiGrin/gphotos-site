@@ -8,17 +8,19 @@ import { EmailIcon, WebsiteIcon } from "./icons/icons";
 import Link from "next/link";
 import BrandingFooter from "./BrandingFooter";
 
+interface UserSiteProps {
+  layoutConfig: LayoutConfig;
+  images: Photo[];
+  albums: Album[];
+  currentAlbum?: Album;
+}
+
 export default function UserSite({
   layoutConfig,
   images,
-  album,
-  domain,
-}: {
-  layoutConfig: LayoutConfig;
-  images: Photo[];
-  album?: Album;
-  domain?: string;
-}) {
+  albums,
+  currentAlbum,
+}: UserSiteProps) {
   // Sort images based on layoutConfig.sort
   const sortedImages = [...images].sort((a, b) => {
     const aDate = new Date(a.gphotos_created_at).getTime();
@@ -33,10 +35,10 @@ export default function UserSite({
       <div className="flex flex-col min-h-screen mx-4">
         <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
           {/* Back to albums link when viewing an album */}
-          {album && (
+          {currentAlbum && (
             <Link
               href={`/`}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors relative mb-4"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors relative mb-4 z-10"
             >
               <svg
                 className="w-4 h-4"
@@ -55,7 +57,7 @@ export default function UserSite({
             </Link>
           )}
           {/* Action buttons container */}
-          <div className="w-full flex justify-center md:justify-between items-start mb-8 md:mb-0 md:absolute z-0">
+          <div className="w-full flex justify-center md:justify-between items-start mb-8 md:mb-0 md:absolute relative z-0">
             {/* Email and Website buttons */}
             <div className="flex flex-row md:flex-col gap-2">
               {layoutConfig.buttons?.email?.show && (
@@ -93,20 +95,15 @@ export default function UserSite({
           </div>
 
           <header className="flex flex-col items-center max-w-4xl mb-8">
-            {album ? (
+            {layoutConfig.content?.title?.show && (
               <h1 className="text-3xl mb-6 px-4 tracking-tight">
-                {album.title}
+                {currentAlbum?.title ?? layoutConfig.content.title.value}
               </h1>
-            ) : (
-              layoutConfig.content?.title?.show && (
-                <h1 className="text-3xl mb-6 px-4 tracking-tight">
-                  {layoutConfig.content.title.value}
-                </h1>
-              )
             )}
             {layoutConfig.content?.description?.show && (
               <h3 className="text-center mb-6 text-[#444] tracking-tight">
-                {album?.description ?? layoutConfig.content.description.value}
+                {currentAlbum?.description ??
+                  layoutConfig.content.description.value}
               </h3>
             )}
           </header>

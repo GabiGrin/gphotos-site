@@ -16,7 +16,7 @@ import {
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { LayoutConfig, Photo, Site } from "@/types/gphotos";
+import { Album, LayoutConfig, Photo, Site } from "@/types/gphotos";
 import { getSiteHost, getSiteUrl } from "@/utils/baseUrl";
 import Link from "next/link";
 import {
@@ -48,6 +48,8 @@ export default function SettingsPanel(props: {
   onManageImages: () => void;
   onImportImages: () => void;
   images: Photo[];
+  albums: Album[];
+  onAlbumsChange: (albums: Album[]) => void;
 }) {
   const config = (props.site.layout_config as LayoutConfig) ?? {};
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export default function SettingsPanel(props: {
     "idle"
   );
 
-  const debouncedConfig = useDebounce(config, 1500);
+  const debouncedConfig = useDebounce(config, 800);
 
   useEffect(() => {
     setSaveStatus("saving");
@@ -479,6 +481,8 @@ export default function SettingsPanel(props: {
         onOpenChange={setShowAlbumsModal}
         images={props.images || []}
         userId={props.site.user_id}
+        albums={props.albums}
+        onAlbumsChange={props.onAlbumsChange}
       />
     </div>
   );

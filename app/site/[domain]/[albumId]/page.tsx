@@ -86,8 +86,8 @@ export default async function AlbumPage({
     <UserSite
       layoutConfig={layoutConfig}
       images={photos}
-      album={album}
-      domain={domain}
+      albums={[]}
+      currentAlbum={album}
     />
   );
 }

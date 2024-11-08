@@ -97,9 +97,33 @@ export default function DashboardPage() {
     }
   }, []);
 
+  const fetchAlbums = async () => {
+    if (user) {
+      try {
+        const albums = await clientApi.getAlbums(user.id);
+        setAlbums(albums);
+      } catch (error) {
+        console.error("Error getting albums:", error);
+        toast({
+          variant: "destructive",
+          description: "Failed to load albums. Please try again.",
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchAlbums();
+    }
+  }, [user]);
+
   const siteWithLayoutConfig = useMemo(() => {
-    return { ...site, layout_config: layoutConfig } as Site;
-  }, [site, layoutConfig]);
+    return {
+      ...site,
+      layout_config: layoutConfig,
+    } as Site;
+  }, [site, layoutConfig, albums]);
 
   const handleAssignToAlbum = async (photoIds: string[], albumId: string) => {
     try {
@@ -112,31 +136,14 @@ export default function DashboardPage() {
     }
   };
 
-  const fetchAlbums = async () => {
-    if (user) {
-      console.log("Getting albums");
-      try {
-        const albums = await clientApi.getAlbums(user.id);
-        console.log("Albums:", albums);
-        setAlbums(albums);
-      } catch (error) {
-        console.error("Error getting albums:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (user) {
-      fetchAlbums();
-    }
-  }, [user]);
-
   if (!user || !site || !processedImages) {
     return (
-      <div className="flex-1 w-full flex items-center justify-center py-20">
+      <div className="flex-1 w-full flex items-center justify-center py-56">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          <p className="text-gray-600">Loading your dashboard...</p>
+          <p className="text-gray-600">
+            Loading your gallery website settings...
+          </p>
         </div>
       </div>
     );
@@ -154,6 +161,8 @@ export default function DashboardPage() {
         onManageImages={() => setIsManageImagesOpen(true)}
         onImportImages={() => setIsImportModalOpen(true)}
         images={processedImages}
+        albums={albums}
+        onAlbumsChange={setAlbums}
       />
 
       <ManageImagesModal
@@ -194,7 +203,11 @@ export default function DashboardPage() {
           </Button>
         </div>
       ) : (
-        <UserSite layoutConfig={layoutConfig} images={processedImages} />
+        <UserSite
+          layoutConfig={layoutConfig}
+          images={processedImages}
+          albums={albums}
+        />
       )}
     </div>
   );

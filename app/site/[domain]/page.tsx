@@ -113,5 +113,7 @@ export default async function UserGallery({
   }
 
   // Otherwise, show the regular photo gallery
-  return <UserSite layoutConfig={layoutConfig} images={photos} />;
+  return (
+    <UserSite layoutConfig={layoutConfig} images={photos} albums={albums} />
+  );
 }

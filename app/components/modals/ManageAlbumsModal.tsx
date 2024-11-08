@@ -30,6 +30,8 @@ interface ManageAlbumsModalProps {
   onOpenChange: (open: boolean) => void;
   images: Photo[];
   userId: string;
+  albums: Album[];
+  onAlbumsChange: (albums: Album[]) => void;
 }
 
 export default function ManageAlbumsModal({
@@ -37,6 +39,8 @@ export default function ManageAlbumsModal({
   onOpenChange,
   images,
   userId,
+  albums,
+  onAlbumsChange,
 }: ManageAlbumsModalProps) {
   const [showAlbumModal, setShowAlbumModal] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -44,28 +48,6 @@ export default function ManageAlbumsModal({
 
   const supabase = createClient();
   const clientApi = createClientApi(supabase);
-
-  const [albums, setAlbums] = useState<Album[]>([]);
-
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      try {
-        const albums = await clientApi.getAlbums(userId);
-
-        setAlbums(albums);
-      } catch (error) {
-        console.error("Error fetching albums:", error);
-        toast({
-          variant: "destructive",
-          description: "Failed to load albums. Please try again.",
-        });
-      }
-    };
-
-    if (open) {
-      fetchAlbums();
-    }
-  }, [open, userId, clientApi]);
 
   const getCoverImage = (imageId: string) => {
     return images.find((img) => img.id === imageId);
@@ -115,7 +97,7 @@ export default function ManageAlbumsModal({
         user_id: userId,
       });
 
-      setAlbums((prevAlbums) => [...prevAlbums, newAlbum]);
+      onAlbumsChange([...albums, newAlbum]);
       setShowAlbumModal(false);
       toast({
         description: "Album created successfully",
@@ -144,8 +126,8 @@ export default function ManageAlbumsModal({
         cover_image_id: data.coverImageId,
       });
 
-      setAlbums((prevAlbums) =>
-        prevAlbums.map((album) =>
+      onAlbumsChange(
+        albums.map((album) =>
           album.id === updatedAlbum.id ? updatedAlbum : album
         )
       );
@@ -166,7 +148,7 @@ export default function ManageAlbumsModal({
   const handleDeleteAlbum = async (album: Album) => {
     try {
       await clientApi.deleteAlbum(album.id);
-      setAlbums((prevAlbums) => prevAlbums.filter((a) => a.id !== album.id));
+      onAlbumsChange(albums.filter((a) => a.id !== album.id));
       setAlbumToDelete(null);
       toast({
         description: "Album deleted successfully",

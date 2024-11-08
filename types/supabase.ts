@@ -12,29 +12,29 @@ export type Database = {
       albums: {
         Row: {
           cover_image_id: string | null
-          created_at: string | null
-          description: string | null
+          created_at: string
+          description: string
           id: string
           title: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           cover_image_id?: string | null
-          created_at?: string | null
-          description?: string | null
+          created_at?: string
+          description: string
           id?: string
           title: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           cover_image_id?: string | null
-          created_at?: string | null
-          description?: string | null
+          created_at?: string
+          description?: string
           id?: string
           title?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -146,6 +146,8 @@ export type Database = {
         Row: {
           created_at: string | null
           layout_config: Json
+          premium_overrides: Json | null
+          premium_plan: string
           status: string
           updated_at: string | null
           user_id: string
@@ -154,6 +156,8 @@ export type Database = {
         Insert: {
           created_at?: string | null
           layout_config: Json
+          premium_overrides?: Json | null
+          premium_plan?: string
           status?: string
           updated_at?: string | null
           user_id: string
@@ -162,6 +166,8 @@ export type Database = {
         Update: {
           created_at?: string | null
           layout_config?: Json
+          premium_overrides?: Json | null
+          premium_plan?: string
           status?: string
           updated_at?: string | null
           user_id?: string
