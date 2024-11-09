@@ -61,6 +61,8 @@ export default async function UserGallery({
     return null;
   });
 
+  console.log(42, site);
+
   if (!site) {
     return <NotFound domain={domain} />;
   }
@@ -78,6 +80,8 @@ export default async function UserGallery({
     logger.error(error, "UserGallery getProcessedImages error");
     return <div>Error loading images. Please try again later.</div>;
   }
+
+  console.log(44, images.length);
 
   posthogServer.capture({
     event: "view_site",
@@ -97,15 +101,14 @@ export default async function UserGallery({
   const albumPhotos =
     rawAlbums.length > 0
       ? await serverApi.getImageByIds(
-          rawAlbums.map((album) => album.cover_image_id!)
+          rawAlbums.flatMap((album) => album.cover_image_id ?? [])
         )
       : [];
+
   const albums = rawAlbums.map((album) => ({
     ...album,
     coverPhoto: albumPhotos.find((photo) => photo.id === album.cover_image_id),
   })) as AlbumWithCoverPhoto[];
-
-  console.log(42, albumPhotos);
 
   // If albums exist, show the albums view
   if (rawAlbums && albums.length > 0) {
