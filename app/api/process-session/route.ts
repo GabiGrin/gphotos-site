@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createServerApi } from "@/utils/dal/server-api";
+import { getLimits } from "@/premium/plans";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();
@@ -35,6 +36,9 @@ export async function POST(req: NextRequest) {
 
   const serverApi = createServerApi(serviceClient);
 
+  const site = await serverApi.getSite(data.user.id);
+  const limits = getLimits(site);
+
   try {
     const job = await serverApi.createProcessPageJob({
       userId: data.user.id,
@@ -42,6 +46,7 @@ export async function POST(req: NextRequest) {
       googleAccessToken,
       pageToken: "",
       pageSize: 10,
+      photoLimit: limits.photoLimit,
     });
 
     return NextResponse.json({ jobId: job.id }, { status: 200 });

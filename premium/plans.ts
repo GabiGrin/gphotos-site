@@ -1,3 +1,5 @@
+import { Site } from "@/types/gphotos";
+
 export interface PremiumPlanLimits {
   photoLimit: number;
   albumLimit: number;
@@ -27,3 +29,14 @@ export const premiumPlans = {
 };
 
 export type PremiumPlanType = keyof typeof premiumPlans;
+
+export function getLimits(site: Site) {
+  const premiumPlan = premiumPlans[site.premium_plan ?? "free"];
+  const overrides =
+    (site.premium_overrides as unknown as PremiumPlanLimits) ?? {};
+
+  return {
+    ...premiumPlan,
+    ...overrides,
+  };
+}
