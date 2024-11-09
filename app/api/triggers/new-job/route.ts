@@ -66,10 +66,30 @@ export async function POST(req: NextRequest) {
       case JobType.PROCESS_PAGE: {
         logger.info({ jobId: newJob.id }, "Processing PROCESS_PAGE job");
 
+        const currentCount = await serverApi.getPhotoCount(newJob.user_id);
+        const remainingSlots = newJob.job_data.photoLimit - currentCount;
+
+        if (remainingSlots <= 0) {
+          logger.info(
+            { jobId: newJob.id },
+            "Photo limit reached, skipping processing"
+          );
+          await serverApi.markJobAsCompleted(newJob.id);
+          return NextResponse.json(
+            { message: "Photo limit reached" },
+            { status: 200 }
+          );
+        }
+
+        const adjustedPageSize = Math.min(
+          newJob.job_data.pageSize,
+          remainingSlots
+        );
+
         const items = await gphotos.listMediaItems({
           sessionId: newJob.session_id,
           googleAccessToken: newJob.job_data.googleAccessToken,
-          pageSize: newJob.job_data.pageSize,
+          pageSize: adjustedPageSize,
           pageToken: newJob.job_data.pageToken,
         });
 
@@ -78,7 +98,10 @@ export async function POST(req: NextRequest) {
           "Processed page"
         );
 
-        if (items.nextPageToken) {
+        if (
+          items.nextPageToken &&
+          currentCount + items.mediaItems.length < newJob.job_data.photoLimit
+        ) {
           logger.info(
             { jobId: newJob.id, nextPageToken: items.nextPageToken },
             "Creating next page job"
@@ -90,6 +113,7 @@ export async function POST(req: NextRequest) {
             sessionId: newJob.session_id,
             googleAccessToken: newJob.job_data.googleAccessToken,
             userId: newJob.user_id,
+            photoLimit: newJob.job_data.photoLimit,
           });
           logger.info(
             { jobId: newJob.id, nextJobId: nextJob.id },

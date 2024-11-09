@@ -5,9 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Photo, Album } from "@/types/gphotos";
+import { Photo, Album, Site } from "@/types/gphotos";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { deleteImages } from "@/app/actions/images";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Check } from "lucide-react";
+import { usePremiumData } from "@/hooks/use-premium-data";
 
 interface ManageImagesModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ interface ManageImagesModalProps {
   onImportImages: () => void;
   onAssignToAlbum: (photoIds: string[], albumId: string) => Promise<void>;
   userId: string;
+  site: Site;
 }
 
 const THUMBNAIL_SIZES = {
@@ -56,12 +58,17 @@ export function ManageImagesModal({
   onImportImages,
   onAssignToAlbum,
   userId,
+  site,
 }: ManageImagesModalProps) {
   const { toast } = useToast();
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [thumbnailSize, setThumbnailSize] = useState<ThumbnailSize>("small");
   const [isAssigning, setIsAssigning] = useState(false);
+
+  const combinedPremiumData = usePremiumData(site);
+  const { photoLimit } = combinedPremiumData;
+  const remainingPhotos = photoLimit - photos.length;
 
   useEffect(() => {
     if (isOpen) {
@@ -167,9 +174,24 @@ export function ManageImagesModal({
             <div className="flex items-center gap-4">
               {/* Image Management Controls */}
               <div className="flex items-center gap-2">
-                <Button variant="default" onClick={onImportImages}>
+                <Button
+                  variant="default"
+                  onClick={onImportImages}
+                  disabled={remainingPhotos <= 0}
+                  title={
+                    remainingPhotos <= 0
+                      ? "Photo limit reached"
+                      : "Import more photos"
+                  }
+                >
                   Import More Photos
                 </Button>
+                <span className="text-sm text-muted-foreground">
+                  {photos.length} / {photoLimit} photos used
+                  {remainingPhotos <= 0 && (
+                    <span className="text-red-500 ml-2">Limit reached</span>
+                  )}
+                </span>
               </div>
 
               {/* Selection Controls */}

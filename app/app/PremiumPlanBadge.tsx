@@ -1,12 +1,9 @@
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
-import { PremiumPlanType } from "@/premium/plans";
 import { Site } from "@/types/gphotos";
 import Link from "next/link";
 
 export function PremiumPlanBadge({ site }: { site: Site }) {
   let premiumPlan = site.premium_plan;
-
-  premiumPlan = "pro" as PremiumPlanType;
 
   switch (premiumPlan) {
     case "free":

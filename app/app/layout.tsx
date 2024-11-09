@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { UpgradeModal } from "@/app/components/UpgradeModal";
 import { PremiumIcon } from "../components/icons/PremiumIcon";
 import { PremiumPlanBadge } from "./PremiumPlanBadge";
+import { createServerApi } from "@/utils/dal/server-api";
 
 export default async function DashboardLayout({
   children,
@@ -55,11 +56,8 @@ export default async function DashboardLayout({
   const userImage = user?.user_metadata?.avatar_url;
 
   // Fetch site data
-  const { data: site } = await supabase
-    .from("sites")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+  const serverApi = createServerApi(supabase);
+  const site = await serverApi.getSite(user.id);
 
   return (
     <div className="min-h-screen bg-white">

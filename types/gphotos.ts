@@ -23,8 +23,9 @@ export interface BaseJobData {
 }
 
 export interface CreateProcessPageJobData extends BaseJobData {
-  pageToken: string;
+  pageToken?: string;
   pageSize: number;
+  photoLimit: number;
 }
 
 export interface CreateImageUploadJobData extends BaseJobData {

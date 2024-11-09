@@ -1,4 +1,4 @@
-export interface PremiumPlan {
+export interface PremiumPlanLimits {
   photoLimit: number;
   albumLimit: number;
   branding: boolean;

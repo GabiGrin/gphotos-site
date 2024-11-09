@@ -16,6 +16,10 @@ import { logger } from "../logger";
 import { NormalizeError } from "next/dist/shared/lib/utils";
 import { processedImageToPhoto } from "./api-utils";
 
+type SiteWithPremiumPlan = Omit<Site, "premium_plan"> & {
+  premium_plan: "free" | "basic" | "pro";
+};
+
 export interface BaseUploadJobDto {
   sessionId: string;
   googleAccessToken: string;
@@ -54,6 +58,13 @@ export interface JobStatusCounts {
 export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
+      const currentCount = await api.getPhotoCount(data.userId);
+      const remainingSlots = data.photoLimit - currentCount;
+
+      if (remainingSlots <= 0) {
+        throw new Error("Photo limit reached");
+      }
+
       const res = await client
         .from("jobs")
         .insert({
@@ -62,7 +73,9 @@ export function createServerApi(client: SupabaseClient<Database>) {
           job_data: {
             googleAccessToken: data.googleAccessToken,
             pageToken: data.pageToken,
-            pageSize: data.pageSize,
+            pageSize: Math.min(data.pageSize, remainingSlots),
+            photoLimit: data.photoLimit,
+            currentCount: currentCount,
           },
           user_id: data.userId,
         })
@@ -494,6 +507,29 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .eq("id", albumId);
       if (error) throw error;
       return data[0];
+    },
+    getSite: async (userId: string): Promise<Site> => {
+      const { data, error } = await client
+        .from("sites")
+        .select()
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+      if (!data) {
+        throw new Error("Site not found");
+      }
+
+      return data as Site;
+    },
+    getPhotoCount: async (userId: string): Promise<number> => {
+      const { count, error } = await client
+        .from("processed_images")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return count || 0;
     },
   };
 

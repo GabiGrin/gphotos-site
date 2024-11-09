@@ -174,6 +174,7 @@ export default function DashboardPage() {
         onImportImages={() => setIsImportModalOpen(true)}
         onAssignToAlbum={handleAssignToAlbum}
         userId={user.id}
+        site={siteWithLayoutConfig}
       />
 
       <ImportImagesModal
