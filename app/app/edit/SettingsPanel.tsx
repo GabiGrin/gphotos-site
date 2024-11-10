@@ -42,6 +42,7 @@ import { CheckIcon } from "@/app/components/icons/icons";
 import { EyeIcon, Loader2 } from "lucide-react";
 import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
+import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
 
 export default function SettingsPanel(props: {
   site: Site;
@@ -60,6 +61,7 @@ export default function SettingsPanel(props: {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
+  const [showDomainModal, setShowDomainModal] = useState(false);
 
   const limits = usePremiumLimits(props.site);
 
@@ -177,7 +179,10 @@ export default function SettingsPanel(props: {
           >
             {getSiteHost(props.site.username)}
           </Link>
-          <MainButton premiumDisabled>
+          <MainButton
+            premiumDisabled={!limits.customDomain}
+            onClick={() => setShowDomainModal(true)}
+          >
             <ChainIcon /> Connect custom domain
           </MainButton>
         </div>
@@ -489,6 +494,10 @@ export default function SettingsPanel(props: {
         userId={props.site.user_id}
         albums={props.albums}
         onAlbumsChange={props.onAlbumsChange}
+      />
+      <ConnectDomainModal
+        open={showDomainModal}
+        onOpenChange={setShowDomainModal}
       />
     </div>
   );
