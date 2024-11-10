@@ -32,6 +32,7 @@ interface ManageAlbumsModalProps {
   userId: string;
   albums: Album[];
   onAlbumsChange: (albums: Album[]) => void;
+  onOpenManageImages: () => void;
 }
 
 export default function ManageAlbumsModal({
@@ -41,6 +42,7 @@ export default function ManageAlbumsModal({
   userId,
   albums,
   onAlbumsChange,
+  onOpenManageImages,
 }: ManageAlbumsModalProps) {
   const [showAlbumModal, setShowAlbumModal] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
@@ -186,16 +188,6 @@ export default function ManageAlbumsModal({
           </DialogHeader>
 
           <div className="flex flex-col gap-4">
-            <button
-              className="main-btn flex items-center gap-2 w-fit"
-              onClick={() => {
-                setSelectedAlbum(null);
-                setShowAlbumModal(true);
-              }}
-            >
-              <PlusIcon /> Create new album
-            </button>
-
             <div className="grid gap-4 max-h-[500px] overflow-y-auto">
               {albums.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center border rounded-lg border-dashed">
@@ -209,8 +201,8 @@ export default function ManageAlbumsModal({
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md">
                     <p className="text-sm text-blue-700">
                       <strong>Note:</strong> Creating your first album will
-                      enable "Albums Mode". In this mode, only photos that are
-                      added to albums will be visible in your gallery.
+                      enable "Albums Display". In this mode, only photos that
+                      are added to albums will be visible in your gallery.
                     </p>
                   </div>
                 </div>
@@ -263,6 +255,36 @@ export default function ManageAlbumsModal({
               )}
             </div>
           </div>
+
+          <div className="flex flex-col gap-4 pt-4 border-t">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-700">
+                <strong>Tip:</strong> To add or remove images from an album, use
+                the{" "}
+                <button
+                  onClick={() => {
+                    onOpenChange(false);
+                    onOpenManageImages();
+                  }}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Manage Images
+                </button>{" "}
+                feature, select the images you want to modify, and use the
+                "Assign to Album" option.
+              </p>
+            </div>
+
+            <button
+              className="main-btn flex items-center gap-2 w-fit ml-auto"
+              onClick={() => {
+                setSelectedAlbum(null);
+                setShowAlbumModal(true);
+              }}
+            >
+              <PlusIcon /> Create new album
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -287,12 +309,12 @@ export default function ManageAlbumsModal({
                 <>
                   <p>
                     This is your last album. Deleting it will switch the gallery
-                    back to "Flat Mode", where all photos will be visible
+                    back to "Flat Display", where all photos will be visible
                     regardless of album status.
                   </p>
                   <p>
                     Are you sure you want to delete "{albumToDelete?.title}" and
-                    switch back to Flat Mode?
+                    switch back to Flat Display?
                   </p>
                 </>
               ) : (
@@ -309,7 +331,7 @@ export default function ManageAlbumsModal({
               className="bg-red-500 hover:bg-red-600"
               onClick={() => albumToDelete && handleDeleteAlbum(albumToDelete)}
             >
-              {isLastAlbum ? "Delete and Switch to Flat Mode" : "Delete"}
+              {isLastAlbum ? "Delete and Switch to Flat Display" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

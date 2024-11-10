@@ -111,9 +111,14 @@ export default async function UserGallery({
     coverPhoto: albumPhotos.find((photo) => photo.id === album.cover_image_id),
   })) as AlbumWithCoverPhoto[];
 
-  // If albums exist, show the albums view
   if (rawAlbums && albums.length > 0) {
-    return <UserAlbums layoutConfig={layoutConfig} albums={albums} />;
+    return (
+      <UserAlbums
+        layoutConfig={layoutConfig}
+        albums={albums}
+        showBrandingFooter={limits.branding}
+      />
+    );
   }
 
   // Otherwise, show the regular photo gallery

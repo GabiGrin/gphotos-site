@@ -9,6 +9,11 @@ import {
 import { Album, Photo } from "@/types/gphotos";
 import { useEffect, useState, useRef } from "react";
 import ImageSelector from "../ImageSelector";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ImageIcon, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AlbumFormModalProps {
   open: boolean;
@@ -34,109 +39,135 @@ export default function AlbumFormModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverImageId, setCoverImageId] = useState("");
-
-  // Add ref for the selected image
+  const [error, setError] = useState("");
   const selectedImageRef = useRef<HTMLDivElement>(null);
 
-  // Reset form when modal opens/closes or mode changes
   useEffect(() => {
     if (open) {
       if (mode === "edit" && initialData) {
         setTitle(initialData.title);
         setDescription(initialData.description || "");
         setCoverImageId(initialData.cover_image_id || "");
-
-        // Add small delay to ensure the DOM is ready
         setTimeout(() => {
-          selectedImageRef.current?.scrollIntoView({
-            block: "nearest",
-          });
+          selectedImageRef.current?.scrollIntoView({ block: "nearest" });
         }, 100);
       } else {
-        // Reset form for create mode
         setTitle("");
         setDescription("");
         setCoverImageId("");
       }
+      setError("");
     }
   }, [open, mode, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!title.trim()) {
+      setError("Please enter an album title");
+      return;
+    }
+
+    if (!coverImageId) {
+      setError("Please select a cover image");
+      return;
+    }
+
     onSubmit({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       coverImageId,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] p-0">
-        <DialogHeader className="p-6 py-4">
-          <DialogTitle>
-            {mode === "create" ? "Create Album" : "Edit Album"}
+      <DialogContent className="max-w-3xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="shrink-0 px-6 py-4 border-b">
+          <DialogTitle className="text-xl font-semibold">
+            {mode === "create" ? "Create New Album" : "Edit Album"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="flex-1 overflow-y-auto px-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="title" className="text-sm font-medium">
-                  Title
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  placeholder="Enter album title"
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="flex flex-col min-h-0 flex-1">
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-              <div className="space-y-2">
-                <label htmlFor="description" className="text-sm font-medium">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  placeholder="Enter album description"
-                  rows={3}
-                />
-              </div>
+              <div className="flex flex-col min-h-0 h-full gap-6">
+                <div className="space-y-2">
+                  <label htmlFor="title" className="text-sm font-medium block">
+                    Album Title <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Summer Vacation 2024"
+                    className="w-full"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Cover Image</label>
-                <ImageSelector
-                  images={images}
-                  selectedImageId={coverImageId}
-                  onSelect={setCoverImageId}
-                  selectedImageRef={selectedImageRef}
-                />
+                <div className="space-y-2">
+                  <label
+                    htmlFor="description"
+                    className="text-sm font-medium block"
+                  >
+                    Description{" "}
+                    <span className="text-gray-500">(optional)</span>
+                  </label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Add a description for your album..."
+                    className="w-full resize-none"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex flex-col flex-1 min-h-0">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-medium">
+                      Cover Image <span className="text-red-500">*</span>
+                    </label>
+                    {!coverImageId && (
+                      <span className="text-sm text-gray-500 flex items-center gap-1">
+                        <ImageIcon size={14} />
+                        Select a cover image
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-h-0 border rounded-lg overflow-hidden">
+                    <ImageSelector
+                      images={images}
+                      selectedImageId={coverImageId}
+                      onSelect={setCoverImageId}
+                      selectedImageRef={selectedImageRef}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="border-t p-6 mt-auto">
-            <div className="flex justify-end gap-2">
-              <button
+          <div className="shrink-0 border-t p-4 bg-gray-50">
+            <div className="flex justify-end gap-3">
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="px-4 py-2 border rounded-md"
               >
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600"
-              >
-                {mode === "create" ? "Create" : "Save Changes"}
-              </button>
+              </Button>
+              <Button type="submit" variant="default">
+                {mode === "create" ? "Create Album" : "Save Changes"}
+              </Button>
             </div>
           </div>
         </form>

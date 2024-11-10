@@ -9,9 +9,11 @@ import BrandingFooter from "./BrandingFooter";
 export default function UserAlbums({
   layoutConfig,
   albums,
+  showBrandingFooter,
 }: {
   layoutConfig: LayoutConfig;
   albums: AlbumWithCoverPhoto[];
+  showBrandingFooter: boolean;
 }) {
   return (
     <TooltipProvider>
@@ -68,6 +70,7 @@ export default function UserAlbums({
             )}
           </header>
 
+          <div className="text-[16px]  mb-2 text-#515151">My albums:</div>
           <div className="w-full gap-3 flex flex-wrap flex-row">
             {albums.map((album) => (
               <Link
@@ -76,12 +79,16 @@ export default function UserAlbums({
                 className="w-[406px] group flex flex-col bg-white rounded-sm overflow-hidden border border-stone-200 hover:border-gray-300 transition-all"
               >
                 <div className="h-[393px] max-w-full relative shadow-lg">
-                  {album.coverPhoto && (
+                  {album.coverPhoto ? (
                     <img
                       src={album.coverPhoto.thumbnailUrl}
                       alt={album.title}
                       className="w-full h-full object-cover"
                     />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <div className="text-gray-400">{album.title}</div>
+                    </div>
                   )}
                 </div>
                 <div className="p-4 antialiased">
@@ -98,7 +105,7 @@ export default function UserAlbums({
             ))}
           </div>
         </div>
-        <BrandingFooter />
+        {showBrandingFooter && <BrandingFooter />}
       </div>
     </TooltipProvider>
   );

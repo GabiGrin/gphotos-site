@@ -44,7 +44,7 @@ import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
 
-export default function SettingsPanel(props: {
+interface SettingsPanelProps {
   site: Site;
   onChange: (config: LayoutConfig) => void;
   defaultEmail: string;
@@ -53,8 +53,19 @@ export default function SettingsPanel(props: {
   images: Photo[];
   albums: Album[];
   onAlbumsChange: (albums: Album[]) => void;
-}) {
-  const config = (props.site.layout_config as LayoutConfig) ?? {};
+}
+
+export default function SettingsPanel({
+  site,
+  onChange,
+  defaultEmail,
+  onManageImages,
+  onImportImages,
+  images,
+  albums,
+  onAlbumsChange,
+}: SettingsPanelProps) {
+  const config = (site.layout_config as LayoutConfig) ?? {};
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showAlbumsModal, setShowAlbumsModal] = useState(false);
@@ -63,7 +74,7 @@ export default function SettingsPanel(props: {
   );
   const [showDomainModal, setShowDomainModal] = useState(false);
 
-  const limits = usePremiumLimits(props.site);
+  const limits = usePremiumLimits(site);
 
   const debouncedConfig = useDebounce(config, 800);
 
@@ -90,7 +101,7 @@ export default function SettingsPanel(props: {
   }, [debouncedConfig]);
 
   const updateConfig = (updates: Partial<LayoutConfig>) => {
-    props.onChange({
+    onChange({
       ...config,
       ...updates,
     });
@@ -174,10 +185,10 @@ export default function SettingsPanel(props: {
         <div className="flex flex-row gap-4 w-full justify-center items-center">
           <Link
             className="text-neutral-700 text-sm"
-            href={getSiteUrl(props.site.username)}
+            href={getSiteUrl(site.username)}
             target="_blank"
           >
-            {getSiteHost(props.site.username)}
+            {getSiteHost(site.username)}
           </Link>
           <MainButton
             premiumDisabled={!limits.customDomain}
@@ -196,20 +207,16 @@ export default function SettingsPanel(props: {
                 <ImagesIcon /> Images{" "}
               </span>
 
-              {props.images ? (
+              {images ? (
                 <MainButton
                   className={
-                    props.images.length === 0 ? "!bg-blue-500 text-white" : ""
+                    images.length === 0 ? "!bg-blue-500 text-white" : ""
                   }
                   onClick={
-                    props.images.length === 0
-                      ? props.onImportImages
-                      : props.onManageImages
+                    images.length === 0 ? onImportImages : onManageImages
                   }
                 >
-                  {props.images.length === 0
-                    ? "Import images"
-                    : "Manage images"}
+                  {images.length === 0 ? "Import images" : "Manage images"}
                 </MainButton>
               ) : null}
             </div>
@@ -271,8 +278,7 @@ export default function SettingsPanel(props: {
                       ...config.buttons,
                       email: {
                         show: checked,
-                        value:
-                          config.buttons?.email?.value || props.defaultEmail,
+                        value: config.buttons?.email?.value || defaultEmail,
                       },
                     },
                   })
@@ -480,7 +486,7 @@ export default function SettingsPanel(props: {
           </div>
           <a
             className="main-btn"
-            href={getSiteUrl(props.site.username)}
+            href={getSiteUrl(site.username)}
             target="_blank"
           >
             <EyeIcon className="w-4 h-4" /> View Gallery Website
@@ -490,10 +496,14 @@ export default function SettingsPanel(props: {
       <ManageAlbumsModal
         open={showAlbumsModal}
         onOpenChange={setShowAlbumsModal}
-        images={props.images || []}
-        userId={props.site.user_id}
-        albums={props.albums}
-        onAlbumsChange={props.onAlbumsChange}
+        images={images}
+        userId={site.user_id}
+        albums={albums}
+        onAlbumsChange={onAlbumsChange}
+        onOpenManageImages={() => {
+          setShowAlbumsModal(false);
+          onManageImages();
+        }}
       />
       <ConnectDomainModal
         open={showDomainModal}
