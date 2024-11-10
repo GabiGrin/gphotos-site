@@ -184,6 +184,8 @@ export default function DashboardPage() {
           fetchProcessedImages();
         }}
         onImagesImported={fetchProcessedImages}
+        site={siteWithLayoutConfig}
+        currentPhotoCount={processedImages.length}
       />
 
       {!processedImages || processedImages.length === 0 ? (

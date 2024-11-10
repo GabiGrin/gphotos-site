@@ -55,13 +55,6 @@ export interface JobStatusCounts {
 export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
-      const currentCount = await api.getPhotoCount(data.userId);
-      const remainingSlots = data.maxPhotosLimit - currentCount;
-
-      if (remainingSlots <= 0) {
-        throw new Error("Photo limit reached");
-      }
-
       const res = await client
         .from("jobs")
         .insert({
@@ -70,9 +63,8 @@ export function createServerApi(client: SupabaseClient<Database>) {
           job_data: {
             googleAccessToken: data.googleAccessToken,
             pageToken: data.pageToken,
-            pageSize: Math.min(data.pageSize, remainingSlots),
+            pageSize: Math.min(data.pageSize, data.maxPhotosLimit),
             maxPhotosLimit: data.maxPhotosLimit,
-            currentCount: currentCount,
           },
           user_id: data.userId,
         })

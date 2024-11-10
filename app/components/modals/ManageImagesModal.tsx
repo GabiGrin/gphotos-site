@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Check } from "lucide-react";
-import { usePremiumData } from "@/hooks/use-premium-data";
+import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ManageImagesModalProps {
@@ -67,7 +67,7 @@ export function ManageImagesModal({
   const [thumbnailSize, setThumbnailSize] = useState<ThumbnailSize>("small");
   const [isAssigning, setIsAssigning] = useState(false);
 
-  const combinedPremiumData = usePremiumData(site);
+  const combinedPremiumData = usePremiumLimits(site);
   const { photoLimit } = combinedPremiumData;
   const remainingPhotos = photoLimit - photos.length;
 

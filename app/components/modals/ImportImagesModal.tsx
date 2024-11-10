@@ -19,11 +19,15 @@ import {
   useSessionStatus,
 } from "@/hooks/use-session-status";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Site } from "@/types/gphotos";
+import { usePremiumLimits } from "@/hooks/use-premium-limits";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImagesImported?: () => void;
+  currentPhotoCount: number;
+  site: Site;
 }
 
 type ImportStatus =
@@ -37,6 +41,8 @@ export function ImportImagesModal({
   isOpen,
   onClose,
   onImagesImported,
+  site,
+  currentPhotoCount,
 }: ImportImagesModalProps) {
   const [pickerUrl, setPickerUrl] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -52,6 +58,8 @@ export function ImportImagesModal({
 
   const supabase = createClient();
   const pathname = usePathname();
+
+  const limits = usePremiumLimits(site);
 
   const onSessionComplete = useCallback(
     (sessionStatus: SessionProgressComplete) => {
@@ -320,6 +328,16 @@ export function ImportImagesModal({
                       Select exactly which photos you want to import from your
                       private Google Photos collection.
                     </p>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
+                      <p className="text-xs text-amber-800">
+                        <span className="font-semibold">Note:</span> If you
+                        select more than {limits.photoLimit - currentPhotoCount}{" "}
+                        photos, only the first{" "}
+                        {limits.photoLimit - currentPhotoCount} will be
+                        imported.
+                      </p>
+                    </div>
 
                     <p className="text-xs text-gray-600 mb-4">
                       Clicking below will open Google Photos in a new tab. This
