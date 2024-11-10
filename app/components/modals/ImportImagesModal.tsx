@@ -21,6 +21,7 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Site } from "@/types/gphotos";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
+import { premiumPlans } from "@/premium/plans";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
@@ -76,12 +77,12 @@ export function ImportImagesModal({
 
       if (failedTotal > 0) {
         toast({
-          description: `${sessionStatus.scanning.succeeded + sessionStatus.uploading.succeeded} photos imported. ${failedTotal} couldn't be transferred.`,
+          description: `${sessionStatus.uploading.succeeded} photos imported. ${sessionStatus.uploading.failed} couldn't be transferred.`,
           variant: "destructive",
         });
       } else {
         toast({
-          description: `${sessionStatus.scanning.succeeded + sessionStatus.uploading.succeeded} photos imported successfully!`,
+          description: `${sessionStatus.uploading.succeeded} photos imported successfully!`,
         });
       }
       onClose();
@@ -329,16 +330,6 @@ export function ImportImagesModal({
                       private Google Photos collection.
                     </p>
 
-                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
-                      <p className="text-xs text-amber-800">
-                        <span className="font-semibold">Note:</span> If you
-                        select more than {limits.photoLimit - currentPhotoCount}{" "}
-                        photos, only the first{" "}
-                        {limits.photoLimit - currentPhotoCount} will be
-                        imported.
-                      </p>
-                    </div>
-
                     <p className="text-xs text-gray-600 mb-4">
                       Clicking below will open Google Photos in a new tab. This
                       secure method ensures we only access the specific photos
@@ -355,6 +346,52 @@ export function ImportImagesModal({
                     >
                       Select Photos
                     </a>
+                    <div className="text-sm text-gray-600 rounded-md p-3">
+                      {limits.photoLimit - currentPhotoCount <
+                      limits.photoLimit ? (
+                        <p>
+                          You can import up to{" "}
+                          <span className="font-medium">
+                            {limits.photoLimit - currentPhotoCount}
+                          </span>{" "}
+                          more photos
+                          {site.premium_plan === "free" && (
+                            <>
+                              {" "}
+                              —{" "}
+                              <a
+                                href="?upgrade=true"
+                                className="text-blue-500 hover:underline"
+                              >
+                                upgrade
+                              </a>{" "}
+                              to import up to {premiumPlans.pro.photoLimit}
+                            </>
+                          )}
+                        </p>
+                      ) : (
+                        <p>
+                          You can import up to{" "}
+                          <span className="font-medium">
+                            {limits.photoLimit}
+                          </span>{" "}
+                          photos
+                          {!site.premium_plan && (
+                            <>
+                              {" "}
+                              —{" "}
+                              <a
+                                href="?upgrade=true"
+                                className="text-blue-500 hover:underline"
+                              >
+                                upgrade
+                              </a>{" "}
+                              for up to {premiumPlans.pro.photoLimit} photos
+                            </>
+                          )}
+                        </p>
+                      )}
+                    </div>
                   </>
                 )}
 

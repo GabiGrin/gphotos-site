@@ -1,5 +1,6 @@
 import { JobStatusCounts } from "@/utils/dal/server-api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useClientApi } from "./useClientApi";
 
 interface UseSessionStatusProps {
   sessionId: string;
@@ -44,6 +45,8 @@ export function useSessionStatus({
     failed: 0,
   });
 
+  const clientApi = useClientApi();
+
   useEffect(() => {
     if (!sessionId) return;
     let intervalId: NodeJS.Timeout;
@@ -51,12 +54,8 @@ export function useSessionStatus({
     const pollStatus = async () => {
       console.log("Polling status");
       try {
-        const response = await fetch(`/api/session-status/${sessionId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch session status");
-        }
+        const counts = await clientApi.getSessionStatus(sessionId);
 
-        const counts: JobStatusCounts = await response.json();
         const { processPageJobs, imageUploadJobs } = counts;
 
         // If no jobs exist yet, maintain scanning state with zeros
