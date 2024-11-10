@@ -8,6 +8,7 @@ import {
   DeleteImageJobData,
   Album,
   Photo,
+  Job,
 } from "@/types/gphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -15,10 +16,6 @@ import { MediaItem } from "@/types/google-photos";
 import { logger } from "../logger";
 import { NormalizeError } from "next/dist/shared/lib/utils";
 import { processedImageToPhoto } from "./api-utils";
-
-type SiteWithPremiumPlan = Omit<Site, "premium_plan"> & {
-  premium_plan: "free" | "basic" | "pro";
-};
 
 export interface BaseUploadJobDto {
   sessionId: string;
@@ -59,7 +56,7 @@ export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
       const currentCount = await api.getPhotoCount(data.userId);
-      const remainingSlots = data.photoLimit - currentCount;
+      const remainingSlots = data.maxPhotosLimit - currentCount;
 
       if (remainingSlots <= 0) {
         throw new Error("Photo limit reached");
@@ -74,7 +71,7 @@ export function createServerApi(client: SupabaseClient<Database>) {
             googleAccessToken: data.googleAccessToken,
             pageToken: data.pageToken,
             pageSize: Math.min(data.pageSize, remainingSlots),
-            photoLimit: data.photoLimit,
+            maxPhotosLimit: data.maxPhotosLimit,
             currentCount: currentCount,
           },
           user_id: data.userId,
@@ -529,6 +526,23 @@ export function createServerApi(client: SupabaseClient<Database>) {
         .eq("user_id", userId);
 
       if (error) throw error;
+      return count || 0;
+    },
+    getJobsCountByStatus: async (
+      userId: string,
+      statuses: Job["status"][]
+    ): Promise<number> => {
+      const { count, error } = await client
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .in("status", statuses);
+
+      if (error) {
+        console.error("Error fetching jobs count by status:", error);
+        throw error;
+      }
+
       return count || 0;
     },
   };

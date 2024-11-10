@@ -25,7 +25,7 @@ export interface BaseJobData {
 export interface CreateProcessPageJobData extends BaseJobData {
   pageToken?: string;
   pageSize: number;
-  photoLimit: number;
+  maxPhotosLimit: number;
 }
 
 export interface CreateImageUploadJobData extends BaseJobData {
@@ -37,7 +37,9 @@ export interface DeleteImageJobData {
   thumbnailPath: string;
 }
 
-type DBJob = Database["public"]["Tables"]["jobs"]["Row"];
+type DBJob = Database["public"]["Tables"]["jobs"]["Row"] & {
+  status: JobStatus;
+};
 
 export type ProcessPageJob = DBJob & {
   type: JobType.PROCESS_PAGE;

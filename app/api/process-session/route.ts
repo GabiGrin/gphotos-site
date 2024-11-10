@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createServerApi } from "@/utils/dal/server-api";
 import { getLimits } from "@/premium/plans";
+import { JobStatus } from "@/types/gphotos";
+import logger from "@/utils/logger";
+import { MAX_MEDIA_ITEMS_PER_PAGE } from "@/utils/gphotos";
 
 export async function POST(req: NextRequest) {
   const client = await createClient();
@@ -36,8 +39,29 @@ export async function POST(req: NextRequest) {
 
   const serverApi = createServerApi(serviceClient);
 
+  const pendingJobsCount = await serverApi.getJobsCountByStatus(data.user.id, [
+    JobStatus.PENDING,
+    JobStatus.PROCESSING,
+  ]);
+  if (pendingJobsCount > 0) {
+    return NextResponse.json(
+      { message: "You have pending jobs. Please wait for them to complete." },
+      { status: 429 }
+    );
+  }
+
   const site = await serverApi.getSite(data.user.id);
   const limits = getLimits(site);
+  const currentPhotoCount = await serverApi.getPhotoCount(data.user.id);
+
+  const maxPhotosLimit = limits.photoLimit - currentPhotoCount;
+
+  const pageSize = Math.min(maxPhotosLimit, MAX_MEDIA_ITEMS_PER_PAGE);
+
+  logger.info(
+    { maxPhotosLimit, pageSize, currentPhotoCount },
+    "Creating process page job with page size"
+  );
 
   try {
     const job = await serverApi.createProcessPageJob({
@@ -45,8 +69,8 @@ export async function POST(req: NextRequest) {
       sessionId,
       googleAccessToken,
       pageToken: "",
-      pageSize: 10,
-      photoLimit: limits.photoLimit,
+      pageSize,
+      maxPhotosLimit: maxPhotosLimit,
     });
 
     return NextResponse.json({ jobId: job.id }, { status: 200 });

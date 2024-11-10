@@ -81,3 +81,5 @@ export function getGPhotosClient() {
     },
   };
 }
+
+export const MAX_MEDIA_ITEMS_PER_PAGE = 100;

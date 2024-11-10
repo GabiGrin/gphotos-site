@@ -66,30 +66,15 @@ export async function POST(req: NextRequest) {
       case JobType.PROCESS_PAGE: {
         logger.info({ jobId: newJob.id }, "Processing PROCESS_PAGE job");
 
-        const currentCount = await serverApi.getPhotoCount(newJob.user_id);
-        const remainingSlots = newJob.job_data.photoLimit - currentCount;
-
-        if (remainingSlots <= 0) {
-          logger.info(
-            { jobId: newJob.id },
-            "Photo limit reached, skipping processing"
-          );
-          await serverApi.markJobAsCompleted(newJob.id);
-          return NextResponse.json(
-            { message: "Photo limit reached" },
-            { status: 200 }
-          );
-        }
-
-        const adjustedPageSize = Math.min(
+        const pageSize = Math.min(
           newJob.job_data.pageSize,
-          remainingSlots
+          newJob.job_data.maxPhotosLimit
         );
 
         const items = await gphotos.listMediaItems({
           sessionId: newJob.session_id,
           googleAccessToken: newJob.job_data.googleAccessToken,
-          pageSize: adjustedPageSize,
+          pageSize,
           pageToken: newJob.job_data.pageToken,
         });
 
@@ -98,22 +83,38 @@ export async function POST(req: NextRequest) {
           "Processed page"
         );
 
-        if (
-          items.nextPageToken &&
-          currentCount + items.mediaItems.length < newJob.job_data.photoLimit
-        ) {
+        const remainingPhotosAllowed =
+          newJob.job_data.maxPhotosLimit - items.mediaItems.length;
+
+        if (remainingPhotosAllowed < 0) {
+          logger.warn(
+            { jobId: newJob.id, remainingPhotosAllowed },
+            "Remaining photos allowed is negative"
+          );
+        }
+
+        if (items.nextPageToken && remainingPhotosAllowed > 0) {
+          const newPageSize = Math.min(
+            remainingPhotosAllowed,
+            newJob.job_data.pageSize
+          );
+
           logger.info(
-            { jobId: newJob.id, nextPageToken: items.nextPageToken },
+            {
+              jobId: newJob.id,
+              nextPageToken: items.nextPageToken,
+              newPageSize,
+            },
             "Creating next page job"
           );
           const nextJob = await serverApi.createProcessPageJob({
             parentJobId: newJob.id,
             pageToken: items.nextPageToken,
-            pageSize: newJob.job_data.pageSize,
+            pageSize: newPageSize,
             sessionId: newJob.session_id,
             googleAccessToken: newJob.job_data.googleAccessToken,
             userId: newJob.user_id,
-            photoLimit: newJob.job_data.photoLimit,
+            maxPhotosLimit: remainingPhotosAllowed,
           });
           logger.info(
             { jobId: newJob.id, nextJobId: nextJob.id },

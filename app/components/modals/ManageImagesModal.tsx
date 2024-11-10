@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Check } from "lucide-react";
 import { usePremiumData } from "@/hooks/use-premium-data";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ManageImagesModalProps {
   isOpen: boolean;
@@ -152,6 +153,9 @@ export function ManageImagesModal({
       open={isOpen}
       onOpenChange={onClose} // Allow normal closing behavior
     >
+      <VisuallyHidden>
+        <DialogTitle>Manage Images</DialogTitle>
+      </VisuallyHidden>
       <DialogContent
         className="max-w-4xl h-[80vh] flex flex-col"
         onPointerDownOutside={(e) =>

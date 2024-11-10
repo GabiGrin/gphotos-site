@@ -18,6 +18,7 @@ import {
   SessionProgressComplete,
   useSessionStatus,
 } from "@/hooks/use-session-status";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
@@ -279,6 +280,9 @@ export function ImportImagesModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
+        <VisuallyHidden>
+          <DialogTitle>Import Images</DialogTitle>
+        </VisuallyHidden>
         <DialogContent
           className="sm:max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
