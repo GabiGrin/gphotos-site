@@ -78,13 +78,21 @@ export async function POST(req: NextRequest) {
           pageToken: newJob.job_data.pageToken,
         });
 
+        const photoItems = items.mediaItems.filter(
+          (item) => item.type === "PHOTO"
+        );
+
         logger.info(
-          { jobId: newJob.id, itemsCount: items.mediaItems.length },
+          {
+            jobId: newJob.id,
+            totalItems: items.mediaItems.length,
+            photoItems: photoItems.length,
+          },
           "Processed page"
         );
 
         const remainingPhotosAllowed =
-          newJob.job_data.maxPhotosLimit - items.mediaItems.length;
+          newJob.job_data.maxPhotosLimit - photoItems.length;
 
         if (remainingPhotosAllowed < 0) {
           logger.warn(
@@ -122,18 +130,11 @@ export async function POST(req: NextRequest) {
           );
         }
 
-        for (const item of items.mediaItems) {
+        for (const item of photoItems) {
           logger.info(
             { jobId: newJob.id, itemId: item.id },
             "Creating image upload job"
           );
-          if (item.type !== "PHOTO") {
-            logger.info(
-              { jobId: newJob.id, itemId: item.id },
-              "Skipping non-image item"
-            );
-            continue;
-          }
           try {
             await serverApi.createImageUploadJob({
               parentJobId: newJob.id,
@@ -161,7 +162,7 @@ export async function POST(req: NextRequest) {
             event: "process_page_completed",
             properties: {
               jobId: newJob.id,
-              itemsCount: items.mediaItems.length,
+              itemsCount: photoItems.length,
               hasNextPage: !!items.nextPageToken,
             },
           });
