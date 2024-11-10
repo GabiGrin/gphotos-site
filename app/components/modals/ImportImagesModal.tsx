@@ -56,6 +56,10 @@ export function ImportImagesModal({
   const [isInitializing, setIsInitializing] = useState(true);
   const { toast } = useToast();
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const [gPhotosError, setGPhotosError] = useState<{
+    email: string | null;
+    message: string;
+  } | null>(null);
 
   const supabase = createClient();
   const pathname = usePathname();
@@ -137,7 +141,39 @@ export function ImportImagesModal({
       setSessionId(data.id);
       setPickerUrl(data.pickerUri);
     } catch (error) {
-      console.error("Error creating picker session:", error);
+      const session = await supabase.auth.getSession();
+      const userEmail = session.data.session?.user?.email || null;
+
+      if (error instanceof Error) {
+        if (error.message === "AUTH_REQUIRED") {
+          setNeedsReauth(true);
+          setIsInitializing(false);
+          return;
+        }
+
+        if (error.message === "SETUP_REQUIRED") {
+          setGPhotosError({
+            email: userEmail,
+            message:
+              "This usually means Google Photos needs to be set up first.",
+          });
+          return;
+        }
+
+        if (error.message.startsWith("UNKNOWN_ERROR:")) {
+          const statusCode = error.message.split(":")[1];
+          setGPhotosError({
+            email: userEmail,
+            message: `Unable to connect to Google Photos (${statusCode}). Please try again later.`,
+          });
+          return;
+        }
+      }
+
+      setGPhotosError({
+        email: userEmail,
+        message: "Unable to connect to Google Photos. Please try again later.",
+      });
     }
   };
 
@@ -303,6 +339,58 @@ export function ImportImagesModal({
                 <span className="font-bold">
                   Setting up secure connection...
                 </span>
+              </div>
+            ) : gPhotosError ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="text-gray-600 mb-2">
+                  <svg
+                    className="w-12 h-12 mx-auto mb-4 text-blue-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <p className="text-center font-medium mb-2">
+                    Having trouble connecting to Google Photos
+                  </p>
+                  <p className="text-sm text-gray-600 text-center">
+                    We couldn't access Google Photos for {gPhotosError.email}.
+                    This usually means Google Photos needs to be set up first.{" "}
+                    <a
+                      href="https://photos.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                    >
+                      Visit Google Photos
+                    </a>{" "}
+                    to get started.
+                  </p>
+                  <p className="text-sm text-gray-500 text-center mt-4">
+                    Still having issues?{" "}
+                    <a
+                      href="mailto:hey@gphotos.site"
+                      className="text-blue-500 hover:underline"
+                    >
+                      Contact our support team
+                    </a>
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    setGPhotosError(null);
+                    checkAndGetGoogleToken();
+                  }}
+                  className="mt-4"
+                >
+                  Try Again
+                </Button>
               </div>
             ) : needsReauth ? (
               <div className="flex flex-col items-center gap-4">

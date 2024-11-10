@@ -57,7 +57,7 @@ export default async function DashboardLayout({
 
   // Fetch site data
   const serverApi = createServerApi(supabase);
-  const site = await serverApi.getSite(user.id);
+  const site = await serverApi.getSite(user.id).catch(() => null);
 
   return (
     <div className="min-h-screen bg-white">

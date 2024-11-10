@@ -11,8 +11,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js App",
-  description: "A clean Next.js application",
+  title: "GPhotos.site",
+  description:
+    "Build a beautiful photo website from your Google Photos in 1 minute",
 };
 
 export default function RootLayout({

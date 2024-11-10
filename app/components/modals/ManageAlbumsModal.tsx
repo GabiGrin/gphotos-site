@@ -9,7 +9,7 @@ import {
 import { Album, Photo, ProcessedImage } from "@/types/gphotos";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { PlusIcon, Trash, Pencil, FolderIcon } from "lucide-react";
+import { PlusIcon, Trash, Pencil, FolderIcon, ImageOff } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import AlbumFormModal from "./AlbumFormModal";
 import { createClientApi } from "@/utils/dal/client-api";
@@ -214,13 +214,17 @@ export default function ManageAlbumsModal({
                       key={album.id}
                       className="flex items-center gap-4 p-4 border rounded-lg"
                     >
-                      {coverImage && (
+                      {coverImage ? (
                         <div className="relative w-20 h-20 rounded-md overflow-hidden">
                           <img
                             src={coverImage.thumbnailUrl}
                             alt={album.title}
-                            className="object-cover"
+                            className="object-cover w-full h-full"
                           />
+                        </div>
+                      ) : (
+                        <div className="relative w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                          <ImageOff className="w-8 h-8 text-gray-400" />
                         </div>
                       )}
                       <div className="flex-1">

@@ -77,7 +77,30 @@ export function getGPhotosClient() {
           },
         }
       );
-      return response.json();
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error("AUTH_REQUIRED");
+        }
+
+        if (response.status === 400) {
+          throw new Error("SETUP_REQUIRED");
+        }
+
+        throw new Error(`UNKNOWN_ERROR:${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.id || !data.pickerUri) {
+        throw new Error("INVALID_RESPONSE");
+      }
+
+      return data;
+    },
+    getAuthScopes: async (token: string) => {
+      return fetch(
+        `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`
+      ).then((response) => response.json());
     },
   };
 }

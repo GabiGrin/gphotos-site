@@ -9,13 +9,11 @@ export default async function AppPage() {
 
   const api = createServerApi(supabase);
 
-  console.log(user.data.user);
-
   if (!user.data.user) {
     return redirect("/sign-in");
   }
 
-  const site = await api.getSiteByUserId(user.data.user.id);
+  const site = await api.getSiteByUserId(user.data.user.id).catch(() => null);
 
   if (!site) {
     return redirect("/create");

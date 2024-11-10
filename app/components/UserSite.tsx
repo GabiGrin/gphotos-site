@@ -1,6 +1,6 @@
 import { LayoutConfig, Photo, Album } from "@/types/gphotos";
 import MasonryGallery from "./MasonryGallery";
-import { Mail, Globe } from "lucide-react";
+import { Mail, Globe, ImageIcon } from "lucide-react";
 import ShareButton from "./buttons/ShareButton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
@@ -116,10 +116,20 @@ export default function UserSite({
               </h3>
             )}
           </header>
-          <MasonryGallery
-            images={sortedImages}
-            maxColumns={layoutConfig.maxColumns || 3}
-          />
+          {sortedImages.length > 0 ? (
+            <MasonryGallery
+              images={sortedImages}
+              maxColumns={layoutConfig.maxColumns || 3}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+              <ImageIcon className="w-16 h-16 mb-4 stroke-[1.2]" />
+              <p className="text-lg">No photos to display yet</p>
+              {currentAlbum && (
+                <p className="text-sm mt-1">This album is currently empty</p>
+              )}
+            </div>
+          )}
         </div>
         {showBranding && <BrandingFooter />}
       </div>
