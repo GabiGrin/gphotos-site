@@ -38,6 +38,5 @@ export function getLimits(site: Site) {
   return {
     ...premiumPlan,
     ...overrides,
-    customDomain: true,
   };
 }
