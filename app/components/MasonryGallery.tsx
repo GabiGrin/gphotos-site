@@ -125,7 +125,7 @@ export default function MasonryGallery({
         }}
         className="w-full masonry-gallery"
       >
-        <Masonry gutter="2px">
+        <Masonry gutter="4px">
           {images.map((image, index) => (
             <img
               key={image.id}

@@ -59,12 +59,12 @@ export default function UserAlbums({
 
           <header className="flex flex-col items-center max-w-4xl mb-8">
             {layoutConfig.content?.title?.show && (
-              <h1 className="text-3xl mb-6 px-4 tracking-tight">
+              <h1 className="text-4xl mb-4 px-4 tracking-tight">
                 {layoutConfig.content.title.value}
               </h1>
             )}
             {layoutConfig.content?.description?.show && (
-              <h3 className="text-center mb-6 text-[#444] tracking-tight">
+              <h3 className="text-center mb-6 text-[#515151] tracking-tight text-[16px]">
                 {layoutConfig.content.description.value}
               </h3>
             )}
