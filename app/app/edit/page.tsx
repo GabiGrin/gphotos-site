@@ -14,6 +14,7 @@ import { ImportImagesModal } from "@/app/components/modals/ImportImagesModal";
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Loader2 } from "lucide-react";
 import { toast, useToast } from "@/hooks/use-toast";
+import { usePremiumLimits } from "@/hooks/use-premium-limits";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -37,6 +38,8 @@ export default function DashboardPage() {
   );
 
   const [albums, setAlbums] = useState<Album[]>([]);
+
+  const limits = usePremiumLimits(site);
 
   useEffect(() => {
     if (site?.layout_config) {
@@ -210,6 +213,7 @@ export default function DashboardPage() {
           layoutConfig={layoutConfig}
           images={processedImages}
           albums={albums}
+          showBranding={limits.branding}
         />
       )}
     </div>

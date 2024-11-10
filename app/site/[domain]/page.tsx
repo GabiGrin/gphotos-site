@@ -10,6 +10,7 @@ import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import UserAlbums from "@/app/components/UserAlbums";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
+import { getLimits } from "@/premium/plans";
 
 // Add this function to generate metadata
 export async function generateMetadata({
@@ -61,11 +62,11 @@ export default async function UserGallery({
     return null;
   });
 
-  console.log(42, site);
-
   if (!site) {
     return <NotFound domain={domain} />;
   }
+
+  const limits = getLimits(site);
 
   const layoutConfig = site.layout_config as LayoutConfig;
   const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
@@ -117,6 +118,11 @@ export default async function UserGallery({
 
   // Otherwise, show the regular photo gallery
   return (
-    <UserSite layoutConfig={layoutConfig} images={photos} albums={albums} />
+    <UserSite
+      layoutConfig={layoutConfig}
+      images={photos}
+      albums={albums}
+      showBranding={limits.branding}
+    />
   );
 }

@@ -40,6 +40,8 @@ import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CheckIcon } from "@/app/components/icons/icons";
 import { EyeIcon, Loader2 } from "lucide-react";
+import { MainButton } from "@/app/components/MainButton";
+import { usePremiumLimits } from "@/hooks/use-premium-limits";
 
 export default function SettingsPanel(props: {
   site: Site;
@@ -58,6 +60,8 @@ export default function SettingsPanel(props: {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
+
+  const limits = usePremiumLimits(props.site);
 
   const debouncedConfig = useDebounce(config, 800);
 
@@ -116,12 +120,12 @@ export default function SettingsPanel(props: {
     return (
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button
-            className={`main-btn ${!show ? "opacity-50 cursor-not-allowed" : ""}`}
+          <MainButton
+            className={`${!show ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={!show}
           >
             Edit
-          </button>
+          </MainButton>
         </PopoverTrigger>
         {show && (
           <PopoverContent className="w-80">
@@ -141,7 +145,7 @@ export default function SettingsPanel(props: {
                   onChange={(e) => setTempValue(e.target.value)}
                 />
               )}
-              <button
+              <MainButton
                 className="main-btn !bg-blue-500 text-white"
                 onClick={() => {
                   onSave(tempValue);
@@ -149,7 +153,7 @@ export default function SettingsPanel(props: {
                 }}
               >
                 Save
-              </button>
+              </MainButton>
             </div>
           </PopoverContent>
         )}
@@ -173,9 +177,9 @@ export default function SettingsPanel(props: {
           >
             {getSiteHost(props.site.username)}
           </Link>
-          <button className="main-btn">
-            <ChainIcon /> Connect custom domain <PremiumIcon />
-          </button>
+          <MainButton premiumDisabled>
+            <ChainIcon /> Connect custom domain
+          </MainButton>
         </div>
 
         <div className="grid grid-cols-3 gap-8 w-full max-w-5xl">
@@ -188,8 +192,10 @@ export default function SettingsPanel(props: {
               </span>
 
               {props.images ? (
-                <button
-                  className={`main-btn ${props.images.length === 0 ? "!bg-blue-500 text-white" : ""}`}
+                <MainButton
+                  className={
+                    props.images.length === 0 ? "!bg-blue-500 text-white" : ""
+                  }
                   onClick={
                     props.images.length === 0
                       ? props.onImportImages
@@ -199,19 +205,19 @@ export default function SettingsPanel(props: {
                   {props.images.length === 0
                     ? "Import images"
                     : "Manage images"}
-                </button>
+                </MainButton>
               ) : null}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <span className="text-sm inline-flex items-center gap-3 text-neutral-700">
                 <AlbumIcon /> Albums
               </span>
-              <button
-                className="main-btn"
+              <MainButton
                 onClick={() => setShowAlbumsModal(true)}
+                premiumDisabled={limits.albumLimit === 1}
               >
                 Manage albums
-              </button>
+              </MainButton>
             </div>
           </div>
 
@@ -431,15 +437,15 @@ export default function SettingsPanel(props: {
               <div />
               <div className="flex flex-row gap-1">
                 {[1, 2, 3].map((num) => (
-                  <button
+                  <MainButton
                     key={num}
-                    className={`main-btn ${
+                    className={
                       currentMaxColumns === num ? "!bg-blue-500 text-white" : ""
-                    }`}
+                    }
                     onClick={() => updateConfig({ maxColumns: num as any })}
                   >
                     {num}
-                  </button>
+                  </MainButton>
                 ))}
               </div>
             </div>

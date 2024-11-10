@@ -13,6 +13,7 @@ interface UserSiteProps {
   images: Photo[];
   albums: Album[];
   currentAlbum?: Album;
+  showBranding: boolean;
 }
 
 export default function UserSite({
@@ -20,6 +21,7 @@ export default function UserSite({
   images,
   albums,
   currentAlbum,
+  showBranding,
 }: UserSiteProps) {
   // Sort images based on layoutConfig.sort
   const sortedImages = [...images].sort((a, b) => {
@@ -112,7 +114,7 @@ export default function UserSite({
             maxColumns={layoutConfig.maxColumns || 3}
           />
         </div>
-        <BrandingFooter />
+        {showBranding && <BrandingFooter />}
       </div>
     </TooltipProvider>
   );

@@ -6,6 +6,7 @@ import { LayoutConfig, Photo } from "@/types/gphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
+import { getLimits } from "@/premium/plans";
 
 export async function generateMetadata({
   params,
@@ -55,6 +56,8 @@ export default async function AlbumPage({
     return <NotFound domain={domain} />;
   }
 
+  const limits = getLimits(site);
+
   const layoutConfig = site.layout_config as LayoutConfig;
   const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
 
@@ -88,6 +91,7 @@ export default async function AlbumPage({
       images={photos}
       albums={[]}
       currentAlbum={album}
+      showBranding={limits.branding}
     />
   );
 }
