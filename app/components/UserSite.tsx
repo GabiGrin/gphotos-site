@@ -15,6 +15,7 @@ interface UserSiteProps {
   albums: Album[];
   currentAlbum?: Album;
   showBranding: boolean;
+  hostname: string;
 }
 
 export default function UserSite({
@@ -23,6 +24,7 @@ export default function UserSite({
   albums,
   currentAlbum,
   showBranding,
+  hostname,
 }: UserSiteProps) {
   // Sort images based on layoutConfig.sort
   const sortedImages = [...images].sort((a, b) => {
@@ -57,7 +59,7 @@ export default function UserSite({
             </div>
           )}
         </div>
-        {showBranding && <BrandingFooter />}
+        {showBranding && <BrandingFooter hostname={hostname} />}
       </div>
     </TooltipProvider>
   );

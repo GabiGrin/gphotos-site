@@ -117,6 +117,7 @@ export default async function UserGallery({
         layoutConfig={layoutConfig}
         albums={albums}
         showBrandingFooter={limits.branding}
+        hostname={host}
       />
     );
   }
@@ -128,6 +129,7 @@ export default async function UserGallery({
       images={photos}
       albums={albums}
       showBranding={limits.branding}
+      hostname={host}
     />
   );
 }

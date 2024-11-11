@@ -8,10 +8,12 @@ export default function UserAlbums({
   layoutConfig,
   albums,
   showBrandingFooter,
+  hostname,
 }: {
   layoutConfig: LayoutConfig;
   albums: AlbumWithCoverPhoto[];
   showBrandingFooter: boolean;
+  hostname: string;
 }) {
   return (
     <TooltipProvider>
@@ -58,7 +60,7 @@ export default function UserAlbums({
             </div>
           </div>
         </div>
-        {showBrandingFooter && <BrandingFooter />}
+        {showBrandingFooter && <BrandingFooter hostname={hostname} />}
       </div>
     </TooltipProvider>
   );

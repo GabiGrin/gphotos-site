@@ -1,6 +1,4 @@
-import Link from "next/link";
-
-export default function BrandingFooter() {
+export default function BrandingFooter(props: { hostname: string }) {
   return (
     <footer className="fixed bottom-0 left-0 w-full py-2.5 bg-white bg-opacity-80 backdrop-blur-sm shadow-md">
       <div className="container mx-auto flex items-center justify-center px-4">
@@ -28,9 +26,9 @@ export default function BrandingFooter() {
             </svg>
           </a>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 ml-2">
           <a
-            href="https://app.gphotos.site?utm_source=gphotos.site"
+            href={`https://www.gphotos.site?utm_source=${props.hostname}&utm_medium=footer&utm_campaign=user_sites`}
             target="_blank"
             rel="noopener"
             className="text-xs px-3 py-1 rounded-[10px] bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"

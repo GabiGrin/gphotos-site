@@ -92,6 +92,7 @@ export default async function AlbumPage({
       albums={[]}
       currentAlbum={album}
       showBranding={limits.branding}
+      hostname={host}
     />
   );
 }
