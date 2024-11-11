@@ -4,6 +4,7 @@ import { getGPhotosClient } from "@/utils/gphotos";
 import { createThumbnail } from "@/utils/create-thumbnail";
 import logger from "@/utils/logger";
 import { MediaItem } from "@/types/google-photos";
+import { calculateImageDimensions } from "@/utils/image-sizing";
 
 const maxWidth = 2048;
 const maxHeight = 2048;
@@ -30,33 +31,16 @@ export async function processGPhotosImage({
   const { getImage } = getGPhotosClient();
 
   try {
-    // Calculate reasonable max dimensions for the image
-
     const originalWidth = mediaItem.mediaFile.mediaFileMetadata.width;
     const originalHeight = mediaItem.mediaFile.mediaFileMetadata.height;
-    const aspectRatio = originalWidth / originalHeight;
 
-    let requestedWidth, requestedHeight;
-
-    if (aspectRatio > 1) {
-      // Landscape orientation
-      requestedWidth = Math.min(maxWidth, originalWidth);
-      requestedHeight = Math.round(requestedWidth / aspectRatio);
-    } else {
-      // Portrait orientation
-      requestedHeight = Math.min(maxHeight, originalHeight);
-      requestedWidth = Math.round(requestedHeight * aspectRatio);
-    }
-
-    // Ensure both dimensions are within limits
-    if (requestedWidth > maxWidth) {
-      requestedWidth = maxWidth;
-      requestedHeight = Math.round(maxWidth / aspectRatio);
-    }
-    if (requestedHeight > maxHeight) {
-      requestedHeight = maxHeight;
-      requestedWidth = Math.round(maxHeight * aspectRatio);
-    }
+    const { width: requestedWidth, height: requestedHeight } =
+      calculateImageDimensions({
+        originalWidth,
+        originalHeight,
+        maxWidth,
+        maxHeight,
+      });
 
     logger.info(
       { userId, mediaItemId: mediaItem.id, requestedWidth, requestedHeight },

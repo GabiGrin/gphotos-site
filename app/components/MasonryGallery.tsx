@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import { Photo, ProcessedImage } from "@/types/gphotos";
+import { Photo } from "@/types/gphotos";
+import { calculateImageDimensions } from "@/utils/image-sizing";
 
 const DESKTOP_BREAKPOINT = 768; // Define the breakpoint for desktop screens
+const THUMBNAIL_WIDTH = 500; // Same as in process-gphotos-image.ts
+const CHUNK_SIZE = 12; // Number of images to group together for height optimization
 
 export default function MasonryGallery({
   images,
@@ -115,6 +118,60 @@ export default function MasonryGallery({
     preloadImage(hoveredIndex);
   }, [hoveredIndex, preloadImage]);
 
+  const getThumbnailDimensions = useCallback((image: Photo) => {
+    return calculateImageDimensions({
+      originalWidth: image.width ?? 0,
+      originalHeight: image.height ?? 0,
+      maxWidth: THUMBNAIL_WIDTH,
+      maxHeight: THUMBNAIL_WIDTH, // Using same value for simplicity
+    });
+  }, []);
+
+  // Add this new function to sort and distribute images
+  const getOptimizedImageOrder = useCallback(
+    (images: Photo[]) => {
+      // Split images into chunks while preserving their original order
+      const chunks: number[][] = [];
+      for (let i = 0; i < images.length; i += CHUNK_SIZE) {
+        const chunk = images
+          .slice(i, i + CHUNK_SIZE)
+          .map((_, index) => i + index);
+
+        // Calculate height ratios for images in this chunk
+        const chunkWithRatios = chunk.map((index) => ({
+          index,
+          heightRatio: (images[index].height ?? 1) / (images[index].width ?? 1),
+        }));
+
+        // Sort chunk by height ratio (tallest first)
+        chunkWithRatios.sort((a, b) => b.heightRatio - a.heightRatio);
+
+        // Distribute chunk in zigzag pattern
+        const columns = Math.min(maxColumns, 3);
+        const optimizedChunk: number[] = [];
+
+        // Forward pass within chunk
+        for (let j = 0; j < chunkWithRatios.length; j += columns) {
+          for (let k = 0; k < columns && j + k < chunkWithRatios.length; k++) {
+            optimizedChunk.push(chunkWithRatios[j + k].index);
+          }
+        }
+
+        chunks.push(optimizedChunk);
+      }
+
+      // Flatten chunks back into a single array
+      return chunks.flat();
+    },
+    [maxColumns]
+  );
+
+  // Get optimized image order
+  const optimizedOrder = useMemo(
+    () => getOptimizedImageOrder(images),
+    [images, getOptimizedImageOrder]
+  );
+
   return (
     <>
       <ResponsiveMasonry
@@ -126,18 +183,37 @@ export default function MasonryGallery({
         className="w-full masonry-gallery"
       >
         <Masonry gutter="4px">
-          {images.map((image, index) => (
-            <img
-              key={image.id}
-              src={image.thumbnailUrl}
-              alt={image.thumbnailUrl}
-              className="w-full cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75"
-              onClick={() => openLightbox(index)}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              loading="lazy"
-            />
-          ))}
+          {optimizedOrder.map((originalIndex) => {
+            const image = images[originalIndex];
+            const dimensions = getThumbnailDimensions(image);
+            const aspectRatio = dimensions.width / dimensions.height;
+
+            return (
+              <div
+                key={image.id}
+                className="relative bg-gray-100 overflow-hidden border border-gray-200"
+                style={{
+                  paddingBottom: `${(1 / aspectRatio) * 100}%`,
+                }}
+              >
+                <img
+                  style={{ verticalAlign: "bottom" }}
+                  src={image.thumbnailUrl}
+                  alt={image.thumbnailUrl}
+                  className={`absolute inset-0 w-full h-full object-cover cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75 ${
+                    loadedImages.has(originalIndex)
+                      ? "opacity-100"
+                      : "opacity-0"
+                  }`}
+                  onClick={() => openLightbox(originalIndex)}
+                  onMouseEnter={() => setHoveredIndex(originalIndex)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  onLoad={() => handleImageLoad(originalIndex)}
+                  loading="lazy"
+                />
+              </div>
+            );
+          })}
         </Masonry>
       </ResponsiveMasonry>
 

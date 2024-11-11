@@ -27,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ImageIcon } from "lucide-react";
 
 interface ManageImagesModalProps {
   isOpen: boolean;
@@ -230,67 +231,86 @@ export function ManageImagesModal({
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <div
-              className="grid gap-2 content-start auto-rows-auto"
-              style={{
-                gridTemplateColumns: `repeat(auto-fill, minmax(${THUMBNAIL_SIZES[thumbnailSize].size}px, 1fr))`,
-              }}
-            >
-              {filteredPhotos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className={`relative cursor-pointer group aspect-square ${
-                    selectedPhotos.includes(photo.id)
-                      ? "ring-2 ring-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => togglePhotoSelection(photo.id)}
-                >
-                  <img
-                    src={photo.thumbnailUrl}
-                    alt={photo.id}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  {selectedPhotos.includes(photo.id) && (
-                    <>
-                      <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-lg" />
-                      <div className="absolute top-2 right-2 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                        <Check className="w-3 h-3 text-white stroke-[3]" />
-                      </div>
-                    </>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1.5 rounded-b-lg flex flex-col gap-0.5">
-                    <span className="text-gray-300">
-                      {new Date(photo.gphotos_created_at).toLocaleDateString()}
-                    </span>
-                    {albums.length > 0 && (
-                      <span className="text-white flex items-center gap-1">
-                        {photo.album_id ? (
-                          `${albums.find((a) => a.id === photo.album_id)?.title || "Unknown"}`
-                        ) : (
-                          <>
-                            <i>Unassigned</i>
-                            <TooltipProvider delayDuration={100}>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <AlertTriangleIcon className="w-3 h-3" />
-                                </TooltipTrigger>
-                                <TooltipContent sideOffset={5}>
-                                  <p>
-                                    This image won't be visible until it's
-                                    assigned to an album
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </>
-                        )}
-                      </span>
+            {filteredPhotos.length > 0 ? (
+              <div
+                className="grid gap-2 content-start auto-rows-auto"
+                style={{
+                  gridTemplateColumns: `repeat(auto-fill, minmax(${THUMBNAIL_SIZES[thumbnailSize].size}px, 1fr))`,
+                }}
+              >
+                {filteredPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className={`relative cursor-pointer group aspect-square ${
+                      selectedPhotos.includes(photo.id)
+                        ? "ring-2 ring-blue-500"
+                        : ""
+                    }`}
+                    onClick={() => togglePhotoSelection(photo.id)}
+                  >
+                    <img
+                      src={photo.thumbnailUrl}
+                      alt={photo.id}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    {selectedPhotos.includes(photo.id) && (
+                      <>
+                        <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-lg" />
+                        <div className="absolute top-2 right-2 bg-blue-500 rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                          <Check className="w-3 h-3 text-white stroke-[3]" />
+                        </div>
+                      </>
                     )}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-1.5 rounded-b-lg flex flex-col gap-0.5">
+                      <span className="text-gray-300">
+                        {new Date(
+                          photo.gphotos_created_at
+                        ).toLocaleDateString()}
+                      </span>
+                      {albums.length > 0 && (
+                        <span className="text-white flex items-center gap-1">
+                          {photo.album_id ? (
+                            `${albums.find((a) => a.id === photo.album_id)?.title || "Unknown"}`
+                          ) : (
+                            <>
+                              <i>Unassigned</i>
+                              <TooltipProvider delayDuration={100}>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <AlertTriangleIcon className="w-3 h-3" />
+                                  </TooltipTrigger>
+                                  <TooltipContent sideOffset={5}>
+                                    <p>
+                                      This image won't be visible until it's
+                                      assigned to an album
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                <ImageIcon className="w-12 h-12 mb-4 opacity-50" />
+                {photos.length === 0 ? (
+                  <>
+                    <p className="text-lg font-medium mb-2">No photos yet</p>
+                    <p className="text-sm">Import some photos to get started</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-lg font-medium mb-2">No photos found</p>
+                    <p className="text-sm">Try changing your filter settings</p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Updated Footer */}
@@ -344,7 +364,7 @@ export function ManageImagesModal({
                   title={
                     remainingPhotos <= 0
                       ? "Photo limit reached"
-                      : "Import more photos"
+                      : "Import photos"
                   }
                 >
                   Import More Photos
