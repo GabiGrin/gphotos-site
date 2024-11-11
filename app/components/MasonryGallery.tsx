@@ -5,9 +5,9 @@ import { Photo } from "@/types/gphotos";
 import { calculateImageDimensions } from "@/utils/image-sizing";
 import { Masonry } from "./Masonry/Masonry";
 
-const MOBILE_BREAKPOINT = 480; // For phones
-const TABLET_BREAKPOINT = 768; // For tablets
-const DESKTOP_BREAKPOINT = 768; // Existing desktop breakpoint
+const MOBILE_BREAKPOINT = 350; // For phones
+const TABLET_BREAKPOINT = 750; // For tablets
+const DESKTOP_BREAKPOINT = 900; // Existing desktop breakpoint
 const THUMBNAIL_WIDTH = 500; // Same as in process-gphotos-image.ts
 const CHUNK_SIZE = 12; // Number of images to group together for height optimization
 
@@ -34,11 +34,13 @@ export default function MasonryGallery({
 
       // Update column count based on screen width
       if (width < MOBILE_BREAKPOINT) {
-        setColumnCount(1);
+        setColumnCount(Math.min(maxColumns, 2));
       } else if (width < TABLET_BREAKPOINT) {
-        setColumnCount(2);
+        setColumnCount(Math.min(maxColumns, 2));
+      } else if (width < DESKTOP_BREAKPOINT) {
+        setColumnCount(Math.min(maxColumns, 2));
       } else {
-        setColumnCount(maxColumns);
+        setColumnCount(Math.min(maxColumns, 3));
       }
     };
 
