@@ -10,6 +10,7 @@ const TABLET_BREAKPOINT = 750; // For tablets
 const DESKTOP_BREAKPOINT = 900; // Existing desktop breakpoint
 const THUMBNAIL_WIDTH = 500; // Same as in process-gphotos-image.ts
 const CHUNK_SIZE = 12; // Number of images to group together for height optimization
+const SWIPE_THRESHOLD = 50; // Minimum swipe distance to trigger next/prev
 
 export default function MasonryGallery({
   images,
@@ -20,17 +21,16 @@ export default function MasonryGallery({
 }) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [columnCount, setColumnCount] = useState(maxColumns);
   const [preloadedImages, setPreloadedImages] = useState<Set<number>>(
     new Set()
   );
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [columnCount, setColumnCount] = useState(maxColumns);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   useEffect(() => {
     const updateLayout = () => {
       const width = window.innerWidth;
-      setIsDesktop(width >= DESKTOP_BREAKPOINT);
 
       // Update column count based on screen width
       if (width < MOBILE_BREAKPOINT) {
@@ -52,11 +52,11 @@ export default function MasonryGallery({
 
   const openLightbox = useCallback(
     (index: number) => {
-      if (isDesktop) {
+      if (columnCount > 1) {
         setLightboxIndex(index);
       }
     },
-    [isDesktop]
+    [columnCount]
   );
 
   const closeLightbox = useCallback(() => {
@@ -109,8 +109,8 @@ export default function MasonryGallery({
       const img = new Image();
       img.src = images[index].imageUrl;
       img.onload = () => {
-        setPreloadedImages((prev) => new Set(prev).add(index));
-        setLoadedImages((prev) => new Set(prev).add(index));
+        setPreloadedImages((prev: Set<number>) => new Set(prev).add(index));
+        setLoadedImages((prev: Set<number>) => new Set(prev).add(index));
       };
     },
     [images, preloadedImages]
@@ -119,10 +119,8 @@ export default function MasonryGallery({
   useEffect(() => {
     if (lightboxIndex === null) return;
 
-    // Preload next 2 images
+    // Preload next and previous images
     const next1 = (lightboxIndex + 1) % images.length;
-
-    // Preload previous 2 images
     const prev1 = (lightboxIndex - 1 + images.length) % images.length;
 
     [next1, prev1].forEach(preloadImage);
@@ -138,7 +136,7 @@ export default function MasonryGallery({
       originalWidth: image.width ?? 0,
       originalHeight: image.height ?? 0,
       maxWidth: THUMBNAIL_WIDTH,
-      maxHeight: THUMBNAIL_WIDTH, // Using same value for simplicity
+      maxHeight: THUMBNAIL_WIDTH,
     });
   }, []);
 
@@ -173,6 +171,35 @@ export default function MasonryGallery({
     return { element, size: dimensions };
   });
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStart === null) return;
+
+      const currentTouch = e.touches[0].clientX;
+      const diff = touchStart - currentTouch;
+
+      if (Math.abs(diff) > SWIPE_THRESHOLD) {
+        if (diff > 0) {
+          // Swiped left, go next
+          moveNext();
+        } else {
+          // Swiped right, go prev
+          movePrev();
+        }
+        setTouchStart(null);
+      }
+    },
+    [touchStart, moveNext, movePrev]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setTouchStart(null);
+  }, []);
+
   return (
     <>
       <Masonry
@@ -182,7 +209,7 @@ export default function MasonryGallery({
         columns={columnCount}
       />
 
-      {isDesktop && lightboxIndex !== null && (
+      {columnCount > 1 && lightboxIndex !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
           <button
             className="absolute top-4 right-4 text-white text-2xl"
@@ -196,7 +223,12 @@ export default function MasonryGallery({
           >
             &#8249;
           </button>
-          <div className="relative">
+          <div
+            className="relative"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={images[lightboxIndex].thumbnailUrl}
               alt={images[lightboxIndex].thumbnailUrl}
