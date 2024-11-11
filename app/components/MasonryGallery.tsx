@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { Photo } from "@/types/gphotos";
 import { calculateImageDimensions } from "@/utils/image-sizing";
+import { Masonry } from "./Masonry/Masonry";
 
-const DESKTOP_BREAKPOINT = 768; // Define the breakpoint for desktop screens
+const MOBILE_BREAKPOINT = 480; // For phones
+const TABLET_BREAKPOINT = 768; // For tablets
+const DESKTOP_BREAKPOINT = 768; // Existing desktop breakpoint
 const THUMBNAIL_WIDTH = 500; // Same as in process-gphotos-image.ts
 const CHUNK_SIZE = 12; // Number of images to group together for height optimization
 
@@ -23,17 +25,28 @@ export default function MasonryGallery({
     new Set()
   );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [columnCount, setColumnCount] = useState(maxColumns);
 
   useEffect(() => {
-    const checkIsDesktop = () => {
-      setIsDesktop(window.innerWidth >= DESKTOP_BREAKPOINT);
+    const updateLayout = () => {
+      const width = window.innerWidth;
+      setIsDesktop(width >= DESKTOP_BREAKPOINT);
+
+      // Update column count based on screen width
+      if (width < MOBILE_BREAKPOINT) {
+        setColumnCount(1);
+      } else if (width < TABLET_BREAKPOINT) {
+        setColumnCount(2);
+      } else {
+        setColumnCount(maxColumns);
+      }
     };
 
-    checkIsDesktop();
-    window.addEventListener("resize", checkIsDesktop);
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
 
-    return () => window.removeEventListener("resize", checkIsDesktop);
-  }, []);
+    return () => window.removeEventListener("resize", updateLayout);
+  }, [maxColumns]);
 
   const openLightbox = useCallback(
     (index: number) => {
@@ -127,95 +140,45 @@ export default function MasonryGallery({
     });
   }, []);
 
-  // Add this new function to sort and distribute images
-  const getOptimizedImageOrder = useCallback(
-    (images: Photo[]) => {
-      // Split images into chunks while preserving their original order
-      const chunks: number[][] = [];
-      for (let i = 0; i < images.length; i += CHUNK_SIZE) {
-        const chunk = images
-          .slice(i, i + CHUNK_SIZE)
-          .map((_, index) => i + index);
+  const galleryItems = images.map((image, originalIndex) => {
+    const dimensions = getThumbnailDimensions(image);
+    const aspectRatio = dimensions.width / dimensions.height;
 
-        // Calculate height ratios for images in this chunk
-        const chunkWithRatios = chunk.map((index) => ({
-          index,
-          heightRatio: (images[index].height ?? 1) / (images[index].width ?? 1),
-        }));
+    const element = (
+      <div
+        key={image.id}
+        className="relative bg-gray-100 overflow-hidden border border-gray-200"
+        style={{
+          paddingBottom: `${(1 / aspectRatio) * 100}%`,
+        }}
+      >
+        <img
+          style={{ verticalAlign: "bottom" }}
+          src={image.thumbnailUrl}
+          alt={image.thumbnailUrl}
+          className={`absolute inset-0 w-full h-full object-cover cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75 ${
+            loadedImages.has(originalIndex) ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={() => openLightbox(originalIndex)}
+          onMouseEnter={() => setHoveredIndex(originalIndex)}
+          onMouseLeave={() => setHoveredIndex(null)}
+          onLoad={() => handleImageLoad(originalIndex)}
+          loading="lazy"
+        />
+      </div>
+    );
 
-        // Sort chunk by height ratio (tallest first)
-        chunkWithRatios.sort((a, b) => b.heightRatio - a.heightRatio);
-
-        // Distribute chunk in zigzag pattern
-        const columns = Math.min(maxColumns, 3);
-        const optimizedChunk: number[] = [];
-
-        // Forward pass within chunk
-        for (let j = 0; j < chunkWithRatios.length; j += columns) {
-          for (let k = 0; k < columns && j + k < chunkWithRatios.length; k++) {
-            optimizedChunk.push(chunkWithRatios[j + k].index);
-          }
-        }
-
-        chunks.push(optimizedChunk);
-      }
-
-      // Flatten chunks back into a single array
-      return chunks.flat();
-    },
-    [maxColumns]
-  );
-
-  // Get optimized image order
-  const optimizedOrder = useMemo(
-    () => getOptimizedImageOrder(images),
-    [images, getOptimizedImageOrder]
-  );
+    return { element, size: dimensions };
+  });
 
   return (
     <>
-      <ResponsiveMasonry
-        columnsCountBreakPoints={{
-          350: Math.min(maxColumns, 2),
-          750: Math.min(maxColumns, 2),
-          900: Math.min(maxColumns, 3),
-        }}
-        className="w-full masonry-gallery"
-      >
-        <Masonry gutter="4px">
-          {optimizedOrder.map((originalIndex) => {
-            const image = images[originalIndex];
-            const dimensions = getThumbnailDimensions(image);
-            const aspectRatio = dimensions.width / dimensions.height;
-
-            return (
-              <div
-                key={image.id}
-                className="relative bg-gray-100 overflow-hidden border border-gray-200"
-                style={{
-                  paddingBottom: `${(1 / aspectRatio) * 100}%`,
-                }}
-              >
-                <img
-                  style={{ verticalAlign: "bottom" }}
-                  src={image.thumbnailUrl}
-                  alt={image.thumbnailUrl}
-                  className={`absolute inset-0 w-full h-full object-cover cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75 ${
-                    loadedImages.has(originalIndex)
-                      ? "opacity-100"
-                      : "opacity-0"
-                  }`}
-                  onClick={() => openLightbox(originalIndex)}
-                  onMouseEnter={() => setHoveredIndex(originalIndex)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  onLoad={() => handleImageLoad(originalIndex)}
-                  loading="lazy"
-                />
-              </div>
-            );
-          })}
-        </Masonry>
-      </ResponsiveMasonry>
+      <Masonry
+        gutter={4}
+        className="w-full"
+        items={galleryItems}
+        columns={columnCount}
+      />
 
       {isDesktop && lightboxIndex !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
