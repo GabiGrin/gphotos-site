@@ -214,6 +214,7 @@ export default function DashboardPage() {
           images={processedImages}
           albums={albums}
           showBranding={limits.branding}
+          hostname={site.username}
         />
       )}
     </div>
