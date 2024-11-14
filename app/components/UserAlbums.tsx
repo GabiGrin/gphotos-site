@@ -28,7 +28,7 @@ export default function UserAlbums({
                 {albums.map((album) => (
                   <Link
                     key={album.id}
-                    href={`/${album.id}`}
+                    href={`/${album.slug}`}
                     className="w-full group flex flex-col bg-white rounded-sm overflow-hidden border border-stone-200 hover:border-gray-300 transition-all"
                   >
                     <div className="relative aspect-[4/3] w-full overflow-hidden">

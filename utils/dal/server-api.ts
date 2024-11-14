@@ -537,6 +537,30 @@ export function createServerApi(client: SupabaseClient<Database>) {
 
       return count || 0;
     },
+    getAlbumBySlug: async (
+      slug: string,
+      userId: string
+    ): Promise<Album | null> => {
+      const { data, error } = await client
+        .from("albums")
+        .select()
+        .eq("slug", slug)
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    checkSlugExists: async (slug: string, userId: string): Promise<boolean> => {
+      const { count, error } = await client
+        .from("albums")
+        .select("*", { count: "exact", head: true })
+        .eq("slug", slug)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return (count || 0) > 0;
+    },
   };
 
   return api;

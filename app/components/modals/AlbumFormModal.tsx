@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ImageIcon, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { generateSlug } from "@/utils/string-utils";
 
 interface AlbumFormModalProps {
   open: boolean;
@@ -22,10 +23,34 @@ interface AlbumFormModalProps {
     title: string;
     description: string;
     coverImageId: string;
+    slug: string;
   }) => void;
   images: Photo[];
   initialData?: Album;
   mode: "create" | "edit";
+  checkSlugExists: (slug: string) => Promise<boolean>;
+}
+
+function generateRandomString(length: number): string {
+  return Math.random()
+    .toString(36)
+    .substring(2, 2 + length);
+}
+
+async function generateUniqueSlug(
+  title: string,
+  checkSlugExists: (slug: string) => Promise<boolean>
+): Promise<string> {
+  let slug = generateSlug(title);
+  let isUnique = !(await checkSlugExists(slug));
+
+  while (!isUnique) {
+    const randomSuffix = generateRandomString(3);
+    slug = `${generateSlug(title)}-${randomSuffix}`;
+    isUnique = !(await checkSlugExists(slug));
+  }
+
+  return slug;
 }
 
 export default function AlbumFormModal({
@@ -35,6 +60,7 @@ export default function AlbumFormModal({
   images,
   initialData,
   mode,
+  checkSlugExists,
 }: AlbumFormModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -60,7 +86,7 @@ export default function AlbumFormModal({
     }
   }, [open, mode, initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -73,10 +99,13 @@ export default function AlbumFormModal({
       return;
     }
 
+    const slug = await generateUniqueSlug(title, checkSlugExists);
+
     onSubmit({
       title: title.trim(),
       description: description.trim(),
       coverImageId,
+      slug,
     });
   };
 

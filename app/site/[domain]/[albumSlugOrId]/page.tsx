@@ -11,9 +11,9 @@ import { getLimits } from "@/premium/plans";
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ domain: string; albumId: string }>;
+  params: Promise<{ domain: string; albumSlugOrId: string }>;
 }): Promise<Metadata> {
-  const { domain, albumId } = await params;
+  const { domain, albumSlugOrId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".gphotos.site", "");
@@ -27,7 +27,7 @@ export async function generateMetadata({
     return { title: "Not Found" };
   }
 
-  const album = await serverApi.getAlbumById(albumId).catch((e) => {
+  const album = await serverApi.getAlbumById(albumSlugOrId).catch((e) => {
     logger.error(e, "generateMetadata getAlbumById error");
     return null;
   });
@@ -40,9 +40,9 @@ export async function generateMetadata({
 export default async function AlbumPage({
   params,
 }: {
-  params: Promise<{ domain: string; albumId: string }>;
+  params: Promise<{ domain: string; albumSlugOrId: string }>;
 }) {
-  const { domain, albumId } = await params;
+  const { domain, albumSlugOrId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".gphotos.site", "");
@@ -56,24 +56,34 @@ export default async function AlbumPage({
     return <NotFound domain={domain} />;
   }
 
-  const limits = getLimits(site);
+  // Try to get album by ID first, then by slug if ID lookup fails
+  let album = await serverApi
+    .getAlbumBySlug(albumSlugOrId, site.user_id)
+    .catch((e) => {
+      logger.error(e, "AlbumPage getAlbumBySlug error");
+      return null;
+    });
 
-  const layoutConfig = site.layout_config as LayoutConfig;
-  const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
-
-  const album = await serverApi.getAlbumById(albumId).catch((e) => {
-    logger.error(e, "AlbumPage getAlbumById error");
-    return null;
-  });
+  if (!album) {
+    album = await serverApi.getAlbumById(albumSlugOrId).catch((e) => {
+      logger.error(e, "AlbumPage getAlbumById error");
+      return null;
+    });
+  }
 
   if (!album) {
     return <NotFound domain={domain} />;
   }
 
+  const limits = getLimits(site);
+
+  const layoutConfig = site.layout_config as LayoutConfig;
+  const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
+
   const { data: images, error } = await supabase
     .from("processed_images")
     .select("*")
-    .eq("album_id", albumId)
+    .eq("album_id", album.id)
     .order("gphotos_created_at", { ascending: sortOrder });
 
   if (error) {

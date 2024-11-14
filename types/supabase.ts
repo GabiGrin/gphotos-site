@@ -15,6 +15,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          slug: string | null
           title: string
           updated_at: string
           user_id: string
@@ -24,6 +25,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          slug?: string | null
           title: string
           updated_at?: string
           user_id: string
@@ -33,6 +35,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          slug?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -180,7 +183,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      slugify: {
+        Args: {
+          text: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
