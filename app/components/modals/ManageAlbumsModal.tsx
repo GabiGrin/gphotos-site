@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { generateSlug } from "@/utils/string-utils";
 
 interface ManageAlbumsModalProps {
   open: boolean;
@@ -97,6 +98,7 @@ export default function ManageAlbumsModal({
         description: data.description.trim(),
         cover_image_id: data.coverImageId,
         user_id: userId,
+        slug: generateSlug(data.title.trim()),
       });
 
       onAlbumsChange([...albums, newAlbum]);
@@ -299,6 +301,7 @@ export default function ManageAlbumsModal({
         images={images}
         initialData={selectedAlbum || undefined}
         mode={selectedAlbum ? "edit" : "create"}
+        existingSlugs={albums.map((album) => album.slug || "")}
       />
 
       <AlertDialog

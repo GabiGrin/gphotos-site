@@ -21,7 +21,6 @@ export default function UserAlbums({
         <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
           <GalleryHeader layoutConfig={layoutConfig} />
 
-          <div className="text-[16px] mb-2 text-#515151">My albums:</div>
           <div className="w-full px-3">
             <div className="max-w-[1230px] mx-auto">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 justify-center">

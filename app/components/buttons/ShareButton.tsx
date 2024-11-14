@@ -42,7 +42,7 @@ export default function ShareButton({
         onClick={handleShare}
         className={`main-btn icon-btn ${className} ml-2`}
       >
-        <ShareIcon className="w-5 h-5 text-gray-700" />
+        <ShareIcon />
       </button>
     </SimpleTooltip>
   );

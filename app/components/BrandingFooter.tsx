@@ -1,6 +1,6 @@
 export default function BrandingFooter(props: { hostname: string }) {
   return (
-    <footer className="fixed bottom-0 left-0 w-full py-2.5 bg-white bg-opacity-80 backdrop-blur-sm shadow-md">
+    <footer className="fixed bottom-0 left-0 w-full py-2.5 bg-white bg-opacity-80 backdrop-blur-sm shadow-md border border-t-[rgba(255, 255, 255, 0.3) ]">
       <div className="container mx-auto flex items-center justify-center px-4">
         <div className="text-xs text-gray-600">
           Made with{" "}

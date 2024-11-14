@@ -28,7 +28,7 @@ interface AlbumFormModalProps {
   images: Photo[];
   initialData?: Album;
   mode: "create" | "edit";
-  checkSlugExists: (slug: string) => Promise<boolean>;
+  existingSlugs: string[];
 }
 
 function generateRandomString(length: number): string {
@@ -39,15 +39,15 @@ function generateRandomString(length: number): string {
 
 async function generateUniqueSlug(
   title: string,
-  checkSlugExists: (slug: string) => Promise<boolean>
+  existingSlugs: string[]
 ): Promise<string> {
   let slug = generateSlug(title);
-  let isUnique = !(await checkSlugExists(slug));
+  let isUnique = !existingSlugs.includes(slug);
 
   while (!isUnique) {
     const randomSuffix = generateRandomString(3);
     slug = `${generateSlug(title)}-${randomSuffix}`;
-    isUnique = !(await checkSlugExists(slug));
+    isUnique = !existingSlugs.includes(slug);
   }
 
   return slug;
@@ -60,7 +60,7 @@ export default function AlbumFormModal({
   images,
   initialData,
   mode,
-  checkSlugExists,
+  existingSlugs,
 }: AlbumFormModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -99,7 +99,7 @@ export default function AlbumFormModal({
       return;
     }
 
-    const slug = await generateUniqueSlug(title, checkSlugExists);
+    const slug = await generateUniqueSlug(title, existingSlugs);
 
     onSubmit({
       title: title.trim(),

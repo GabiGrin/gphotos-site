@@ -1,8 +1,9 @@
 import { LayoutConfig, Album } from "@/types/gphotos";
 import Link from "next/link";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
-import { EmailIcon, WebsiteIcon } from "./icons/icons";
+import { ChainIcon, EmailIcon, WebsiteIcon } from "./icons/icons";
 import ShareButton from "./buttons/ShareButton";
+import { LinkIcon } from "lucide-react";
 
 interface GalleryHeaderProps {
   layoutConfig: LayoutConfig;
@@ -14,39 +15,8 @@ export default function GalleryHeader({
   currentAlbum,
 }: GalleryHeaderProps) {
   return (
-    <>
-      {/* Back to albums link when viewing an album */}
-      {currentAlbum && (
-        <>
-          <Link
-            href={`/`}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors relative mb-4 z-10"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Back to albums
-          </Link>
-          {layoutConfig.content?.title?.show && (
-            <h2 className="font-medium mb-4 px-4 tracking-tight text-lg">
-              {layoutConfig.content.title.value}
-            </h2>
-          )}
-        </>
-      )}
-      {/* Action buttons container */}
+    <header className="mt-8 w-full">
       <div className="w-full flex justify-center md:justify-between items-start mb-8 md:mb-0 md:absolute relative z-0">
-        {/* Email and Website buttons */}
         <div className="flex flex-row md:flex-col gap-2">
           {layoutConfig.buttons?.email?.show && (
             <SimpleTooltip content="Contact via Email" side="right">
@@ -66,15 +36,14 @@ export default function GalleryHeader({
                 rel="noopener noreferrer"
                 className="main-btn icon-btn !py-[5px]"
               >
-                <WebsiteIcon />
+                <LinkIcon className="w-5 h-5" />
               </a>
             </SimpleTooltip>
           )}
         </div>
 
-        {/* Share button */}
         {layoutConfig.buttons?.share?.show && (
-          <div className="md:absolute md:right-0 ">
+          <div className="md:absolute md:right-0">
             <ShareButton
               title={layoutConfig.content?.title?.value || "Photo Gallery"}
             />
@@ -82,7 +51,17 @@ export default function GalleryHeader({
         )}
       </div>
 
-      <header className="flex flex-col items-center max-w-4xl mb-8">
+      <div className="flex flex-col items-center max-w-4xl mb-8 mx-auto relative z-10">
+        {currentAlbum && (
+          <div className="flex items-center gap-1 text-black mb-4">
+            <Link href="/" className="hover:text-gray-600 transition-colors">
+              {layoutConfig.content?.title?.value ?? "Photo Gallery"}
+            </Link>
+            <span className="text-gray-400 ">›</span>
+            <span>{currentAlbum.title}</span>
+          </div>
+        )}
+
         {layoutConfig.content?.title?.show && (
           <h1 className="text-4xl mb-4 px-4 tracking-tight">
             {currentAlbum?.title ?? layoutConfig.content.title.value}
@@ -94,7 +73,7 @@ export default function GalleryHeader({
               layoutConfig.content.description.value}
           </h3>
         )}
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

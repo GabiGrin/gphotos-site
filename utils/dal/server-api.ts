@@ -551,16 +551,6 @@ export function createServerApi(client: SupabaseClient<Database>) {
       if (error) throw error;
       return data;
     },
-    checkSlugExists: async (slug: string, userId: string): Promise<boolean> => {
-      const { count, error } = await client
-        .from("albums")
-        .select("*", { count: "exact", head: true })
-        .eq("slug", slug)
-        .eq("user_id", userId);
-
-      if (error) throw error;
-      return (count || 0) > 0;
-    },
   };
 
   return api;

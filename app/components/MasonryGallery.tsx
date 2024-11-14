@@ -147,7 +147,7 @@ export default function MasonryGallery({
     const element = (
       <div
         key={image.id}
-        className="relative bg-gray-100 overflow-hidden border border-gray-200"
+        className="relative bg-gray-100 overflow-hidden  outline outline-4 outline-white"
         style={{
           paddingBottom: `${(1 / aspectRatio) * 100}%`,
         }}
@@ -156,7 +156,7 @@ export default function MasonryGallery({
           style={{ verticalAlign: "bottom" }}
           src={image.thumbnailUrl}
           alt={image.thumbnailUrl}
-          className={`absolute inset-0 w-full h-full object-cover cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75 ${
+          className={`absolute inset-0 w-full h-full object-cover cursor-pointer transition-all duration-200 [.masonry-gallery:has(&:hover)_&:not(:hover)]:brightness-75  ${
             loadedImages.has(originalIndex) ? "opacity-100" : "opacity-0"
           }`}
           onClick={() => openLightbox(originalIndex)}
