@@ -31,7 +31,7 @@ export default function BrandingFooter(props: { hostname: string }) {
             href={`https://www.gphotos.site?utm_source=${props.hostname}&utm_medium=footer&utm_campaign=user_sites`}
             target="_blank"
             rel="noopener"
-            className="text-xs px-3 py-1 rounded-[10px] bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"
+            className="text-xs px-3 py-1 rounded-full bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"
           >
             Create yours for free
           </a>

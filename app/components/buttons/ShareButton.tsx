@@ -13,8 +13,14 @@ export default function ShareButton({
 }) {
   const [copied, setCopied] = useState(false);
 
+  const isMobile = () => {
+    return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+      navigator.userAgent.toLowerCase()
+    );
+  };
+
   const handleShare = async () => {
-    if (navigator.share) {
+    if (isMobile() && navigator.share) {
       try {
         await navigator.share({
           title: title,
