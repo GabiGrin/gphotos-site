@@ -8,6 +8,28 @@ import UserSite from "@/app/components/UserSite";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
 
+async function getAlbum(
+  serverApi: any,
+  albumSlugOrId: string,
+  userId?: string
+) {
+  let album = userId
+    ? await serverApi.getAlbumBySlug(albumSlugOrId, userId).catch((e: any) => {
+        logger.error(e, "getAlbumBySlug error");
+        return null;
+      })
+    : null;
+
+  if (!album) {
+    album = await serverApi.getAlbumById(albumSlugOrId).catch((e: any) => {
+      logger.error(e, "getAlbumById error");
+      return null;
+    });
+  }
+
+  return album;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,14 +45,7 @@ export async function generateMetadata({
     return null;
   });
 
-  if (!site) {
-    return { title: "Not Found" };
-  }
-
-  const album = await serverApi.getAlbumById(albumSlugOrId).catch((e) => {
-    logger.error(e, "generateMetadata getAlbumById error");
-    return null;
-  });
+  const album = await getAlbum(serverApi, albumSlugOrId, site?.user_id);
 
   return {
     title: album?.title || "Album Not Found",
@@ -56,20 +71,7 @@ export default async function AlbumPage({
     return <NotFound domain={domain} />;
   }
 
-  // Try to get album by ID first, then by slug if ID lookup fails
-  let album = await serverApi
-    .getAlbumBySlug(albumSlugOrId, site.user_id)
-    .catch((e) => {
-      logger.error(e, "AlbumPage getAlbumBySlug error");
-      return null;
-    });
-
-  if (!album) {
-    album = await serverApi.getAlbumById(albumSlugOrId).catch((e) => {
-      logger.error(e, "AlbumPage getAlbumById error");
-      return null;
-    });
-  }
+  const album = await getAlbum(serverApi, albumSlugOrId, site.user_id);
 
   if (!album) {
     return <NotFound domain={domain} />;
