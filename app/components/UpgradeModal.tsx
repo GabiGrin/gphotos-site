@@ -70,8 +70,8 @@ export function UpgradeModal() {
             {/* Social Proof */}
             <div className="bg-muted/50 p-4 rounded-lg">
               <p className="text-sm italic text-center">
-                "GPhotos Premium helped me create a beautiful portfolio for my
-                photography hobby!"
+                "MyPhotos Site Premium helped me create a beautiful portfolio
+                for my photography hobby!"
                 <br />
                 <span className="font-medium">
                   - Or C., Amateur Photographer
