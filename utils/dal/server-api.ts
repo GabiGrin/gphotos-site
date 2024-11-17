@@ -9,7 +9,7 @@ import {
   Album,
   Photo,
   Job,
-} from "@/types/gphotos";
+} from "@/types/myphotos";
 import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MediaItem } from "@/types/google-photos";

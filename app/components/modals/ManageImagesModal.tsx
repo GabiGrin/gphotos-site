@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Photo, Album, Site } from "@/types/gphotos";
+import { Photo, Album, Site } from "@/types/myphotos";
 
 import { useEffect, useMemo, useState } from "react";
 import { deleteImages } from "@/app/actions/images";

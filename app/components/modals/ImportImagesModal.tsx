@@ -19,7 +19,7 @@ import {
   useSessionStatus,
 } from "@/hooks/use-session-status";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Site } from "@/types/gphotos";
+import { Site } from "@/types/myphotos";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import { premiumPlans } from "@/premium/plans";
 
@@ -375,7 +375,7 @@ export function ImportImagesModal({
                   <p className="text-sm text-gray-500 text-center mt-4">
                     Still having issues?{" "}
                     <a
-                      href="mailto:hey@gphotos.site"
+                      href="mailto:hey@myphotos.site"
                       className="text-blue-500 hover:underline"
                     >
                       Contact our support team

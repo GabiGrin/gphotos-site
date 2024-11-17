@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { Photo } from "@/types/gphotos";
+import { Photo } from "@/types/myphotos";
 import { calculateImageDimensions } from "@/utils/image-sizing";
 import { Masonry } from "./Masonry/Masonry";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ProcessedImage, Site } from "@/types/gphotos";
+import { ProcessedImage, Site } from "@/types/myphotos";
 import { createClientApi } from "@/utils/dal/client-api";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";

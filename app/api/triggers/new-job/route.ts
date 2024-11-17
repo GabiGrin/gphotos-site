@@ -1,4 +1,4 @@
-import { CreateImageUploadJobData, Job, JobType } from "@/types/gphotos";
+import { CreateImageUploadJobData, Job, JobType } from "@/types/myphotos";
 import { Database } from "@/types/supabase";
 import { createServerApi } from "@/utils/dal/server-api";
 import { createServiceClient } from "@/utils/supabase/service";

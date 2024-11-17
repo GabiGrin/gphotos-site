@@ -51,7 +51,7 @@ export function UpgradeModal() {
                 <div>
                   <p className="font-medium">Professional Branding</p>
                   <p className="text-sm text-muted-foreground">
-                    Remove GPhotos.site branding & use your domain
+                    Remove MyPhotos.site branding & use your domain
                   </p>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export function UpgradeModal() {
             <div className="space-y-3 pt-2">
               <Button className="w-full h-12" asChild>
                 <a
-                  href="https://www.gphotos.site/upgrade"
+                  href="https://www.myphotos.site/upgrade"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

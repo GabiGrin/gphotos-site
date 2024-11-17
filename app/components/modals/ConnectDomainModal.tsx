@@ -15,7 +15,7 @@ export default function ConnectDomainModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const emailSubject = encodeURIComponent("Connect Domain Request");
-  const emailLink = `mailto:hey@gphotos.site?subject=${emailSubject}`;
+  const emailLink = `mailto:hey@myphotos.site?subject=${emailSubject}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -34,7 +34,7 @@ export default function ConnectDomainModal({
               href={emailLink}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors duration-200 font-medium text-sm"
             >
-              <span>Contact hey@gphotos.site</span>
+              <span>Contact hey@myphotos.site</span>
             </a>
           </div>
         </div>

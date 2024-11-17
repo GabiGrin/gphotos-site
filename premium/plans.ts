@@ -1,4 +1,4 @@
-import { Site } from "@/types/gphotos";
+import { Site } from "@/types/myphotos";
 
 export interface PremiumPlanLimits {
   photoLimit: number;

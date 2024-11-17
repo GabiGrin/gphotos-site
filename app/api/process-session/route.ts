@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createServerApi } from "@/utils/dal/server-api";
 import { getLimits } from "@/premium/plans";
-import { JobStatus } from "@/types/gphotos";
+import { JobStatus } from "@/types/myphotos";
 import logger from "@/utils/logger";
 import { MAX_MEDIA_ITEMS_PER_PAGE } from "@/utils/gphotos";
 

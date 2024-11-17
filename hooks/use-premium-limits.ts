@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Site } from "@/types/gphotos";
+import { Site } from "@/types/myphotos";
 import { getLimits, PremiumPlanLimits, premiumPlans } from "@/premium/plans";
 
 export function usePremiumLimits(site: Site | null) {

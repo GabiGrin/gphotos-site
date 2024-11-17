@@ -3,7 +3,7 @@ import CreateSiteForm from "./CreateSiteForm";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
 import posthogServer from "@/utils/posthog";
-import { LayoutConfig } from "@/types/gphotos";
+import { LayoutConfig } from "@/types/myphotos";
 import { Json } from "@/types/supabase";
 
 function isValidUsername(username: string): { valid: boolean; error?: string } {
@@ -74,7 +74,7 @@ export default async function CreatePage() {
         },
         buttons: {
           email: { show: true, value: user.email ?? "" },
-          website: { show: true, value: "https://www.gphotos.site" },
+          website: { show: true, value: "https://www.myphotos.site" },
         },
       };
       const { data, error } = await supabase

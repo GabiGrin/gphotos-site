@@ -11,7 +11,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "GPhotos.site",
+  title: "MyPhotos.site",
   description:
     "Build a beautiful photo website from your Google Photos in 1 minute",
 };

@@ -5,7 +5,7 @@ import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
-import { AlbumWithCoverPhoto, LayoutConfig, Photo } from "@/types/gphotos";
+import { AlbumWithCoverPhoto, LayoutConfig, Photo } from "@/types/myphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import UserAlbums from "@/app/components/UserAlbums";
@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { domain } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
-  const host = domain.replace(".gphotos.site", "");
+  const host = domain.replace(".myphotos.site", "");
 
   const site = await serverApi.getSiteByUsername(host).catch((e) => {
     logger.error(e, "generateMetadata getSiteByUsername error");
@@ -53,7 +53,7 @@ export default async function UserGallery({
 
   // Fetch processed images for the user from Supabase
 
-  const host = domain.replace(".gphotos.site", "");
+  const host = domain.replace(".myphotos.site", "");
 
   logger.info({ host }, "UserGallery host");
 

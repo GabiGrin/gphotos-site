@@ -62,7 +62,7 @@ export default function CreateSiteForm({
             disabled={pending}
           />
           <span className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500">
-            .gphotos.site
+            .myphotos.site
           </span>
         </div>
       </div>

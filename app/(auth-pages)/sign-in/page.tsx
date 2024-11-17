@@ -22,7 +22,7 @@ export default function Login() {
       {/* Hero Section */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-3">
-          Welcome to GPhotos.site
+          Welcome to MyPhotos.site
         </h1>
         <p className="text-gray-600">
           Create and share your beautiful photos with the world
@@ -70,14 +70,14 @@ export default function Login() {
       <p className="mt-8 text-sm text-gray-500">
         By continuing, you agree to our{" "}
         <a
-          href="https://www.gphotos.site/tos"
+          href="https://www.myphotos.site/tos"
           className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
         >
           Terms of Service
         </a>{" "}
         and{" "}
         <a
-          href="https://www.gphotos.site/privacy-policy"
+          href="https://www.myphotos.site/privacy-policy"
           className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
         >
           Privacy Policy

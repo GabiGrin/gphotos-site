@@ -17,7 +17,7 @@ export async function GET(request: Request) {
       const isLocalEnv = process.env.NODE_ENV === "development";
 
       const redirectUrl = isLocalEnv
-        ? `http://app.local-gphotos.site:3000${sanitizedNext}`
+        ? `http://app.local-myphotos.site:3000${sanitizedNext}`
         : forwardedHost
           ? `https://${forwardedHost}${sanitizedNext}`
           : `${origin}${sanitizedNext}`;

@@ -9,7 +9,7 @@ export async function middleware(req: NextRequest) {
   let hostname = req.headers
     .get("host")
     ?.replace(
-      ".local-gphotos.site:3000",
+      ".local-myphotos.site:3000",
       `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     );
 

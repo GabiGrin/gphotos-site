@@ -1,5 +1,5 @@
 import { PremiumIcon } from "@/app/components/icons/PremiumIcon";
-import { Site } from "@/types/gphotos";
+import { Site } from "@/types/myphotos";
 import Link from "next/link";
 
 export function PremiumPlanBadge({ site }: { site: Site }) {

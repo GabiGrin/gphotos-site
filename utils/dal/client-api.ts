@@ -1,4 +1,4 @@
-import { Album, Photo, ProcessedImage, Site } from "@/types/gphotos";
+import { Album, Photo, ProcessedImage, Site } from "@/types/myphotos";
 import { Database } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { JobStatusCounts } from "./server-api";

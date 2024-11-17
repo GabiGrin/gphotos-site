@@ -5,9 +5,9 @@ export default function NotFound({ domain }: { domain: string }) {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800">
       <div className="max-w-md text-center px-4">
         <h1 className="text-4xl font-bold mb-4">Site Not Found</h1>
-        <p className="text-xl mb-8">{domain}.gphotos.site is available!</p>
+        <p className="text-xl mb-8">{domain}.myphotos.site is available!</p>
         <p className="text-lg mb-8">
-          Create your own beautiful photo gallery with GPhotos.site in minutes.
+          Create your own beautiful photo gallery with MyPhotos.site in minutes.
         </p>
         <Link
           href="/sign-in"

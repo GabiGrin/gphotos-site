@@ -1,4 +1,4 @@
-import { Photo, ProcessedImage } from "@/types/gphotos";
+import { Photo, ProcessedImage } from "@/types/myphotos";
 import { Database } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 

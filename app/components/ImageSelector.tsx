@@ -1,4 +1,4 @@
-import { Photo } from "@/types/gphotos";
+import { Photo } from "@/types/myphotos";
 import Image from "next/image";
 
 interface ImageSelectorProps {

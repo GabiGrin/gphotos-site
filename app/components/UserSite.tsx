@@ -1,4 +1,4 @@
-import { LayoutConfig, Photo, Album } from "@/types/gphotos";
+import { LayoutConfig, Photo, Album } from "@/types/myphotos";
 import MasonryGallery from "./MasonryGallery";
 import { Mail, Globe, ImageIcon } from "lucide-react";
 import ShareButton from "./buttons/ShareButton";

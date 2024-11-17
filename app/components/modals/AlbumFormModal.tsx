@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Album, Photo } from "@/types/gphotos";
+import { Album, Photo } from "@/types/myphotos";
 import { useEffect, useState, useRef } from "react";
 import ImageSelector from "../ImageSelector";
 import { Button } from "@/components/ui/button";

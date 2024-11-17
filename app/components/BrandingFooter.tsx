@@ -5,12 +5,12 @@ export default function BrandingFooter(props: { hostname: string }) {
         <div className="text-xs text-gray-600">
           Made with{" "}
           <a
-            href="https://app.gphotos.site"
+            href="https://app.myphotos.site"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200 font-medium inline-flex items-center gap-1 group"
           >
-            GPhotos.site
+            MyPhotos.site
             <svg
               className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200"
               fill="none"
@@ -28,7 +28,7 @@ export default function BrandingFooter(props: { hostname: string }) {
         </div>
         <div className="flex items-center gap-3 ml-2">
           <a
-            href={`https://www.gphotos.site?utm_source=${props.hostname}&utm_medium=footer&utm_campaign=user_sites`}
+            href={`https://www.myphotos.site?utm_source=${props.hostname}&utm_medium=footer&utm_campaign=user_sites`}
             target="_blank"
             rel="noopener"
             className="text-xs px-3 py-1 rounded-full bg-blue-500 text-white hover:bg-blue-800 transition-colors duration-200"

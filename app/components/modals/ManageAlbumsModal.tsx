@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Album, Photo, ProcessedImage } from "@/types/gphotos";
+import { Album, Photo, ProcessedImage } from "@/types/myphotos";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { PlusIcon, Trash, Pencil, FolderIcon, ImageOff } from "lucide-react";

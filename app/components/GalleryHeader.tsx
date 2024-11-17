@@ -1,4 +1,4 @@
-import { LayoutConfig, Album } from "@/types/gphotos";
+import { LayoutConfig, Album } from "@/types/myphotos";
 import Link from "next/link";
 import { SimpleTooltip } from "@/components/ui/simple-tooltip";
 import { ChainIcon, EmailIcon, WebsiteIcon } from "./icons/icons";
@@ -21,7 +21,7 @@ export default function GalleryHeader({
           {layoutConfig.buttons?.email?.show && (
             <SimpleTooltip content="Contact via Email" side="right">
               <a
-                href={`mailto:${layoutConfig.buttons.email.value}?subject=Inquiry about your GPhotos.site gallery`}
+                href={`mailto:${layoutConfig.buttons.email.value}?subject=Inquiry about your MyPhotos.site gallery`}
                 className="main-btn icon-btn"
               >
                 <EmailIcon />

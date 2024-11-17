@@ -1,4 +1,4 @@
-import { AlbumWithCoverPhoto, LayoutConfig } from "@/types/gphotos";
+import { AlbumWithCoverPhoto, LayoutConfig } from "@/types/myphotos";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Link from "next/link";
 import BrandingFooter from "./BrandingFooter";

@@ -2,7 +2,7 @@ import { createServiceClient } from "@/utils/supabase/service";
 import { createServerApi } from "@/utils/dal/server-api";
 import logger from "@/utils/logger";
 import NotFound from "../not-found";
-import { LayoutConfig, Photo } from "@/types/gphotos";
+import { LayoutConfig, Photo } from "@/types/myphotos";
 import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
@@ -38,7 +38,7 @@ export async function generateMetadata({
   const { domain, albumSlugOrId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
-  const host = domain.replace(".gphotos.site", "");
+  const host = domain.replace(".myphotos.site", "");
 
   const site = await serverApi.getSiteByUsername(host).catch((e) => {
     logger.error(e, "generateMetadata getSiteByUsername error");
@@ -60,7 +60,7 @@ export default async function AlbumPage({
   const { domain, albumSlugOrId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
-  const host = domain.replace(".gphotos.site", "");
+  const host = domain.replace(".myphotos.site", "");
 
   const site = await serverApi.getSiteByUsername(host).catch((e) => {
     logger.error(e, "AlbumPage getSiteByUsername error");
