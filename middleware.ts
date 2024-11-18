@@ -13,6 +13,18 @@ export async function middleware(req: NextRequest) {
       `.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     );
 
+  if (hostname?.includes("gphotos.site")) {
+    const newHostname = hostname.replace("gphotos.site", "myphotos.site");
+    const searchParams = req.nextUrl.searchParams.toString();
+    const path = `${url.pathname}${
+      searchParams.length > 0 ? `?${searchParams}` : ""
+    }`;
+
+    return NextResponse.redirect(new URL(`https://${newHostname}${path}`), {
+      status: 301,
+    });
+  }
+
   logger.info({ hostname }, "Middleware hostname");
 
   const searchParams = req.nextUrl.searchParams.toString();
