@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { CSPostHogProvider } from "./posthog-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
+      <GoogleTagManager gtmId="GTM-KXKTD642" />
       <CSPostHogProvider>
         <body className="bg-background text-foreground">
           {children}

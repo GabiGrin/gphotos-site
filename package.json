@@ -7,6 +7,7 @@
     "types": "npx --yes supabase gen types typescript --project-id ffwdqslcgzreiytehizw --schema public > types/supabase.ts"
   },
   "dependencies": {
+    "@next/third-parties": "^15.0.3",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.1",
