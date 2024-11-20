@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 interface CreateSiteFormProps {
   suggestedUsername: string | undefined;
@@ -26,6 +27,9 @@ export default function CreateSiteForm({
         prevState,
         formData.get("username") as string
       );
+
+      sendGTMEvent({ event: "create_site", value: username });
+
       if (result?.success) {
         router.push("/edit");
       }
