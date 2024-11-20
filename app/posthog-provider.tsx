@@ -6,7 +6,7 @@ import { PostHogProvider } from "posthog-js/react";
 if (typeof window !== "undefined") {
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     person_profiles: "identified_only",
-    api_host: "https://www.myphotos.site/zipzap",
+    api_host: "https://app.myphotos.site/zipzap",
     ui_host: "https://us.posthog.com",
   });
 }
