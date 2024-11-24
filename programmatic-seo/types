@@ -1,0 +1,204 @@
+{
+    "items": [
+        {
+            "id": "674320c9c83debd6b2cb3433",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:49:13.444Z",
+            "createdOn": "2024-11-24T12:49:13.444Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Cultural Ceremony",
+                "slug": "cultural-ceremony"
+            }
+        },
+        {
+            "id": "674320bf5c5ccf9560771317",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:49:03.934Z",
+            "createdOn": "2024-11-24T12:49:03.934Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Festival",
+                "slug": "festival"
+            }
+        },
+        {
+            "id": "674320b862fef8e27a8bf796",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:56.136Z",
+            "createdOn": "2024-11-24T12:48:56.136Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Memorial",
+                "slug": "memorial"
+            }
+        },
+        {
+            "id": "674320afe73b758b3128d1c4",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:47.803Z",
+            "createdOn": "2024-11-24T12:48:47.803Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Nonprofit Campaign",
+                "slug": "nonprofit-campaign"
+            }
+        },
+        {
+            "id": "674320a57649b770d11ffe1b",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:37.932Z",
+            "createdOn": "2024-11-24T12:48:37.932Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Holiday Celebration",
+                "slug": "holiday-celebration"
+            }
+        },
+        {
+            "id": "6743209bd82d3e7ba751f166",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:27.935Z",
+            "createdOn": "2024-11-24T12:48:27.935Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Sports Event",
+                "slug": "sports-event"
+            }
+        },
+        {
+            "id": "6743209562fef8e27a8be35a",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:21.481Z",
+            "createdOn": "2024-11-24T12:48:21.481Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Corporate Event",
+                "slug": "corporate-event"
+            }
+        },
+        {
+            "id": "6743208ce73b758b3128b26a",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:12.509Z",
+            "createdOn": "2024-11-24T12:48:12.509Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Baby Shower",
+                "slug": "baby-shower"
+            }
+        },
+        {
+            "id": "674320855927a125f5d7251f",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:48:05.102Z",
+            "createdOn": "2024-11-24T12:48:05.102Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Graduation",
+                "slug": "graduation"
+            }
+        },
+        {
+            "id": "674320331e5c164ac43f40fc",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:46:43.564Z",
+            "createdOn": "2024-11-24T12:46:43.564Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Family Reunion",
+                "slug": "family-reunion"
+            }
+        },
+        {
+            "id": "67432019284895117aa0d65c",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:46:17.428Z",
+            "createdOn": "2024-11-24T12:46:17.428Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Birthday",
+                "slug": "birthday"
+            }
+        },
+        {
+            "id": "67432010cdde6507d56d66df",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:46:08.649Z",
+            "createdOn": "2024-11-24T12:46:08.649Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Travel",
+                "slug": "travel"
+            }
+        },
+        {
+            "id": "6743200a90bd5ff57af7361b",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:46:02.817Z",
+            "createdOn": "2024-11-24T12:46:02.817Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Conference",
+                "slug": "conference"
+            }
+        },
+        {
+            "id": "674319a7ced71f07886ad2c6",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:18:47.480Z",
+            "createdOn": "2024-11-24T12:18:47.480Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Wedding",
+                "slug": "wedding"
+            }
+        },
+        {
+            "id": "6743199994c5ef5aafe38e7c",
+            "cmsLocaleId": "67266e22de8d744ff5253e7f",
+            "lastPublished": null,
+            "lastUpdated": "2024-11-24T12:18:33.648Z",
+            "createdOn": "2024-11-24T12:18:33.648Z",
+            "isArchived": false,
+            "isDraft": false,
+            "fieldData": {
+                "name": "Anniversary",
+                "slug": "anniversary"
+            }
+        }
+    ],
+    "pagination": {
+        "limit": 100,
+        "offset": 0,
+        "total": 15
+    }
+}

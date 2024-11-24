@@ -20,6 +20,12 @@ export async function middleware(req: NextRequest) {
       searchParams.length > 0 ? `?${searchParams}` : ""
     }`;
 
+    console.log(
+      "redirecting  because",
+      hostname,
+      "includes gphotos.site",
+      hostname.includes("gphotos.site")
+    );
     return NextResponse.redirect(new URL(`https://${newHostname}${path}`), {
       status: 301,
     });
