@@ -73,8 +73,9 @@ export default async function CreatePage() {
           },
         },
         buttons: {
-          email: { show: true, value: user.email ?? "" },
-          website: { show: true, value: "https://www.myphotos.site" },
+          email: { show: false, value: user.email ?? "" },
+          website: { show: false, value: "https://www.myphotos.site" },
+          share: { show: false, value: "" },
         },
       };
       const { data, error } = await supabase
