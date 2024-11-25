@@ -11,7 +11,7 @@ export default function NotFound({ domain }: { domain: string }) {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
-          <span className="break-words">{domain}.myphotos.site</span>
+          <span className="break-words">{domain}</span>
         </h1>
 
         <p className="text-xl mb-6">
