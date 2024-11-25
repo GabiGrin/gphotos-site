@@ -33,11 +33,7 @@ export function Masonry({ items, gutter, columns, className }: MasonryProps) {
     const middleColumnIndex = Math.floor(columns / 2);
 
     items.forEach((item) => {
-      // Find column with minimum height
       const minHeight = Math.min(...heights);
-
-      // If multiple columns have the same minimum height,
-      // prefer the middle column
       const minHeightColumns = heights
         .map((height, index) => ({ height, index }))
         .filter((col) => col.height === minHeight);
@@ -48,10 +44,7 @@ export function Masonry({ items, gutter, columns, className }: MasonryProps) {
           ? middleColumnIndex
           : heights.indexOf(minHeight);
 
-      // Add item to column
       newColumnItems[columnIndex].push(item);
-
-      // Calculate normalized height and update column height
       const normalizedHeight = item.size.height / item.size.width;
       heights[columnIndex] += normalizedHeight + gutter / 100;
     });
@@ -60,7 +53,12 @@ export function Masonry({ items, gutter, columns, className }: MasonryProps) {
   }, [items, columns, gutter]);
 
   return (
-    <div className={cn("relative w-full bg-neutral-100", className)}>
+    <div
+      className={cn(
+        "relative w-full bg-neutral-100 masonry-gallery",
+        className
+      )}
+    >
       <div
         className="flex gap-[var(--gutter)]"
         style={{ "--gutter": `${gutter}px` } as any}

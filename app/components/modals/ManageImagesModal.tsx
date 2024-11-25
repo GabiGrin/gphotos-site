@@ -17,10 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertTriangleIcon, Check } from "lucide-react";
+import { AlertTriangleIcon, Check, ChevronDown } from "lucide-react";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { InfoIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -28,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ImageIcon } from "lucide-react";
+import { AlbumIcon } from "../icons/icons";
 
 interface ManageImagesModalProps {
   isOpen: boolean;
@@ -93,10 +92,10 @@ export function ManageImagesModal({
   };
 
   const toggleSelectAll = () => {
-    if (selectedPhotos.length === photos.length) {
+    if (selectedPhotos.length === filteredPhotos.length) {
       setSelectedPhotos([]);
     } else {
-      setSelectedPhotos(photos.map((photo) => photo.id));
+      setSelectedPhotos(filteredPhotos.map((photo) => photo.id));
     }
   };
 
@@ -176,44 +175,40 @@ export function ManageImagesModal({
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 justify-between pr-12">
-            Manage Images{" "}
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">View:</span>
-              <Select
-                value={thumbnailSize}
-                onValueChange={(value: ThumbnailSize) =>
-                  setThumbnailSize(value)
-                }
-              >
-                <SelectTrigger className="w-[100px]" size="sm">
-                  <SelectValue placeholder="Size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(THUMBNAIL_SIZES).map(([key, { label }]) => (
-                    <SelectItem key={key} value={key} className="text-sm">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 flex-1 min-h-0">
-          <div className="flex justify-between items-center">
+            Manage Images
             <div className="flex items-center gap-4">
-              {/* View Controls */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">View:</span>
+                <Select
+                  value={thumbnailSize}
+                  onValueChange={(value: ThumbnailSize) =>
+                    setThumbnailSize(value)
+                  }
+                >
+                  <SelectTrigger className="w-[100px]" size="sm">
+                    <SelectValue placeholder="Size" />
+                    <ChevronDown className="h-4 w-4 opacity-50" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(THUMBNAIL_SIZES).map(([key, { label }]) => (
+                      <SelectItem key={key} value={key} className="text-sm">
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {/* Filter Controls */}
               {albums.length > 0 && (
                 <div className="flex items-center gap-2 border-l pl-4">
-                  <span className="text-sm text-muted-foreground">Filter:</span>
+                  <span className="text-sm text-muted-foreground">Show:</span>
                   <Select
                     value={filterOption}
                     onValueChange={(value) => setFilterOption(value)}
                   >
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Filter images" />
+                      <ChevronDown className="h-4 w-4 opacity-50" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Images</SelectItem>
@@ -227,6 +222,22 @@ export function ManageImagesModal({
                   </Select>
                 </div>
               )}
+
+              <div className="border-l pl-4">
+                <span className="text-sm text-muted-foreground">
+                  {photos.length} / {photoLimit} photos used
+                  {remainingPhotos <= 0 && (
+                    <span className="text-red-500 ml-2">Limit reached</span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4 flex-1 min-h-0">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              {/* Empty now that controls moved to header */}
             </div>
           </div>
 
@@ -270,7 +281,10 @@ export function ManageImagesModal({
                       {albums.length > 0 && (
                         <span className="text-white flex items-center gap-1">
                           {photo.album_id ? (
-                            `${albums.find((a) => a.id === photo.album_id)?.title || "Unknown"}`
+                            <>
+                              <AlbumIcon />
+                              {`${albums.find((a) => a.id === photo.album_id)?.title || "Unknown"}`}
+                            </>
                           ) : (
                             <>
                               <i>Unassigned</i>
@@ -316,7 +330,7 @@ export function ManageImagesModal({
           {/* Updated Footer */}
           <div className="border-t pt-4 mt-4 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Button variant="default" onClick={toggleSelectAll}>
+              <Button variant="outline" onClick={toggleSelectAll}>
                 {selectedPhotos.length === filteredPhotos.length
                   ? "Deselect All"
                   : "Select All"}
@@ -335,6 +349,7 @@ export function ManageImagesModal({
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Assign to album..." />
+                      <ChevronDown className="h-4 w-4 opacity-50" />
                     </SelectTrigger>
                     <SelectContent>
                       {albums.map((album) => (
@@ -369,12 +384,9 @@ export function ManageImagesModal({
                 >
                   Import More Photos
                 </Button>
-                <span className="text-sm text-muted-foreground">
-                  {photos.length} / {photoLimit} photos used
-                  {remainingPhotos <= 0 && (
-                    <span className="text-red-500 ml-2">Limit reached</span>
-                  )}
-                </span>
+                <Button variant="outline" onClick={onClose}>
+                  Done
+                </Button>
               </div>
             )}
           </div>

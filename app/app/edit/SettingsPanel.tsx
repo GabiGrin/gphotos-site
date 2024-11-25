@@ -39,7 +39,7 @@ import { AlbumIcon } from "@/app/components/icons/icons";
 import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CheckIcon } from "@/app/components/icons/icons";
-import { EyeIcon, Loader2 } from "lucide-react";
+import { EyeIcon, Loader2, ChevronDown } from "lucide-react";
 import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
@@ -186,11 +186,11 @@ export default function SettingsPanel({
 
   return (
     <div className="bg-zinc-50 w-full antialiased border-b-neutral-200 border-b">
-      <div className="max-w-5xl mx-auto px-4 flex flex-col items-center justify-between gap-5 py-8">
-        <h1 className="text-2xl font-medium tracking-tight text-center">
+      <div className="max-w-5xl mx-auto px-6 md:px-4 flex flex-col items-center justify-between gap-5 py-4 md:py-8">
+        <h1 className="text-xl md:text-2xl font-medium tracking-tight text-center">
           Edit your gallery
         </h1>
-        <div className="flex flex-row gap-4 w-full justify-center items-center">
+        <div className="flex flex-col md:flex-row gap-4 w-full justify-center items-center">
           <Link
             className="text-neutral-700 text-sm"
             href={getSiteUrl(site.username)}
@@ -203,45 +203,44 @@ export default function SettingsPanel({
           </MainButton>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 w-full max-w-5xl">
-          <div className="flex flex-col gap-[10px]">
-            <h2 className="text-sm font-medium mb-1">General</h2>
-            <div className="flex flex-row gap-2 items-center">
-              <span className="text-sm inline-flex items-center gap-3 text-neutral-700">
-                {" "}
-                <ImagesIcon /> Images{" "}
-              </span>
-
-              {images ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 w-full max-w-5xl">
+          <div className="flex flex-col gap-6">
+            <h2 className="text-sm font-medium">General</h2>
+            <div className="grid gap-4">
+              <div className="flex flex-row gap-2 items-center">
+                <span className="text-sm inline-flex items-center gap-3 text-neutral-700 mr-1">
+                  <ImagesIcon />
+                </span>
+                {images ? (
+                  <MainButton
+                    className={
+                      images.length === 0 ? "!bg-blue-500 text-white" : ""
+                    }
+                    onClick={
+                      images.length === 0 ? onImportImages : onManageImages
+                    }
+                  >
+                    {images.length === 0 ? "Import images" : "Manage images"}
+                  </MainButton>
+                ) : null}
+              </div>
+              <div className="flex flex-row gap-2 items-center ">
+                <span className="text-sm inline-flex items-center gap-3 text-neutral-700">
+                  <AlbumIcon />
+                </span>
                 <MainButton
-                  className={
-                    images.length === 0 ? "!bg-blue-500 text-white" : ""
-                  }
-                  onClick={
-                    images.length === 0 ? onImportImages : onManageImages
-                  }
+                  onClick={() => setShowAlbumsModal(true)}
+                  premiumDisabled={limits.albumLimit === 1}
                 >
-                  {images.length === 0 ? "Import images" : "Manage images"}
+                  Manage albums
                 </MainButton>
-              ) : null}
-            </div>
-            <div className="flex flex-row gap-2 items-center">
-              <span className="text-sm inline-flex items-center gap-3 text-neutral-700">
-                <AlbumIcon /> Albums
-              </span>
-              <MainButton
-                onClick={() => setShowAlbumsModal(true)}
-                premiumDisabled={limits.albumLimit === 1}
-              >
-                Manage albums
-              </MainButton>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col gap-[10px]">
-            <h2 className="text-sm font-medium mb-1">Buttons</h2>
-
-            <div className="grid grid-cols-[auto_auto_1fr_auto] gap-x-2 gap-y-1 grid-flow-row-dense	grid-rows-3 p-2 items-center">
+          <div className="flex flex-col gap-6">
+            <h2 className="text-sm font-medium">Buttons</h2>
+            <div className="grid grid-cols-[24px_40px_1fr_auto] gap-x-2 gap-y-2 items-center">
               <ShareIcon />
               <Switch
                 id="share-button"
@@ -258,20 +257,7 @@ export default function SettingsPanel({
               <Label htmlFor="share-button" className="text-sm font-normal">
                 Share
               </Label>
-              <EditButton
-                show={Boolean(config.buttons?.share?.show)}
-                field="share"
-                value={config.buttons?.share?.value}
-                type="url"
-                onSave={(value) =>
-                  updateConfig({
-                    buttons: {
-                      ...config.buttons,
-                      share: { show: true, value },
-                    },
-                  })
-                }
-              />
+              <div />
 
               <EmailIcon />
               <Switch
@@ -344,10 +330,11 @@ export default function SettingsPanel({
               />
             </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium mb-1">Display</h2>
-            <div className="grid grid-cols-[auto_auto_1fr_auto] gap-x-2 gap-y-1 grid-flow-row-dense	grid-rows-3 p-2 items-center">
-              <HeadingIcon className="col-span-[20px]" />
+
+          <div className="flex flex-col gap-6">
+            <h2 className="text-sm font-medium">Display</h2>
+            <div className="grid grid-cols-[24px_40px_1fr_auto] gap-x-2 gap-y-2 items-center">
+              <HeadingIcon />
               <Switch
                 id="heading-button"
                 checked={Boolean(config.content?.title?.show)}
@@ -378,10 +365,7 @@ export default function SettingsPanel({
                   updateConfig({
                     content: {
                       ...config.content,
-                      title: {
-                        show: true,
-                        value: value,
-                      },
+                      title: { show: true, value },
                     },
                   });
                 }}
@@ -419,26 +403,25 @@ export default function SettingsPanel({
                   updateConfig({
                     content: {
                       ...config.content,
-                      description: {
-                        show: true,
-                        value: value,
-                      },
+                      description: { show: true, value },
                     },
                   });
                 }}
               />
 
               <SortIcon />
-              <Label htmlFor="sort-button" className="text-sm font-normal">
-                Sort
-              </Label>
-              <div />
+              <div className="col-span-2">
+                <Label htmlFor="sort-button" className="text-sm font-normal">
+                  Sort
+                </Label>
+              </div>
               <Select
                 value={config.sort ?? "newest"}
                 onValueChange={(value) => updateConfig({ sort: value as any })}
               >
                 <SelectTrigger className="!w-[130px] !p-0 !px-3 !py-[3px] h-8">
                   <SelectValue />
+                  <ChevronDown className="h-4 w-4 opacity-50" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="newest">Newest first</SelectItem>
@@ -447,10 +430,11 @@ export default function SettingsPanel({
               </Select>
 
               <ColumnsIcon />
-              <Label htmlFor="columns-button" className="text-sm font-normal">
-                Max. Columns
-              </Label>
-              <div />
+              <div className="col-span-2">
+                <Label htmlFor="columns-button" className="text-sm font-normal">
+                  Max. Columns
+                </Label>
+              </div>
               <div className="flex flex-row gap-1">
                 {[1, 2, 3].map((num) => (
                   <MainButton
@@ -468,8 +452,8 @@ export default function SettingsPanel({
           </div>
         </div>
 
-        <div className="flex flex-row gap-2">
-          <div className="flex flex-row gap-2 justify-center">
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2 justify-center items-center">
             {saveStatus === "saving" && (
               <div className="text-sm text-neutral-500 flex items-center gap-1">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -490,7 +474,7 @@ export default function SettingsPanel({
             )}
           </div>
           <a
-            className="main-btn"
+            className="main-btn mx-auto"
             href={getSiteUrl(site.username)}
             target="_blank"
           >
