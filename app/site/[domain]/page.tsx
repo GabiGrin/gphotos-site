@@ -30,7 +30,7 @@ export async function generateMetadata({
 
   if (!site) {
     return {
-      title: "Not Found",
+      title: `MyPhotos.site -${domain}.myphotos.site is available!`,
     };
   }
 
