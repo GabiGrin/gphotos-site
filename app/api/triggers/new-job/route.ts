@@ -91,6 +91,11 @@ export async function POST(req: NextRequest) {
           "Processed page"
         );
 
+        await serverApi.incrementTotalImages(
+          newJob.session_id,
+          photoItems.length
+        );
+
         const remainingPhotosAllowed =
           newJob.job_data.maxPhotosLimit - photoItems.length;
 
@@ -128,6 +133,8 @@ export async function POST(req: NextRequest) {
             { jobId: newJob.id, nextJobId: nextJob.id },
             "Next page job created"
           );
+        } else {
+          await serverApi.updateSessionStatus(newJob.session_id, "uploading");
         }
 
         for (const item of photoItems) {
@@ -180,11 +187,14 @@ export async function POST(req: NextRequest) {
             thumbnailWidth: 400,
           });
 
+          await serverApi.incrementCompletedImages(newJob.session_id, 1);
+
           logger.info(
             { jobId: newJob.id, mediaItemId: mediaItem.id },
             "Image processed and added to database"
           );
         } catch (error) {
+          await serverApi.incrementFailedImages(newJob.session_id, 1);
           logger.error(
             { jobId: newJob.id, mediaItemId: mediaItem.id, error: error },
             "Error processing image upload"

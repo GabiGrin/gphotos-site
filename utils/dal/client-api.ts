@@ -94,6 +94,31 @@ export function createClientApi(client: SupabaseClient<Database>) {
         .in("id", photoIds);
       if (error) throw error;
     },
+
+    subscribeToUploadSession: (
+      sessionId: string,
+      callback: (
+        status: Database["public"]["Tables"]["upload_session_status"]["Row"]
+      ) => void
+    ) => {
+      return client
+        .channel(`upload_session_${sessionId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "upload_session_status",
+            filter: `session_id=eq.${sessionId}`,
+          },
+          (payload) => {
+            callback(
+              payload.new as Database["public"]["Tables"]["upload_session_status"]["Row"]
+            );
+          }
+        )
+        .subscribe();
+    },
   };
 }
 

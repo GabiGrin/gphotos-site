@@ -13,15 +13,12 @@ import { getGPhotosClient } from "@/utils/gphotos";
 import { useToast } from "@/hooks/use-toast";
 import { processGPhotosSession } from "@/utils/dal/client-api";
 import { getBaseUrl } from "@/utils/baseUrl";
-import {
-  SessionProgress,
-  SessionProgressComplete,
-  useSessionStatus,
-} from "@/hooks/use-session-status";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Site } from "@/types/myphotos";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import { premiumPlans } from "@/premium/plans";
+import { createClientApi } from "@/utils/dal/client-api";
+import { Database } from "@/types/supabase";
 
 interface ImportImagesModalProps {
   isOpen: boolean;
@@ -36,7 +33,11 @@ type ImportStatus =
   | "waiting"
   | "processing"
   | "completed"
-  | "failed";
+  | "failed"
+  | "partially_failed";
+
+type UploadStatus =
+  Database["public"]["Tables"]["upload_session_status"]["Row"];
 
 export function ImportImagesModal({
   isOpen,
@@ -60,44 +61,12 @@ export function ImportImagesModal({
     email: string | null;
     message: string;
   } | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus | null>(null);
 
   const supabase = createClient();
   const pathname = usePathname();
 
   const limits = usePremiumLimits(site);
-
-  const onSessionComplete = useCallback(
-    (sessionStatus: SessionProgressComplete) => {
-      setStatus("completed");
-
-      if (onImagesImported) {
-        onImagesImported();
-      }
-
-      const failedTotal =
-        sessionStatus.type === "complete"
-          ? sessionStatus.scanning.failed + sessionStatus.uploading.failed
-          : 0;
-
-      if (failedTotal > 0) {
-        toast({
-          description: `${sessionStatus.uploading.succeeded} photos imported. ${sessionStatus.uploading.failed} couldn't be transferred.`,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          description: `${sessionStatus.uploading.succeeded} photos imported successfully!`,
-        });
-      }
-      onClose();
-    },
-    []
-  );
-
-  const sessionStatus = useSessionStatus({
-    sessionId: sessionId ?? "",
-    onComplete: onSessionComplete,
-  });
 
   useEffect(() => {
     if (isOpen) {
@@ -112,6 +81,51 @@ export function ImportImagesModal({
       checkAndGetGoogleToken();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!sessionId || status !== "processing") return;
+
+    const api = createClientApi(supabase);
+    const subscription = api.subscribeToUploadSession(sessionId, (status) => {
+      setUploadStatus(status);
+
+      switch (status.status) {
+        case "completed":
+          toast({
+            description: `${status.total_completed} photos imported successfully!`,
+          });
+          onClose();
+          if (onImagesImported) {
+            onImagesImported();
+          }
+          break;
+
+        case "partially_failed":
+          toast({
+            description: `${status.total_completed} photos imported. ${status.total_failed} couldn't be transferred.`,
+            variant: "destructive",
+          });
+          onClose();
+          if (onImagesImported) {
+            onImagesImported();
+          }
+          break;
+
+        case "failed":
+          toast({
+            title: "Import failed",
+            description: "Failed to import photos. Please try again.",
+            variant: "destructive",
+          });
+          setStatus("failed");
+          break;
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [sessionId, status]);
 
   const checkAndGetGoogleToken = async () => {
     try {
@@ -222,9 +236,9 @@ export function ImportImagesModal({
   }, [pickerUrl, status, sessionId, googleAccessToken]);
 
   const renderStatusMessage = () => {
-    if (!sessionId) return null;
+    if (!sessionId || !uploadStatus) return null;
 
-    switch (sessionStatus.type) {
+    switch (uploadStatus.status) {
       case "scanning":
         return (
           <div className="flex flex-col items-center gap-4">
@@ -233,20 +247,22 @@ export function ImportImagesModal({
               <div className="flex flex-col">
                 <span className="font-bold">Preparing your photos...</span>
                 <span className="text-sm text-gray-600">
-                  We're securely processing your selection
+                  Found {uploadStatus.total_images} photos so far
                 </span>
               </div>
             </div>
           </div>
         );
+
       case "uploading":
+      case "processing":
         return (
           <div className="flex flex-col items-center gap-4">
             <div className="w-full max-w-md bg-gray-100 rounded-full h-2.5">
               <div
                 className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
                 style={{
-                  width: `${(sessionStatus.succeeded / sessionStatus.total) * 100}%`,
+                  width: `${(uploadStatus.total_completed / uploadStatus.total_images) * 100}%`,
                 }}
               ></div>
             </div>
@@ -255,31 +271,40 @@ export function ImportImagesModal({
               <div className="flex flex-col">
                 <span className="font-bold">Almost there!</span>
                 <span className="text-sm text-gray-600">
-                  {sessionStatus.succeeded} of {sessionStatus.total} photos
-                  uploaded securely
+                  {uploadStatus.total_completed} of {uploadStatus.total_images}{" "}
+                  photos uploaded securely
                 </span>
               </div>
             </div>
           </div>
         );
-      case "complete":
-        const failedTotal =
-          sessionStatus.scanning.failed + sessionStatus.uploading.failed;
-        if (failedTotal > 0) {
-          return (
-            <div className="flex items-center gap-2 text-amber-600">
-              <span className="font-bold">
-                {failedTotal} photos couldn't be transferred, but the rest are
-                safe and ready!
-              </span>
-            </div>
-          );
-        }
+
+      case "completed":
         return (
           <div className="flex items-center gap-2 text-green-600">
             <span className="font-bold">Success! Your photos are ready.</span>
           </div>
         );
+
+      case "partially_failed":
+        return (
+          <div className="flex items-center gap-2 text-amber-600">
+            <span className="font-bold">
+              {uploadStatus.total_failed} photos couldn't be transferred, but{" "}
+              {uploadStatus.total_completed} were imported successfully!
+            </span>
+          </div>
+        );
+
+      case "failed":
+        return (
+          <div className="flex items-center gap-2 text-red-600">
+            <span className="font-bold">
+              Failed to import photos. Please try again.
+            </span>
+          </div>
+        );
+
       default:
         return null;
     }

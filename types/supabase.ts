@@ -178,11 +178,80 @@ export type Database = {
         }
         Relationships: []
       }
+      upload_session_status: {
+        Row: {
+          session_id: string
+          status: string
+          total_completed: number
+          total_failed: number
+          total_images: number
+          user_id: string
+        }
+        Insert: {
+          session_id: string
+          status: string
+          total_completed: number
+          total_failed: number
+          total_images: number
+          user_id: string
+        }
+        Update: {
+          session_id?: string
+          status?: string
+          total_completed?: number
+          total_failed?: number
+          total_images?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      increment_total_completed:
+        | {
+            Args: {
+              p_session_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_session_id: string
+              p_increment: number
+            }
+            Returns: undefined
+          }
+      increment_total_failed:
+        | {
+            Args: {
+              p_session_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_session_id: string
+              p_increment: number
+            }
+            Returns: undefined
+          }
+      increment_total_images:
+        | {
+            Args: {
+              p_session_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_session_id: string
+              p_increment: number
+            }
+            Returns: undefined
+          }
       slugify: {
         Args: {
           text: string

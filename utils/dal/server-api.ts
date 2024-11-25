@@ -52,6 +52,15 @@ export interface JobStatusCounts {
   };
 }
 
+export interface UploadSessionStatus {
+  session_id: string;
+  user_id: string;
+  status: "scanning" | "uploading" | "completed" | "failed";
+  total_images: number;
+  total_completed: number;
+  total_failed: number;
+}
+
 export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
@@ -550,6 +559,75 @@ export function createServerApi(client: SupabaseClient<Database>) {
 
       if (error) throw error;
       return data;
+    },
+    incrementTotalImages: async (sessionId: string, increment: number) => {
+      const { error } = await client.rpc("increment_total_images", {
+        p_session_id: sessionId,
+        p_increment: increment,
+      });
+
+      if (error) {
+        throw new Error(`Failed to increment total images: ${error.message}`);
+      }
+    },
+
+    incrementCompletedImages: async (sessionId: string, increment: number) => {
+      const { error } = await client.rpc("increment_total_completed", {
+        p_session_id: sessionId,
+        p_increment: increment,
+      });
+
+      if (error) {
+        throw new Error(
+          `Failed to increment completed images: ${error.message}`
+        );
+      }
+    },
+
+    incrementFailedImages: async (sessionId: string, increment: number) => {
+      const { error } = await client.rpc("increment_total_failed", {
+        p_session_id: sessionId,
+        p_increment: increment,
+      });
+
+      if (error) {
+        throw new Error(`Failed to increment failed images: ${error.message}`);
+      }
+    },
+
+    createUploadSessionStatus: async (params: {
+      sessionId: string;
+      userId: string;
+      status: UploadSessionStatus["status"];
+    }) => {
+      const { error } = await client.from("upload_session_status").insert({
+        session_id: params.sessionId,
+        user_id: params.userId,
+        status: params.status,
+        total_images: 0,
+        total_completed: 0,
+        total_failed: 0,
+      });
+
+      if (error) {
+        throw new Error(
+          `Failed to create upload session status: ${error.message}`
+        );
+      }
+    },
+
+    updateSessionStatus: async (
+      sessionId: string,
+      status: UploadSessionStatus["status"]
+    ) => {
+      const { error } = await client
+        .from("upload_session_status")
+        .update({ status })
+        .eq("session_id", sessionId);
+
+      if (error) {
+        throw new Error(`Failed to update session status: ${error.message}`);
+      }
     },
   };
 

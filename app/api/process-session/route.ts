@@ -64,6 +64,12 @@ export async function POST(req: NextRequest) {
   );
 
   try {
+    const status = await serverApi.createUploadSessionStatus({
+      sessionId,
+      userId: data.user.id,
+      status: "scanning",
+    });
+    logger.info({ status }, "Created upload session status");
     const job = await serverApi.createProcessPageJob({
       userId: data.user.id,
       sessionId,
