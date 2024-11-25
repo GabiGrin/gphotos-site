@@ -66,14 +66,22 @@ export async function generateMetadata({
 
       // Use album cover photo if available
       if (album.cover_image_id) {
-        const coverPhoto = images.find(
-          (img) => img.id === album.cover_image_id
-        );
+        // Get the cover photo directly from the server
+        const coverPhotos = await serverApi.getImageByIds([
+          album.cover_image_id,
+        ]);
+        const coverPhoto = coverPhotos[0];
+
         if (coverPhoto) {
           ogImage = getPublicImageUrl(supabase, coverPhoto.image_path);
         }
       }
     }
+  }
+
+  // Ensure the URL is absolute
+  if (ogImage && !ogImage.startsWith("http")) {
+    ogImage = `${process.env.NEXT_PUBLIC_SITE_URL}${ogImage}`;
   }
 
   return {
