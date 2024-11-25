@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 async function getAlbum(
   serverApi: any,
@@ -30,11 +31,15 @@ async function getAlbum(
   return album;
 }
 
-export async function generateMetadata({
-  params,
-}: {
+function getPublicImageUrl(supabase: SupabaseClient, path: string) {
+  return supabase.storage.from("images").getPublicUrl(path).data.publicUrl;
+}
+
+interface Props {
   params: Promise<{ domain: string; albumSlugOrId: string }>;
-}): Promise<Metadata> {
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { domain, albumSlugOrId } = await params;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
@@ -45,10 +50,77 @@ export async function generateMetadata({
     return null;
   });
 
-  const album = await getAlbum(serverApi, albumSlugOrId, site?.user_id);
+  if (!site) {
+    return {
+      title: `MyPhotos.site - ${domain}.myphotos.site is available!`,
+    };
+  }
+
+  const layoutConfig = site.layout_config as LayoutConfig;
+  const album = await getAlbum(serverApi, albumSlugOrId, site.user_id);
+
+  if (!album) {
+    return {
+      title: `Album not found - ${layoutConfig.content?.title?.value || "Photo Gallery"}`,
+    };
+  }
+
+  let title = `${album.title} - ${layoutConfig.content?.title?.value || "Photo Gallery"}`;
+  let description =
+    album.description || layoutConfig.content?.description?.value || "";
+  let ogImage: string | undefined;
+
+  // Get album cover photo
+  if (album.cover_image_id) {
+    const coverPhotos = await serverApi.getImageByIds([album.cover_image_id]);
+    const coverPhoto = coverPhotos[0];
+
+    if (coverPhoto) {
+      ogImage = getPublicImageUrl(supabase, coverPhoto.image_path);
+    }
+  }
+
+  // If no cover photo, try to get first album photo
+  if (!ogImage) {
+    const { data: images } = await supabase
+      .from("processed_images")
+      .select("*")
+      .eq("album_id", album.id)
+      .limit(1);
+
+    if (images?.[0]) {
+      ogImage = getPublicImageUrl(supabase, images[0].image_path);
+    }
+  }
+
+  // Ensure the URL is absolute
+  if (ogImage && !ogImage.startsWith("http")) {
+    ogImage = `${process.env.NEXT_PUBLIC_SITE_URL}${ogImage}`;
+  }
 
   return {
-    title: album?.title || "Album Not Found",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage
+        ? [
+            {
+              url: ogImage,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 
