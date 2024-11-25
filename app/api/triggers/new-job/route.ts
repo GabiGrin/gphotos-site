@@ -137,30 +137,22 @@ export async function POST(req: NextRequest) {
           await serverApi.updateSessionStatus(newJob.session_id, "uploading");
         }
 
-        for (const item of photoItems) {
+        try {
+          const uploadJobs = photoItems.map((item) => ({
+            parentJobId: newJob.id,
+            mediaItem: item,
+            googleAccessToken: newJob.job_data.googleAccessToken,
+            userId: newJob.user_id,
+            sessionId: newJob.session_id,
+          }));
+
+          await serverApi.createImageUploadJobs(uploadJobs);
+
           logger.info(
-            { jobId: newJob.id, itemId: item.id },
-            "Creating image upload job"
+            { jobId: newJob.id, count: photoItems.length },
+            "Bulk created image upload jobs"
           );
-          try {
-            await serverApi.createImageUploadJob({
-              parentJobId: newJob.id,
-              mediaItem: item,
-              googleAccessToken: newJob.job_data.googleAccessToken,
-              userId: newJob.user_id,
-              sessionId: newJob.session_id,
-            });
-            logger.info(
-              { jobId: newJob.id, itemId: item.id },
-              "Image upload job created"
-            );
-          } catch (error) {
-            logger.error(
-              { jobId: newJob.id, itemId: item.id, error: error },
-              "Error creating image upload job"
-            );
-          }
-          logger.info({ jobId: newJob.id }, "Marking job as completed");
+
           await serverApi.markJobAsCompleted(newJob.id);
           logger.info({ jobId: newJob.id }, "Job marked as completed");
 
@@ -173,7 +165,14 @@ export async function POST(req: NextRequest) {
               hasNextPage: !!items.nextPageToken,
             },
           });
+        } catch (error) {
+          logger.error(
+            { jobId: newJob.id, error: error },
+            "Error in bulk creating image upload jobs"
+          );
+          throw error;
         }
+
         break;
       }
       case JobType.UPLOAD_IMAGE: {

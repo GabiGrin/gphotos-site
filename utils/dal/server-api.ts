@@ -629,6 +629,24 @@ export function createServerApi(client: SupabaseClient<Database>) {
         throw new Error(`Failed to update session status: ${error.message}`);
       }
     },
+    createImageUploadJobs: async (jobs: CreateImageUploadJobData[]) => {
+      const { data, error } = await client.from("jobs").insert(
+        jobs.map((job) => ({
+          type: JobType.UPLOAD_IMAGE,
+          status: "pending",
+          user_id: job.userId,
+          session_id: job.sessionId,
+          parent_job_id: job.parentJobId,
+          job_data: {
+            mediaItem: job.mediaItem as unknown as Json,
+            googleAccessToken: job.googleAccessToken,
+          },
+        }))
+      );
+
+      if (error) throw error;
+      return data;
+    },
   };
 
   return api;

@@ -20,6 +20,7 @@ export interface BaseJobData {
   userId: string;
   parentJobId?: string;
   googleAccessToken: string;
+  sessionId: string;
 }
 
 export interface CreateProcessPageJobData extends BaseJobData {

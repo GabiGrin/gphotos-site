@@ -88,6 +88,7 @@ export function ImportImagesModal({
     const api = createClientApi(supabase);
     const subscription = api.subscribeToUploadSession(sessionId, (status) => {
       setUploadStatus(status);
+      console.log("Upload session status:", status);
 
       switch (status.status) {
         case "completed":
@@ -207,12 +208,15 @@ export function ImportImagesModal({
             token: googleAccessToken,
           });
 
+          console.log("Checking session status:", data);
+
           if (data.mediaItemsSet) {
             setImagesSet(true);
             setStatus("processing");
             clearInterval(timer);
 
             try {
+              console.log("Starting process session...");
               const result = await processGPhotosSession(sessionId);
               console.log("Process session response:", result);
             } catch (error) {
@@ -236,7 +240,25 @@ export function ImportImagesModal({
   }, [pickerUrl, status, sessionId, googleAccessToken]);
 
   const renderStatusMessage = () => {
-    if (!sessionId || !uploadStatus) return null;
+    if (!sessionId) return null;
+
+    if (status === "processing" && !uploadStatus) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2 text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+            <div className="flex flex-col">
+              <span className="font-bold">Starting import...</span>
+              <span className="text-sm text-gray-600">
+                Preparing to process your photos
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (!uploadStatus) return null;
 
     switch (uploadStatus.status) {
       case "scanning":
@@ -570,7 +592,11 @@ export function ImportImagesModal({
                   </div>
                 )}
 
-                {status === "processing" && renderStatusMessage()}
+                {(status === "processing" ||
+                  status === "completed" ||
+                  status === "failed" ||
+                  status === "partially_failed") &&
+                  renderStatusMessage()}
               </>
             )}
           </div>
