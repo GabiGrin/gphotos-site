@@ -14,7 +14,6 @@ import { Database, Json } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { MediaItem } from "@/types/google-photos";
 import { logger } from "../logger";
-import { NormalizeError } from "next/dist/shared/lib/utils";
 import { processedImageToPhoto } from "./api-utils";
 
 export interface BaseUploadJobDto {
@@ -74,27 +73,6 @@ export function createServerApi(client: SupabaseClient<Database>) {
             pageToken: data.pageToken,
             pageSize: Math.min(data.pageSize, data.maxPhotosLimit),
             maxPhotosLimit: data.maxPhotosLimit,
-          },
-          user_id: data.userId,
-        })
-        .select();
-      if (res.error) {
-        throw new Error(res.error.message);
-      }
-      if (!res.data) {
-        throw new Error("No data returned from insert");
-      }
-      return res.data[0];
-    },
-    createImageUploadJob: async (data: CreateImageUploadJobDto) => {
-      const res = await client
-        .from("jobs")
-        .insert({
-          type: JobType.UPLOAD_IMAGE,
-          session_id: data.sessionId,
-          job_data: {
-            mediaItem: data.mediaItem as unknown as Json,
-            googleAccessToken: data.googleAccessToken,
           },
           user_id: data.userId,
         })
@@ -633,10 +611,8 @@ export function createServerApi(client: SupabaseClient<Database>) {
       const { data, error } = await client.from("jobs").insert(
         jobs.map((job) => ({
           type: JobType.UPLOAD_IMAGE,
-          status: "pending",
           user_id: job.userId,
           session_id: job.sessionId,
-          parent_job_id: job.parentJobId,
           job_data: {
             mediaItem: job.mediaItem as unknown as Json,
             googleAccessToken: job.googleAccessToken,
@@ -646,6 +622,27 @@ export function createServerApi(client: SupabaseClient<Database>) {
 
       if (error) throw error;
       return data;
+    },
+    createImageUploadJob: async (data: CreateImageUploadJobDto) => {
+      const res = await client
+        .from("jobs")
+        .insert({
+          type: JobType.UPLOAD_IMAGE,
+          user_id: data.userId,
+          session_id: data.sessionId,
+          job_data: {
+            mediaItem: data.mediaItem as unknown as Json,
+            googleAccessToken: data.googleAccessToken,
+          },
+        })
+        .select();
+      if (res.error) {
+        throw new Error(res.error.message);
+      }
+      if (!res.data) {
+        throw new Error("No data returned from insert");
+      }
+      return res.data[0];
     },
   };
 
