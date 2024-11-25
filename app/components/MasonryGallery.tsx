@@ -232,15 +232,13 @@ export default function MasonryGallery({
             <img
               src={images[lightboxIndex].thumbnailUrl}
               alt={images[lightboxIndex].thumbnailUrl}
-              className={`h-[90vh] max-w-[90vw] object-contain ${
-                loadedImages.has(lightboxIndex) ? "hidden" : ""
-              }`}
+              className="h-[90vh] max-w-[90vw] object-contain"
             />
             <img
               src={images[lightboxIndex].imageUrl}
               alt={images[lightboxIndex].imageUrl}
-              className={`h-[90vh] max-w-[90vw] object-contain ${
-                loadedImages.has(lightboxIndex) ? "" : "hidden"
+              className={`absolute inset-0 h-[90vh] max-w-[90vw] object-contain transition-opacity duration-300 ${
+                loadedImages.has(lightboxIndex) ? "opacity-100" : "opacity-0"
               }`}
               onLoad={() => handleImageLoad(lightboxIndex)}
             />

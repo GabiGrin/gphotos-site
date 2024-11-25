@@ -6,19 +6,29 @@ import logger from "@/utils/logger";
 import NotFound from "./not-found";
 import posthogServer from "@/utils/posthog";
 import { AlbumWithCoverPhoto, LayoutConfig, Photo } from "@/types/myphotos";
-import { Metadata } from "next";
+import { Metadata, ResolvingMetadata } from "next";
 import UserSite from "@/app/components/UserSite";
 import UserAlbums from "@/app/components/UserAlbums";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-// Add this function to generate metadata
+interface Props {
+  params: Promise<{ domain: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
+}
+
+function getPublicImageUrl(supabase: SupabaseClient, path: string) {
+  return supabase.storage.from("images").getPublicUrl(path).data.publicUrl;
+}
+
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ domain: string }>;
-}): Promise<Metadata> {
+  searchParams,
+}: Props): Promise<Metadata> {
   const { domain } = await params;
+  const albumSlug = (await searchParams).album;
+
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".myphotos.site", "");
@@ -30,14 +40,65 @@ export async function generateMetadata({
 
   if (!site) {
     return {
-      title: `MyPhotos.site -${domain}.myphotos.site is available!`,
+      title: `MyPhotos.site - ${domain}.myphotos.site is available!`,
     };
   }
 
   const layoutConfig = site.layout_config as LayoutConfig;
 
+  // Get first image for OpenGraph
+  const images = await serverApi.getProcessedImages(site.user_id);
+  const firstImage = images[0];
+
+  let title = layoutConfig.content?.title?.value || "Photo Gallery";
+  let description = layoutConfig.content?.description?.value || "";
+  let ogImage = firstImage
+    ? getPublicImageUrl(supabase, firstImage.image_path)
+    : undefined;
+
+  // If album view, get album-specific metadata
+  if (albumSlug) {
+    const album = await serverApi.getAlbumBySlug(albumSlug, site.user_id);
+
+    if (album) {
+      title = `${album.title} - ${title}`;
+      description = album.description || description;
+
+      // Use album cover photo if available
+      if (album.cover_image_id) {
+        const coverPhoto = images.find(
+          (img) => img.id === album.cover_image_id
+        );
+        if (coverPhoto) {
+          ogImage = getPublicImageUrl(supabase, coverPhoto.image_path);
+        }
+      }
+    }
+  }
+
   return {
-    title: layoutConfig.content?.title?.value || "Photo Gallery",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage
+        ? [
+            {
+              url: ogImage,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 
