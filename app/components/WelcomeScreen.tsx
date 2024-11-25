@@ -20,10 +20,10 @@ export function WelcomeScreen({ onImport }: { onImport: () => void }) {
             <p className="text-gray-900 text-xl font-medium">
               Import your photos and get a beautiful gallery website instantly
             </p>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            {/* <p className="text-gray-600 text-lg leading-relaxed">
               Share your memories with friends and family through an elegant,
               customizable gallery that you can set up in just one minute.
-            </p>
+            </p> */}
           </div>
         </div>
 

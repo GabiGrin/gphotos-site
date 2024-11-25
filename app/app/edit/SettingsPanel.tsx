@@ -24,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -55,6 +55,76 @@ interface SettingsPanelProps {
   onAlbumsChange: (albums: Album[]) => void;
 }
 
+function EditButton({
+  show,
+  field,
+  value,
+  type = "text",
+  onSave,
+}: {
+  show?: boolean;
+  field: string;
+  value?: string;
+  type?: "text" | "email" | "url" | "textarea";
+  onSave: (value: string) => void;
+}) {
+  const [tempValue, setTempValue] = useState(value || "");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setTempValue(value || "");
+    }
+  }, [value, open]);
+
+  const handleSave = useCallback(() => {
+    onSave(tempValue);
+    setOpen(false);
+  }, [tempValue, onSave]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <MainButton
+          className={`${!show ? "opacity-50 cursor-not-allowed" : ""}`}
+          disabled={!show}
+        >
+          Edit
+        </MainButton>
+      </PopoverTrigger>
+      {show && (
+        <PopoverContent className="w-80">
+          <div className="flex flex-col gap-2">
+            {type === "textarea" ? (
+              <textarea
+                className="w-full p-2 border rounded"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                rows={4}
+                autoFocus
+              />
+            ) : (
+              <input
+                type={type}
+                className="w-full p-2 border rounded"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                autoFocus
+              />
+            )}
+            <MainButton
+              className="main-btn !bg-blue-500 text-white"
+              onClick={handleSave}
+            >
+              Save
+            </MainButton>
+          </div>
+        </PopoverContent>
+      )}
+    </Popover>
+  );
+}
+
 export default function SettingsPanel({
   site,
   onChange,
@@ -69,18 +139,23 @@ export default function SettingsPanel({
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showAlbumsModal, setShowAlbumsModal] = useState(false);
+  const [showDomainModal, setShowDomainModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle"
   );
-  const [showDomainModal, setShowDomainModal] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   const limits = usePremiumLimits(site);
 
   const debouncedConfig = useDebounce(config, 800);
 
   useEffect(() => {
-    setSaveStatus("saving");
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
 
+    setSaveStatus("saving");
     let timeout: NodeJS.Timeout;
 
     const save = async () => {
@@ -107,73 +182,6 @@ export default function SettingsPanel({
     });
   };
 
-  const EditButton = ({
-    show,
-    field,
-    value,
-    type = "text",
-    onSave,
-  }: {
-    show?: boolean;
-    field: string;
-    value?: string;
-    type?: "text" | "email" | "url" | "textarea";
-    onSave: (value: string) => void;
-  }) => {
-    const [tempValue, setTempValue] = useState(value || "");
-    const [open, setOpen] = useState(false);
-
-    useEffect(() => {
-      if (editingField === field) {
-        setOpen(true);
-        setEditingField(null);
-      }
-    }, [editingField, field]);
-
-    return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <MainButton
-            className={`${!show ? "opacity-50 cursor-not-allowed" : ""}`}
-            disabled={!show}
-          >
-            Edit
-          </MainButton>
-        </PopoverTrigger>
-        {show && (
-          <PopoverContent className="w-80">
-            <div className="flex flex-col gap-2">
-              {type === "textarea" ? (
-                <textarea
-                  className="w-full p-2 border rounded"
-                  value={tempValue}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  rows={4}
-                />
-              ) : (
-                <input
-                  type={type}
-                  className="w-full p-2 border rounded"
-                  value={tempValue}
-                  onChange={(e) => setTempValue(e.target.value)}
-                />
-              )}
-              <MainButton
-                className="main-btn !bg-blue-500 text-white"
-                onClick={() => {
-                  onSave(tempValue);
-                  setOpen(false);
-                }}
-              >
-                Save
-              </MainButton>
-            </div>
-          </PopoverContent>
-        )}
-      </Popover>
-    );
-  };
-
   const currentMaxColumns = config.maxColumns ?? 3;
 
   return (
@@ -190,10 +198,7 @@ export default function SettingsPanel({
           >
             {getSiteHost(site.username)}
           </Link>
-          <MainButton
-            premiumDisabled={!limits.customDomain}
-            onClick={() => setShowDomainModal(true)}
-          >
+          <MainButton premiumDisabled={!limits.customDomain}>
             <ChainIcon /> Connect custom domain
           </MainButton>
         </div>
@@ -493,6 +498,7 @@ export default function SettingsPanel({
           </a>
         </div>
       </div>
+
       <ManageAlbumsModal
         open={showAlbumsModal}
         onOpenChange={setShowAlbumsModal}
@@ -505,6 +511,7 @@ export default function SettingsPanel({
           onManageImages();
         }}
       />
+
       <ConnectDomainModal
         open={showDomainModal}
         onOpenChange={setShowDomainModal}

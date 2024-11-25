@@ -33,8 +33,12 @@ export default function DashboardPage() {
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const [hasLoadedConfig, setHasLoadedConfig] = useState(false);
+
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(
-    site?.layout_config ?? ({} as any)
+    {} as LayoutConfig
   );
 
   const [albums, setAlbums] = useState<Album[]>([]);
@@ -42,10 +46,14 @@ export default function DashboardPage() {
   const limits = usePremiumLimits(site);
 
   useEffect(() => {
-    if (site?.layout_config) {
+    if (site?.layout_config && !hasLoadedConfig) {
       setLayoutConfig(site.layout_config as LayoutConfig);
+      setHasLoadedConfig(true);
+      setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 100);
     }
-  }, [site]);
+  }, [site, hasLoadedConfig]);
 
   useEffect(() => {
     const getUser = async () => {
@@ -121,12 +129,14 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  const siteWithLayoutConfig = useMemo(() => {
-    return {
-      ...site,
-      layout_config: layoutConfig,
-    } as Site;
-  }, [site, layoutConfig, albums]);
+  const siteWithLayoutConfig = useMemo(
+    () =>
+      ({
+        ...site,
+        layout_config: layoutConfig,
+      }) as Site,
+    [site?.username, layoutConfig, albums]
+  );
 
   const handleAssignToAlbum = async (photoIds: string[], albumId: string) => {
     try {
@@ -177,8 +187,9 @@ export default function DashboardPage() {
         defaultEmail={user?.email ?? ""}
         site={siteWithLayoutConfig}
         onChange={(config) => {
-          console.log("Config changed:", config);
-          setLayoutConfig(config);
+          if (hasLoadedConfig && !isInitialLoad) {
+            setLayoutConfig(config);
+          }
         }}
         onManageImages={() => setIsManageImagesOpen(true)}
         onImportImages={() => setIsImportModalOpen(true)}
@@ -187,28 +198,32 @@ export default function DashboardPage() {
         onAlbumsChange={setAlbums}
       />
 
-      <ManageImagesModal
-        albums={albums}
-        isOpen={isManageImagesOpen}
-        onClose={() => setIsManageImagesOpen(false)}
-        photos={processedImages}
-        onImagesDeleted={fetchProcessedImages}
-        onImportImages={() => setIsImportModalOpen(true)}
-        onAssignToAlbum={handleAssignToAlbum}
-        userId={user.id}
-        site={siteWithLayoutConfig}
-      />
+      {isManageImagesOpen && (
+        <ManageImagesModal
+          albums={albums}
+          isOpen={isManageImagesOpen}
+          onClose={() => setIsManageImagesOpen(false)}
+          photos={processedImages}
+          onImagesDeleted={fetchProcessedImages}
+          onImportImages={() => setIsImportModalOpen(true)}
+          onAssignToAlbum={handleAssignToAlbum}
+          userId={user.id}
+          site={siteWithLayoutConfig}
+        />
+      )}
 
-      <ImportImagesModal
-        isOpen={isImportModalOpen}
-        onClose={() => {
-          setIsImportModalOpen(false);
-          fetchProcessedImages();
-        }}
-        onImagesImported={fetchProcessedImages}
-        site={siteWithLayoutConfig}
-        currentPhotoCount={processedImages.length}
-      />
+      {isImportModalOpen && (
+        <ImportImagesModal
+          isOpen={isImportModalOpen}
+          onClose={() => {
+            setIsImportModalOpen(false);
+            fetchProcessedImages();
+          }}
+          onImagesImported={fetchProcessedImages}
+          site={siteWithLayoutConfig}
+          currentPhotoCount={processedImages.length}
+        />
+      )}
 
       <UserSite
         layoutConfig={layoutConfig}
