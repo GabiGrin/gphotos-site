@@ -409,32 +409,71 @@ export function ImportImagesModal({
             ) : (
               <>
                 {status === "initial" && pickerUrl && (
-                  <>
-                    <p className="text-sm text-gray-600 text-center mb-4">
-                      <span className="font-bold">
-                        Your photos, your choice.
-                      </span>{" "}
-                      Select exactly which photos you want to import from your
-                      private Google Photos collection.
-                    </p>
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="font-bold text-lg mb-2">
+                        Import from Google Photos
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Select photos from your private Google Photos collection
+                        in 2 simple steps
+                      </p>
+                    </div>
 
-                    <p className="text-xs text-gray-600 mb-4">
-                      Clicking below will open Google Photos in a new tab. This
-                      secure method ensures we only access the specific photos
-                      you choose to share. After selecting your photos, click
-                      the "Done" button in Google Photos and return to this tab
-                      to begin the import.
-                    </p>
-                    <a
-                      href={pickerUrl}
-                      target="_blank"
-                      rel="noopener"
-                      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
-                      onClick={handlePickerClick}
-                    >
-                      Select Photos
-                    </a>
-                    <div className="text-sm text-gray-600 rounded-md p-3">
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
+                          1
+                        </span>
+                        <div>
+                          <p className="font-medium">Select your photos</p>
+                          <p className="text-sm text-gray-600">
+                            Click the button below to open Google Photos in a
+                            new tab
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
+                          2
+                        </span>
+                        <div>
+                          <p className="font-medium">Return here to complete</p>
+                          <p className="text-sm text-gray-600">
+                            After selecting photos, click "Done" in Google
+                            Photos and switch back to this tab
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-center pt-2">
+                        <a
+                          href={pickerUrl}
+                          target="_blank"
+                          rel="noopener"
+                          className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                          onClick={handlePickerClick}
+                        >
+                          <span>Open Google Photos</span>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
                       {limits.photoLimit - currentPhotoCount <
                       limits.photoLimit ? (
                         <p>
@@ -480,7 +519,7 @@ export function ImportImagesModal({
                         </p>
                       )}
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {status === "waiting" && (

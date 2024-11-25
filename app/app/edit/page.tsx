@@ -11,10 +11,10 @@ import SettingsPanel from "./SettingsPanel";
 import UserSite from "@/app/components/UserSite";
 import { ManageImagesModal } from "@/app/components/modals/ManageImagesModal";
 import { ImportImagesModal } from "@/app/components/modals/ImportImagesModal";
-import { Button } from "@/components/ui/button";
 import { ImageIcon, Loader2 } from "lucide-react";
 import { toast, useToast } from "@/hooks/use-toast";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
+import { WelcomeScreen } from "@/app/components/WelcomeScreen";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -152,6 +152,25 @@ export default function DashboardPage() {
     );
   }
 
+  if (processedImages.length === 0) {
+    return (
+      <div className="flex-1 w-full">
+        <WelcomeScreen onImport={() => setIsImportModalOpen(true)} />
+
+        <ImportImagesModal
+          isOpen={isImportModalOpen}
+          onClose={() => {
+            setIsImportModalOpen(false);
+            fetchProcessedImages();
+          }}
+          onImagesImported={fetchProcessedImages}
+          site={siteWithLayoutConfig}
+          currentPhotoCount={processedImages.length}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
       <SettingsPanel
@@ -172,7 +191,7 @@ export default function DashboardPage() {
         albums={albums}
         isOpen={isManageImagesOpen}
         onClose={() => setIsManageImagesOpen(false)}
-        photos={processedImages || []}
+        photos={processedImages}
         onImagesDeleted={fetchProcessedImages}
         onImportImages={() => setIsImportModalOpen(true)}
         onAssignToAlbum={handleAssignToAlbum}
@@ -191,32 +210,13 @@ export default function DashboardPage() {
         currentPhotoCount={processedImages.length}
       />
 
-      {!processedImages || processedImages.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-2">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-            <ImageIcon className="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 className="text-xl font-semibold">No images yet</h3>
-          <p className="text-gray-600 text-center max-w-md">
-            Start by importing some images from Google Photos to create your
-            gallery
-          </p>
-          <Button
-            onClick={() => setIsImportModalOpen(true)}
-            className="mt-4 bg-blue-500"
-          >
-            Import Images
-          </Button>
-        </div>
-      ) : (
-        <UserSite
-          layoutConfig={layoutConfig}
-          images={processedImages}
-          albums={albums}
-          showBranding={limits.branding}
-          hostname={site.username}
-        />
-      )}
+      <UserSite
+        layoutConfig={layoutConfig}
+        images={processedImages}
+        albums={albums}
+        showBranding={limits.branding}
+        hostname={site.username}
+      />
     </div>
   );
 }
