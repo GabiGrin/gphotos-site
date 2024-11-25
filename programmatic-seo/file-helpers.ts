@@ -17,7 +17,9 @@ export function getArticleFileName(
           "Platform 2 is required for gallery type platform comparison"
         );
       }
-      return `gallery-${galleryType.toLowerCase().replace(/ /g, "-")}-${platform.toLowerCase().replace(/ /g, "-")}-vs-${platform2?.toLowerCase().replace(/ /g, "-")}`;
+      return `gallery-${galleryType.toLowerCase().replace(/ /g, "-")}-${platform.toLowerCase().replace(/ /g, "-")}-vs-${platform2?.toLowerCase().replace(/ /g, "-")}.json`;
+    case ArticleType.HowToUploadImages:
+      return `how-to-upload-images-${platform.toLowerCase().replace(/ /g, "-")}-${galleryType.toLowerCase().replace(/ /g, "-")}.json`;
   }
 }
 

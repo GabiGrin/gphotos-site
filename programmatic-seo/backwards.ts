@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 
-import { HowToCreateGalleryArticle } from ".";
+import { FullArticle } from ".";
 import { imagePrompts, generateGalleryImage } from "./generate-images";
 import { GalleryType, Platform } from "./types";
 import { logProgress } from "./logger";
@@ -88,7 +88,7 @@ export async function migrateArticlesBackwards() {
 
     const filePath = path.join(articlesDir, file);
     const content = await fs.readFile(filePath, "utf-8");
-    const article = JSON.parse(content) as HowToCreateGalleryArticle;
+    const article = JSON.parse(content) as FullArticle;
 
     try {
       let modified = false;

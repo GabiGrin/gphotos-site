@@ -29,4 +29,5 @@ export enum Platform {
 export enum ArticleType {
   HowToCreateGalleryWebsite = "How To Create Gallery Website",
   GalleryTypePlatformComparison = "Gallery Type Platform Comparison",
+  HowToUploadImages = "How To Upload Images",
 }

@@ -3,8 +3,9 @@ import { logCost, calculateImageCost } from "./costs";
 import fs from "fs/promises";
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
-import { Platform, GalleryType } from "./types";
+import { Platform, GalleryType, ArticleType } from "./types";
 import { existsSync } from "fs";
+import { slugify } from "./slugify";
 
 async function imagesExist(
   platform: Platform,
@@ -101,7 +102,7 @@ export async function generateGalleryImage(
 
   const response = await openAi.images.generate({
     model: "dall-e-3",
-    prompt: `${prompt}, hyperrealistic photography, high-end DSLR quality, natural lighting, no artificial or cartoon effects, 4k detail, landscape orientation`,
+    prompt: `${prompt}, hyperrealistic photography, high-end DSLR quality, natural lighting, no artificial or cartoon effects, 4k detail, landscape orientation. Use mostly non-ethnic people.`,
     size: "1792x1024",
     quality: "standard",
     n: 1,
@@ -166,19 +167,21 @@ export async function downloadImage(
 export async function generateGalleryImages(
   platform: Platform,
   galleryType: GalleryType,
-  openAi: OpenAI
+  articleType: ArticleType,
+  openAi: OpenAI,
+  platform2?: Platform
 ): Promise<[string, string]> {
   const prompts = imagePrompts[galleryType];
 
   return Promise.all([
     generateGalleryImage(
       prompts[0],
-      `${platform.toLowerCase().replace(/ /g, "-")}-${galleryType.toLowerCase().replace(/ /g, "-")}-1.jpg`,
+      slugify(`${platform} ${galleryType} ${articleType} 1`) + ".jpg",
       openAi
     ),
     generateGalleryImage(
       prompts[1],
-      `${platform.toLowerCase().replace(/ /g, "-")}-${galleryType.toLowerCase().replace(/ /g, "-")}-2.jpg`,
+      slugify(`${platform} ${galleryType} ${articleType} 2`) + ".jpg",
       openAi
     ),
   ]);

@@ -1,4 +1,4 @@
-import { HowToCreateGalleryArticle } from ".";
+import { FullArticle } from ".";
 import { Platform } from "./types";
 import { GalleryType } from "./types";
 
@@ -34,7 +34,7 @@ const platformMap: Record<Platform, string> = {
   Wix: "674319767056cf5f112e611b",
 };
 
-async function uploadArticleToWebflow(article: HowToCreateGalleryArticle) {
+async function uploadArticleToWebflow(article: FullArticle) {
   if (article.uploaded) {
     return null;
   }
