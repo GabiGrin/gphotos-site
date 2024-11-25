@@ -208,7 +208,7 @@ export default function SettingsPanel({
             <h2 className="text-sm font-medium">General</h2>
             <div className="grid gap-4">
               <div className="flex flex-row gap-2 items-center">
-                <span className="text-sm inline-flex items-center gap-3 text-neutral-700 mr-1">
+                <span className="text-sm inline-flex items-center gap-3 text-neutral-700 w-[20px] pl-[0.5px]">
                   <ImagesIcon />
                 </span>
                 {images ? (
