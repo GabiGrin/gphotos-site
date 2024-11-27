@@ -41,6 +41,7 @@ export default function EmbedModal({
   const [showSpecificAlbum, setShowSpecificAlbum] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<string>("all");
   const [copied, setCopied] = useState(false);
+  const [fullWidth, setFullWidth] = useState(true);
 
   useEffect(() => {
     if (!open) {
@@ -49,6 +50,7 @@ export default function EmbedModal({
       setShowSpecificAlbum(false);
       setSelectedAlbum("all");
       setCopied(false);
+      setFullWidth(true);
     }
   }, [open]);
 
@@ -69,6 +71,7 @@ export default function EmbedModal({
   if (showSpecificAlbum && selectedAlbum !== "all") {
     embedUrl.searchParams.set("album", selectedAlbum);
   }
+  if (!fullWidth) embedUrl.searchParams.set("contained", "true");
 
   const iframeCode = `<iframe
   src="${embedUrl.toString()}"
@@ -166,6 +169,15 @@ export default function EmbedModal({
                 id="show-buttons"
                 checked={showButtons}
                 onCheckedChange={setShowButtons}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="full-width">Full width</Label>
+              <Switch
+                id="full-width"
+                checked={fullWidth}
+                onCheckedChange={setFullWidth}
               />
             </div>
           </div>

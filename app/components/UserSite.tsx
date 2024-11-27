@@ -28,6 +28,18 @@ export default function UserSite({
   hostname,
   isEmbed,
 }: UserSiteProps) {
+  const searchParams =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : new URLSearchParams();
+  const isContained = searchParams.get("contained") === "true";
+
+  const containerStyle = isEmbed
+    ? {
+        backgroundColor: "transparent",
+      }
+    : undefined;
+
   // Sort images based on layoutConfig.sort
   const sortedImages = [...images].sort((a, b) => {
     const aDate = new Date(a.gphotos_created_at).getTime();
@@ -39,9 +51,14 @@ export default function UserSite({
 
   return (
     <TooltipProvider>
-      <div className={`flex flex-col min-h-screen ${isEmbed ? "" : "mx-4"}`}>
+      <div
+        className={`flex flex-col min-h-screen ${isEmbed ? "" : "mx-4"}`}
+        style={containerStyle}
+      >
         <div
-          className={`flex-grow flex flex-col items-center ${isEmbed ? "" : "py-4 mt-8"} max-w-6xl mx-auto pb-32 w-full relative 2xl:max-w-7xl`}
+          className={`flex-grow flex flex-col items-center ${
+            isEmbed ? (isContained ? "px-4" : "") : "py-4 mt-8"
+          } ${isContained ? "max-w-6xl 2xl:max-w-7xl" : ""} mx-auto pb-32 w-full relative`}
         >
           <GalleryHeader
             layoutConfig={layoutConfig}
