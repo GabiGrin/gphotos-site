@@ -83,7 +83,7 @@ export function UpgradeModal() {
             <div className="space-y-3 pt-2">
               <Button className="w-full h-12" asChild>
                 <a
-                  href="https://www.myphotos.site/upgrade"
+                  href="/api/track-upgrade"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
