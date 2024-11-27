@@ -15,6 +15,7 @@ import { ImageIcon, Loader2 } from "lucide-react";
 import { toast, useToast } from "@/hooks/use-toast";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import { WelcomeScreen } from "@/app/components/WelcomeScreen";
+import { CongratulationsModal } from "@/app/components/modals/CongratulationsModal";
 
 export default function DashboardPage() {
   const supabase = createClient();
@@ -42,6 +43,9 @@ export default function DashboardPage() {
   );
 
   const [albums, setAlbums] = useState<Album[]>([]);
+
+  const [shouldShowCongratulations, setShouldShowCongratulations] =
+    useState(false);
 
   const limits = usePremiumLimits(site);
 
@@ -87,6 +91,10 @@ export default function DashboardPage() {
         const images = await clientApi.getProcessedImages(user.id);
         console.log("Images:", images);
         setProcessedImages(images);
+
+        if (images.length > 0 && processedImages?.length === 0) {
+          setShouldShowCongratulations(true);
+        }
       } catch (error) {
         console.error("Error getting processed images:", error);
       }
@@ -224,6 +232,12 @@ export default function DashboardPage() {
           currentPhotoCount={processedImages.length}
         />
       )}
+
+      <CongratulationsModal
+        isOpen={shouldShowCongratulations}
+        username={site.username}
+        onClose={() => setShouldShowCongratulations(false)}
+      />
 
       <UserSite
         layoutConfig={layoutConfig}
