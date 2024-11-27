@@ -16,6 +16,7 @@ interface UserSiteProps {
   currentAlbum?: Album;
   showBranding: boolean;
   hostname: string;
+  isEmbed: boolean;
 }
 
 export default function UserSite({
@@ -25,6 +26,7 @@ export default function UserSite({
   currentAlbum,
   showBranding,
   hostname,
+  isEmbed,
 }: UserSiteProps) {
   // Sort images based on layoutConfig.sort
   const sortedImages = [...images].sort((a, b) => {
@@ -37,8 +39,10 @@ export default function UserSite({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col min-h-screen mx-4">
-        <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-32 w-full relative 2xl:max-w-7xl">
+      <div className={`flex flex-col min-h-screen ${isEmbed ? "" : "mx-4"}`}>
+        <div
+          className={`flex-grow flex flex-col items-center ${isEmbed ? "" : "py-4 mt-8"} max-w-6xl mx-auto pb-32 w-full relative 2xl:max-w-7xl`}
+        >
           <GalleryHeader
             layoutConfig={layoutConfig}
             currentAlbum={currentAlbum}

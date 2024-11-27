@@ -39,10 +39,11 @@ import { AlbumIcon } from "@/app/components/icons/icons";
 import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CheckIcon } from "@/app/components/icons/icons";
-import { EyeIcon, Loader2, ChevronDown } from "lucide-react";
+import { EyeIcon, Loader2, ChevronDown, CodeIcon } from "lucide-react";
 import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
+import EmbedModal from "@/app/components/modals/EmbedModal";
 
 interface SettingsPanelProps {
   site: Site;
@@ -144,6 +145,7 @@ export default function SettingsPanel({
     "idle"
   );
   const [isFirstRender, setIsFirstRender] = useState(true);
+  const [showEmbedModal, setShowEmbedModal] = useState(false);
 
   const limits = usePremiumLimits(site);
 
@@ -233,6 +235,14 @@ export default function SettingsPanel({
                   premiumDisabled={limits.albumLimit === 1}
                 >
                   Manage albums
+                </MainButton>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <span className="text-sm inline-flex items-center gap-3 text-neutral-700 w-[20px] pl-[0.5px]">
+                  <CodeIcon />
+                </span>
+                <MainButton onClick={() => setShowEmbedModal(true)}>
+                  Embed gallery
                 </MainButton>
               </div>
             </div>
@@ -499,6 +509,13 @@ export default function SettingsPanel({
       <ConnectDomainModal
         open={showDomainModal}
         onOpenChange={setShowDomainModal}
+      />
+
+      <EmbedModal
+        open={showEmbedModal}
+        onOpenChange={setShowEmbedModal}
+        site={site}
+        albums={albums}
       />
     </div>
   );

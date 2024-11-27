@@ -14,6 +14,7 @@ export default function UserAlbums({
   albums: AlbumWithCoverPhoto[];
   showBrandingFooter: boolean;
   hostname: string;
+  isEmbed: boolean;
 }) {
   return (
     <TooltipProvider>

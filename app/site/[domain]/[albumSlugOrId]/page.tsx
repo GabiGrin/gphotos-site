@@ -8,6 +8,7 @@ import UserSite from "@/app/components/UserSite";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
 import { SupabaseClient } from "@supabase/supabase-js";
+import posthogServer from "@/utils/posthog";
 
 async function getAlbum(
   serverApi: any,
@@ -37,6 +38,7 @@ function getPublicImageUrl(supabase: SupabaseClient, path: string) {
 
 interface Props {
   params: Promise<{ domain: string; albumSlugOrId: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -126,10 +128,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AlbumPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ domain: string; albumSlugOrId: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const { domain, albumSlugOrId } = await params;
+  const { embed, hideContent, hideButtons } = await searchParams;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".myphotos.site", "");
@@ -169,14 +174,45 @@ export default async function AlbumPage({
     processedImageToPhoto(supabase, image)
   );
 
+  // Track embed view
+  if (embed === "true") {
+    posthogServer.capture({
+      event: "view_embed",
+      distinctId: site.user_id,
+      properties: {
+        domain,
+        albumId: album.id,
+        hideContent: hideContent === "true",
+        hideButtons: hideButtons === "true",
+      },
+    });
+  }
+
   return (
     <UserSite
-      layoutConfig={layoutConfig}
+      layoutConfig={{
+        ...layoutConfig,
+        content:
+          hideContent === "true"
+            ? {
+                title: {
+                  show: false,
+                  value: layoutConfig.content?.title?.value || "",
+                },
+                description: {
+                  show: false,
+                  value: layoutConfig.content?.description?.value || "",
+                },
+              }
+            : layoutConfig.content,
+        buttons: hideButtons === "true" ? {} : layoutConfig.buttons,
+      }}
       images={photos}
       albums={[]}
       currentAlbum={album}
       showBranding={limits.branding}
       hostname={host}
+      isEmbed={embed === "true"}
     />
   );
 }

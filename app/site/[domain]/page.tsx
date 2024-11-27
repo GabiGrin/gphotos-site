@@ -112,10 +112,13 @@ export async function generateMetadata({
 
 export default async function UserGallery({
   params,
+  searchParams,
 }: {
   params: Promise<{ domain: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const { domain } = await params;
+  const { embed, hideContent, hideButtons } = await searchParams;
   const supabase = await createServiceClient();
 
   const serverApi = createServerApi(supabase);
@@ -183,22 +186,68 @@ export default async function UserGallery({
   if (rawAlbums && albums.length > 0) {
     return (
       <UserAlbums
-        layoutConfig={layoutConfig}
+        layoutConfig={{
+          ...layoutConfig,
+          content:
+            hideContent === "true"
+              ? {
+                  title: {
+                    show: false,
+                    value: layoutConfig.content?.title?.value || "",
+                  },
+                  description: {
+                    show: false,
+                    value: layoutConfig.content?.description?.value || "",
+                  },
+                }
+              : layoutConfig.content,
+          buttons: hideButtons === "true" ? {} : layoutConfig.buttons,
+        }}
         albums={albums}
         showBrandingFooter={limits.branding}
         hostname={host}
+        isEmbed={embed === "true"}
       />
     );
   }
 
-  // Otherwise, show the regular photo gallery
+  // Track embed view
+  if (embed === "true") {
+    posthogServer.capture({
+      event: "view_embed",
+      distinctId: site.user_id,
+      properties: {
+        domain,
+        hideContent: hideContent === "true",
+        hideButtons: hideButtons === "true",
+      },
+    });
+  }
+
   return (
     <UserSite
-      layoutConfig={layoutConfig}
+      layoutConfig={{
+        ...layoutConfig,
+        content:
+          hideContent === "true"
+            ? {
+                title: {
+                  show: false,
+                  value: layoutConfig.content?.title?.value || "",
+                },
+                description: {
+                  show: false,
+                  value: layoutConfig.content?.description?.value || "",
+                },
+              }
+            : layoutConfig.content,
+        buttons: hideButtons === "true" ? {} : layoutConfig.buttons,
+      }}
       images={photos}
       albums={albums}
       showBranding={limits.branding}
       hostname={host}
+      isEmbed={embed === "true"}
     />
   );
 }
