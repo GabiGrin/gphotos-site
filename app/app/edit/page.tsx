@@ -245,6 +245,7 @@ export default function DashboardPage() {
         albums={albums}
         showBranding={limits.branding}
         hostname={site.username}
+        isEmbed={false}
       />
     </div>
   );
