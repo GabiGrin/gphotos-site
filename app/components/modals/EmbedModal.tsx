@@ -72,9 +72,11 @@ export default function EmbedModal({
 
   const iframeCode = `<iframe
   src="${embedUrl.toString()}"
-  style="width: 100%; height: 600px; border: none; border-radius: 8px;"
+  style="width: 100%; height: 100%; border: none;"
   allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
   allowfullscreen
+  width="100%"
+  height="100%"
 ></iframe>`;
 
   const handleCopy = async () => {
