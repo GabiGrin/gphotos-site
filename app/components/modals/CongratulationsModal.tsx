@@ -1,5 +1,6 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface CongratulationsModalProps {
   isOpen: boolean;
@@ -14,11 +15,18 @@ export function CongratulationsModal({
 }: CongratulationsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <VisuallyHidden>
+        <DialogTitle>Congratulations</DialogTitle>
+      </VisuallyHidden>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+      >
         <div className="flex flex-col gap-6">
           <div className="space-y-2 text-center">
             <h2 className="text-2xl font-semibold tracking-tight">
-              🎉 Your Photos Are Ready!
+              🎉 Your Gallery Is Ready!
             </h2>
             <p className="text-muted-foreground">
               Great job importing your first images from Google Photos. Here's
@@ -31,45 +39,34 @@ export function CongratulationsModal({
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
                 1
               </span>
-              <div>
-                <p className="font-medium">Personalize your gallery</p>
-                <p className="text-muted-foreground">
-                  Add a title and description that tells your story
-                </p>
-              </div>
+              <p className="font-medium pt-1">
+                Personalize your gallery with a title and description
+              </p>
             </div>
 
             <div className="flex items-start gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
                 2
               </span>
-              <div>
-                <p className="font-medium">Keep building your collection</p>
-                <p className="text-muted-foreground">
-                  Import more photos anytime to grow your gallery
-                </p>
-              </div>
+              <p className="font-medium pt-1">
+                Keep building your collection by importing more photos
+              </p>
             </div>
 
             <div className="flex items-start gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-medium">
                 3
               </span>
-              <div>
-                <p className="font-medium">
-                  Share gallery with friends and family
-                </p>
-                <p className="text-muted-foreground">
-                  <a
-                    href={`https://${username}.myphotos.site`}
-                    className="text-blue-500 hover:underline"
-                    target="_blank"
-                  >
-                    Copy your gallery link
-                  </a>{" "}
-                  and share it with loved ones
-                </p>
-              </div>
+              <p className="font-medium pt-1">
+                Share your gallery with the world. This is your link:{" "}
+                <a
+                  href={`https://${username}.myphotos.site`}
+                  className="text-blue-500 hover:underline"
+                  target="_blank"
+                >
+                  {username}.myphotos.site
+                </a>
+              </p>
             </div>
           </div>
 
