@@ -9,6 +9,7 @@ export default function UserAlbums({
   albums,
   showBrandingFooter,
   hostname,
+  isEmbed,
 }: {
   layoutConfig: LayoutConfig;
   albums: AlbumWithCoverPhoto[];
@@ -18,12 +19,16 @@ export default function UserAlbums({
 }) {
   return (
     <TooltipProvider>
-      <div className="flex flex-col min-h-screen mx-4">
-        <div className="flex-grow flex flex-col items-center py-4 mt-8 max-w-6xl mx-auto pb-16 w-full relative 2xl:max-w-7xl">
-          <GalleryHeader layoutConfig={layoutConfig} />
+      <div className={`flex flex-col min-h-screen ${isEmbed ? "" : "mx-4"}`}>
+        <div
+          className={`flex-grow flex flex-col items-center ${
+            isEmbed ? "" : "py-4 mt-8 max-w-6xl 2xl:max-w-7xl pb-16"
+          } mx-auto w-full relative`}
+        >
+          <GalleryHeader layoutConfig={layoutConfig} isEmbed={isEmbed} />
 
-          <div className="w-full px-3">
-            <div className="max-w-[1230px] mx-auto">
+          <div className={`w-full ${isEmbed ? "" : "px-3"}`}>
+            <div className={isEmbed ? "w-full" : "max-w-[1230px] mx-auto"}>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 justify-center">
                 {albums.map((album) => (
                   <Link
