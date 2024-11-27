@@ -8,14 +8,16 @@ import { LinkIcon } from "lucide-react";
 interface GalleryHeaderProps {
   layoutConfig: LayoutConfig;
   currentAlbum?: Album;
+  isEmbed?: boolean;
 }
 
 export default function GalleryHeader({
   layoutConfig,
   currentAlbum,
+  isEmbed,
 }: GalleryHeaderProps) {
   return (
-    <header className="mt-8 w-full">
+    <header className={isEmbed ? "w-full" : "mt-8 w-full"}>
       <div className="w-full flex justify-center md:justify-between items-start mb-8 md:mb-0 md:absolute relative z-0">
         <div className="flex flex-row md:flex-col gap-2">
           {layoutConfig.buttons?.email?.show && (
@@ -51,7 +53,9 @@ export default function GalleryHeader({
         )}
       </div>
 
-      <div className="flex flex-col items-center max-w-4xl mb-8 mx-auto relative z-10">
+      <div
+        className={`flex flex-col items-center max-w-4xl ${isEmbed ? "" : "mb-8"} mx-auto relative z-10`}
+      >
         {currentAlbum && (
           <div className="flex items-center gap-1 text-black mb-4">
             <Link href="/" className="hover:text-gray-600 transition-colors">

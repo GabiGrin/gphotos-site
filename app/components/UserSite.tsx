@@ -57,12 +57,13 @@ export default function UserSite({
       >
         <div
           className={`flex-grow flex flex-col items-center ${
-            isEmbed ? (isContained ? "px-4" : "") : "py-4 mt-8"
-          } ${isContained ? "max-w-6xl 2xl:max-w-7xl" : ""} mx-auto pb-32 w-full relative`}
+            isEmbed ? "" : "py-4 mt-8 max-w-6xl 2xl:max-w-7xl pb-32"
+          } mx-auto w-full relative`}
         >
           <GalleryHeader
             layoutConfig={layoutConfig}
             currentAlbum={currentAlbum}
+            isEmbed={isEmbed}
           />
 
           {sortedImages.length > 0 ? (
