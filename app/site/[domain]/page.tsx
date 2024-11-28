@@ -123,8 +123,6 @@ export default async function UserGallery({
 
   const serverApi = createServerApi(supabase);
 
-  // Fetch processed images for the user from Supabase
-
   const host = domain.replace(".myphotos.site", "");
 
   logger.info({ host }, "UserGallery host");
@@ -137,6 +135,11 @@ export default async function UserGallery({
   if (!site) {
     return <NotFound domain={domain} />;
   }
+
+  // Increment site view count
+  serverApi.incrementSiteView(host).catch((e) => {
+    logger.error(e, "Failed to increment site view");
+  });
 
   const limits = getLimits(site);
 

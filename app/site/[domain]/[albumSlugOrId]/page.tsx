@@ -148,6 +148,11 @@ export default async function AlbumPage({
     return <NotFound domain={domain} />;
   }
 
+  // Increment site view count
+  serverApi.incrementSiteView(host).catch((e) => {
+    logger.error(e, "Failed to increment site view");
+  });
+
   const album = await getAlbum(serverApi, albumSlugOrId, site.user_id);
 
   if (!album) {

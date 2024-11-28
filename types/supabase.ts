@@ -145,6 +145,27 @@ export type Database = {
           },
         ]
       }
+      site_visits: {
+        Row: {
+          id: number
+          username: string
+          visit_count: number
+          visit_date: string
+        }
+        Insert: {
+          id?: never
+          username: string
+          visit_count?: number
+          visit_date: string
+        }
+        Update: {
+          id?: never
+          username?: string
+          visit_count?: number
+          visit_date?: string
+        }
+        Relationships: []
+      }
       sites: {
         Row: {
           created_at: string | null
@@ -155,6 +176,7 @@ export type Database = {
           updated_at: string | null
           user_id: string
           username: string
+          visits: number
         }
         Insert: {
           created_at?: string | null
@@ -165,6 +187,7 @@ export type Database = {
           updated_at?: string | null
           user_id: string
           username: string
+          visits?: number
         }
         Update: {
           created_at?: string | null
@@ -175,6 +198,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           username?: string
+          visits?: number
         }
         Relationships: []
       }
@@ -210,6 +234,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_daily_site_visits: {
+        Args: {
+          p_username: string
+        }
+        Returns: undefined
+      }
+      increment_site_visits:
+        | {
+            Args: {
+              p_user_id: string
+              p_username: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_username: string
+            }
+            Returns: undefined
+          }
       increment_total_completed:
         | {
             Args: {

@@ -50,7 +50,8 @@ export async function middleware(req: NextRequest) {
     if (
       path.startsWith("/sign-") ||
       path.startsWith("/auth") ||
-      path.startsWith("/api/")
+      path.startsWith("/api/") ||
+      path.startsWith("/admin")
     ) {
       return NextResponse.next();
     }

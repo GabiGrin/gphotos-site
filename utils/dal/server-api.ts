@@ -60,6 +60,11 @@ export interface UploadSessionStatus {
   total_failed: number;
 }
 
+interface SiteVisitStats {
+  username: string;
+  total_visits: number;
+}
+
 export function createServerApi(client: SupabaseClient<Database>) {
   const api = {
     createProcessPageJob: async (data: CreateProcessPageJobDto) => {
@@ -643,6 +648,29 @@ export function createServerApi(client: SupabaseClient<Database>) {
         throw new Error("No data returned from insert");
       }
       return res.data[0];
+    },
+    incrementSiteView: async (username: string) => {
+      const { error } = await client.rpc("increment_site_visits", {
+        p_username: username,
+      });
+      if (error) throw error;
+    },
+    getTopSiteVisits: async (
+      month: string,
+      limit: number = 50
+    ): Promise<SiteVisitStats[]> => {
+      const { data, error } = await client
+        .from("site_visits")
+        .select("username, visit_count")
+        .eq("visit_date", month)
+        .order("visit_count", { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data.map((row) => ({
+        username: row.username,
+        total_visits: row.visit_count,
+      }));
     },
   };
 
