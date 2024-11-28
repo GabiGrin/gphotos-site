@@ -39,7 +39,13 @@ import { AlbumIcon } from "@/app/components/icons/icons";
 import ManageAlbumsModal from "@/app/components/modals/ManageAlbumsModal";
 import { useDebounce } from "@/hooks/useDebounce";
 import { CheckIcon } from "@/app/components/icons/icons";
-import { EyeIcon, Loader2, ChevronDown, CodeIcon } from "lucide-react";
+import {
+  EyeIcon,
+  Loader2,
+  ChevronDown,
+  CodeIcon,
+  LockIcon,
+} from "lucide-react";
 import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
@@ -66,7 +72,7 @@ function EditButton({
   show?: boolean;
   field: string;
   value?: string;
-  type?: "text" | "email" | "url" | "textarea";
+  type?: "text" | "email" | "url" | "textarea" | "password";
   onSave: (value: string) => void;
 }) {
   const [tempValue, setTempValue] = useState(value || "");
@@ -244,6 +250,46 @@ export default function SettingsPanel({
                 <MainButton onClick={() => setShowEmbedModal(true)}>
                   Embed gallery
                 </MainButton>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <span className="text-sm inline-flex items-center gap-3 text-neutral-700 w-[20px] pl-[0.5px]">
+                  <LockIcon className="w-4 h-4" />
+                </span>
+                <MainButton
+                  onClick={() => {
+                    updateConfig({
+                      security: {
+                        ...config.security,
+                        password: {
+                          enabled: !config.security?.password?.enabled,
+                          value: config.security?.password?.value || "",
+                        },
+                      },
+                    });
+                  }}
+                >
+                  {config.security?.password?.enabled ? (
+                    <>Password Protected</>
+                  ) : (
+                    <>Add Password Protection</>
+                  )}
+                </MainButton>
+                {config.security?.password?.enabled && (
+                  <EditButton
+                    show={true}
+                    field="password"
+                    value={config.security?.password?.value}
+                    type="text"
+                    onSave={(value) =>
+                      updateConfig({
+                        security: {
+                          ...config.security,
+                          password: { enabled: true, value },
+                        },
+                      })
+                    }
+                  />
+                )}
               </div>
             </div>
           </div>

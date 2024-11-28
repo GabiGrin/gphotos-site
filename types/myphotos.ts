@@ -69,6 +69,7 @@ export type Photo = ProcessedImage & {
 
 export type Site = Database["public"]["Tables"]["sites"]["Row"] & {
   premium_plan: PremiumPlanType;
+  layout_config: LayoutConfig;
 };
 
 export type Album = Database["public"]["Tables"]["albums"]["Row"];
@@ -89,4 +90,10 @@ export interface LayoutConfig {
   };
   sort?: "newest" | "oldest";
   maxColumns?: 1 | 2 | 3;
+  security?: {
+    password?: {
+      enabled: boolean;
+      value: string;
+    };
+  };
 }
