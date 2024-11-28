@@ -116,6 +116,7 @@ export default function AdminStats() {
           <table className="min-w-full">
             <thead>
               <tr className="border-b">
+                <th className="px-6 py-3 text-left">#</th>
                 <th className="px-6 py-3 text-left">Username</th>
                 <th className="px-6 py-3 text-left">Total Visits</th>
                 <th className="px-6 py-3 text-left">Images</th>
@@ -123,8 +124,9 @@ export default function AdminStats() {
               </tr>
             </thead>
             <tbody>
-              {stats.map((stat) => (
+              {stats.map((stat, index) => (
                 <tr key={stat.username} className="border-b">
+                  <td className="px-6 py-4 text-gray-500">{index + 1}</td>
                   <td className="px-6 py-4">{stat.username}</td>
                   <td className="px-6 py-4">{stat.total_visits}</td>
                   <td className="px-6 py-4">{stat.image_count}</td>
