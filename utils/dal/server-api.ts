@@ -63,6 +63,7 @@ export interface UploadSessionStatus {
 interface SiteVisitStats {
   username: string;
   total_visits: number;
+  image_count: number;
 }
 
 export function createServerApi(client: SupabaseClient<Database>) {
@@ -659,17 +660,16 @@ export function createServerApi(client: SupabaseClient<Database>) {
       month: string,
       limit: number = 50
     ): Promise<SiteVisitStats[]> => {
-      const { data, error } = await client
-        .from("site_visits")
-        .select("username, visit_count")
-        .eq("visit_date", month)
-        .order("visit_count", { ascending: false })
-        .limit(limit);
+      const { data, error } = await client.rpc("get_top_user_sites", {
+        date_filter: month,
+        limit_count: limit,
+      });
 
       if (error) throw error;
       return data.map((row) => ({
         username: row.username,
-        total_visits: row.visit_count,
+        total_visits: Number(row.site_visits),
+        image_count: Number(row.image_count),
       }));
     },
   };

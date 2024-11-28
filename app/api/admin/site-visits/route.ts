@@ -2,6 +2,7 @@ import { createServerApi } from "@/utils/dal/server-api";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { createServiceClient } from "@/utils/supabase/service";
 
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Month parameter is required", { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const api = createServerApi(supabase);
 
   try {

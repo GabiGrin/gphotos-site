@@ -234,6 +234,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_top_sites_by_visitors: {
+        Args: {
+          target_date: string
+          top_x: number
+        }
+        Returns: {
+          username: string
+          visit_count: number
+        }[]
+      }
+      get_top_user_sites: {
+        Args: {
+          date_filter: string
+          limit_count: number
+        }
+        Returns: {
+          username: string
+          site_visits: number
+          image_count: number
+        }[]
+      }
       increment_daily_site_visits: {
         Args: {
           p_username: string

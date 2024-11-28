@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface SiteVisitStats {
   username: string;
   total_visits: number;
+  image_count: number;
 }
 
 export default function AdminStats() {
@@ -103,7 +104,7 @@ export default function AdminStats() {
         <input
           type="month"
           value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
+          onChange={(e) => setSelectedMonth(e.target.value + "-01")}
           className="border p-2 rounded"
         />
       </div>
@@ -117,6 +118,7 @@ export default function AdminStats() {
               <tr className="border-b">
                 <th className="px-6 py-3 text-left">Username</th>
                 <th className="px-6 py-3 text-left">Total Visits</th>
+                <th className="px-6 py-3 text-left">Images</th>
                 <th className="px-6 py-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -125,6 +127,7 @@ export default function AdminStats() {
                 <tr key={stat.username} className="border-b">
                   <td className="px-6 py-4">{stat.username}</td>
                   <td className="px-6 py-4">{stat.total_visits}</td>
+                  <td className="px-6 py-4">{stat.image_count}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => viewSite(stat.username)}
