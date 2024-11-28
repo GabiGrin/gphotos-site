@@ -12,6 +12,12 @@ import UserAlbums from "@/app/components/UserAlbums";
 import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
 import { SupabaseClient } from "@supabase/supabase-js";
+import {
+  getSitePassword,
+  validateSitePassword,
+} from "@/utils/password-protection";
+import PasswordProtectionForm from "@/app/components/PasswordProtectionForm";
+import { cookies } from "next/headers";
 
 interface Props {
   params: Promise<{ domain: string }>;
@@ -118,14 +124,10 @@ export default async function UserGallery({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const { domain } = await params;
-  const { embed, hideContent, hideButtons } = await searchParams;
+  const { embed, hideContent, hideButtons, password } = await searchParams;
   const supabase = await createServiceClient();
-
   const serverApi = createServerApi(supabase);
-
   const host = domain.replace(".myphotos.site", "");
-
-  logger.info({ host }, "UserGallery host");
 
   const site = await serverApi.getSiteByUsername(host).catch((e) => {
     logger.error(e, "UserGallery getSiteByUsername error");
@@ -136,6 +138,19 @@ export default async function UserGallery({
     return <NotFound domain={domain} />;
   }
 
+  const layoutConfig = site.layout_config as LayoutConfig;
+  const sitePassword = layoutConfig.security?.password?.value;
+
+  // Check password protection
+  const cookiePassword = (await cookies()).get(
+    `site_password_${domain}`
+  )?.value;
+  const isPasswordValid = validateSitePassword(sitePassword, cookiePassword);
+
+  if (!isPasswordValid) {
+    return <PasswordProtectionForm domain={domain} />;
+  }
+
   // Increment site view count
   serverApi.incrementSiteView(host).catch((e) => {
     logger.error(e, "Failed to increment site view");
@@ -143,7 +158,6 @@ export default async function UserGallery({
 
   const limits = getLimits(site);
 
-  const layoutConfig = site.layout_config as LayoutConfig;
   const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
 
   const { data: images, error } = await supabase

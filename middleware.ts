@@ -61,6 +61,10 @@ export async function middleware(req: NextRequest) {
     );
   }
 
+  if (path.startsWith("/api/validate-password")) {
+    return NextResponse.next();
+  }
+
   // rewrite everything else to `/[domain]/[slug] dynamic route
   return NextResponse.rewrite(new URL(`/site/${hostname}${path}`, req.url));
 }

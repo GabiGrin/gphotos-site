@@ -9,6 +9,12 @@ import { processedImageToPhoto } from "@/utils/dal/api-utils";
 import { getLimits } from "@/premium/plans";
 import { SupabaseClient } from "@supabase/supabase-js";
 import posthogServer from "@/utils/posthog";
+import {
+  getSitePassword,
+  validateSitePassword,
+} from "@/utils/password-protection";
+import PasswordProtectionForm from "@/app/components/PasswordProtectionForm";
+import { cookies } from "next/headers";
 
 async function getAlbum(
   serverApi: any,
@@ -134,7 +140,7 @@ export default async function AlbumPage({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const { domain, albumSlugOrId } = await params;
-  const { embed, hideContent, hideButtons } = await searchParams;
+  const { embed, hideContent, hideButtons, password } = await searchParams;
   const supabase = await createServiceClient();
   const serverApi = createServerApi(supabase);
   const host = domain.replace(".myphotos.site", "");
@@ -146,6 +152,19 @@ export default async function AlbumPage({
 
   if (!site) {
     return <NotFound domain={domain} />;
+  }
+
+  const layoutConfig = site.layout_config as LayoutConfig;
+  const sitePassword = layoutConfig.security?.password?.value;
+
+  // Check password protection
+  const cookiePassword = (await cookies()).get(
+    `site_password_${domain}`
+  )?.value;
+  const isPasswordValid = validateSitePassword(sitePassword, cookiePassword);
+
+  if (!isPasswordValid) {
+    return <PasswordProtectionForm domain={domain} />;
   }
 
   // Increment site view count
@@ -161,7 +180,6 @@ export default async function AlbumPage({
 
   const limits = getLimits(site);
 
-  const layoutConfig = site.layout_config as LayoutConfig;
   const sortOrder = layoutConfig.sort === "oldest" ? true : false; // true for ascending (oldest), false for descending (newest)
 
   const { data: images, error } = await supabase
