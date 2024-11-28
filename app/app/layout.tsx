@@ -20,6 +20,7 @@ import { UpgradeModal } from "@/app/components/UpgradeModal";
 import { PremiumIcon } from "../components/icons/PremiumIcon";
 import { PremiumPlanBadge } from "./PremiumPlanBadge";
 import { createServerApi } from "@/utils/dal/server-api";
+import CrispChat from "../components/Crisp";
 
 export default async function DashboardLayout({
   children,
@@ -62,6 +63,8 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-white">
       <UpgradeModal />
+      <CrispChat />
+
       <header className="border-b">
         <div className="max-w-5xl mx-auto px-4 py-1 flex items-center justify-between">
           <PosthogIdentifier user={user} />
