@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const api = createServerApi(supabase);
 
   try {
-    const siteVisits = await api.getTopSiteVisits(month, 50);
+    const siteVisits = await api.getTopSiteVisits(month, 200);
     return NextResponse.json(siteVisits);
   } catch (error) {
     console.error("Error fetching site visits:", error);
