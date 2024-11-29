@@ -8,6 +8,9 @@ interface SiteVisitStats {
   image_count: number;
 }
 
+type SortField = "username" | "total_visits" | "image_count";
+type FilterType = "all" | "no_images" | "no_visits" | "active";
+
 export default function AdminStats() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,6 +20,9 @@ export default function AdminStats() {
   const [stats, setStats] = useState<SiteVisitStats[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sortField, setSortField] = useState<SortField>("total_visits");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
 
   const authenticate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +79,37 @@ export default function AdminStats() {
     window.open(`https://${username}.myphotos.site`, "_blank");
   };
 
+  const sortStats = (field: SortField) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
+
+  const filterStats = (stats: SiteVisitStats[]) => {
+    switch (activeFilter) {
+      case "no_images":
+        return stats.filter((stat) => stat.image_count === 0);
+      case "no_visits":
+        return stats.filter((stat) => stat.total_visits === 0);
+      case "active":
+        return stats.filter(
+          (stat) => stat.total_visits > 0 && stat.image_count > 0
+        );
+      default:
+        return stats;
+    }
+  };
+
+  const getSortedAndFilteredStats = () => {
+    return filterStats([...stats]).sort((a, b) => {
+      const multiplier = sortDirection === "asc" ? 1 : -1;
+      return multiplier * (a[sortField] > b[sortField] ? 1 : -1);
+    });
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -100,13 +137,54 @@ export default function AdminStats() {
     <div className="p-8 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Site Visit Statistics</h1>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-wrap gap-4 items-center">
         <input
           type="month"
           value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value + "-01")}
+          onChange={(e) => setSelectedMonth(e.target.value)}
           className="border p-2 rounded"
         />
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveFilter("all")}
+            className={`px-3 py-1 rounded ${
+              activeFilter === "all" ? "bg-blue-500 text-white" : "bg-gray-100"
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setActiveFilter("no_images")}
+            className={`px-3 py-1 rounded ${
+              activeFilter === "no_images"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100"
+            }`}
+          >
+            No Images
+          </button>
+          <button
+            onClick={() => setActiveFilter("no_visits")}
+            className={`px-3 py-1 rounded ${
+              activeFilter === "no_visits"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100"
+            }`}
+          >
+            No Visits
+          </button>
+          <button
+            onClick={() => setActiveFilter("active")}
+            className={`px-3 py-1 rounded ${
+              activeFilter === "active"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100"
+            }`}
+          >
+            Active Sites
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -117,15 +195,45 @@ export default function AdminStats() {
             <thead>
               <tr className="border-b">
                 <th className="px-6 py-3 text-left">#</th>
-                <th className="px-6 py-3 text-left">Username</th>
-                <th className="px-6 py-3 text-left">Total Visits</th>
-                <th className="px-6 py-3 text-left">Images</th>
+                <th
+                  className="px-6 py-3 text-left cursor-pointer"
+                  onClick={() => sortStats("username")}
+                >
+                  Username{" "}
+                  {sortField === "username" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  className="px-6 py-3 text-left cursor-pointer"
+                  onClick={() => sortStats("total_visits")}
+                >
+                  Total Visits{" "}
+                  {sortField === "total_visits" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
+                </th>
+                <th
+                  className="px-6 py-3 text-left cursor-pointer"
+                  onClick={() => sortStats("image_count")}
+                >
+                  Images{" "}
+                  {sortField === "image_count" &&
+                    (sortDirection === "asc" ? "↑" : "↓")}
+                </th>
                 <th className="px-6 py-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {stats.map((stat, index) => (
-                <tr key={stat.username} className="border-b">
+              {getSortedAndFilteredStats().map((stat, index) => (
+                <tr
+                  key={stat.username}
+                  className={`border-b ${
+                    stat.image_count === 0
+                      ? "bg-red-50"
+                      : stat.total_visits === 0
+                        ? "bg-yellow-50"
+                        : ""
+                  }`}
+                >
                   <td className="px-6 py-4 text-gray-500">{index + 1}</td>
                   <td className="px-6 py-4">{stat.username}</td>
                   <td className="px-6 py-4">{stat.total_visits}</td>
