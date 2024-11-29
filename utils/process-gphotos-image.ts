@@ -10,6 +10,13 @@ const maxWidth = 2048;
 const maxHeight = 2048;
 const thumbnailWidth = 500;
 
+function sanitizeFilename(filename: string): string {
+  return filename
+    .replace(/[^a-zA-Z0-9.-]/g, "_")
+    .replace(/_{2,}/g, "_")
+    .toLowerCase();
+}
+
 export async function processGPhotosImage({
   userId,
   sessionId,
@@ -58,16 +65,14 @@ export async function processGPhotosImage({
       "Image fetched, preparing for upload"
     );
 
+    const sanitizedFilename = sanitizeFilename(mediaItem.mediaFile.filename);
+
     // Upload the image to Supabase storage
     const { data, error } = await client.storage
       .from("images")
-      .upload(
-        `${userId}/${sessionId}/${mediaItem.mediaFile.filename}`,
-        imageBlob,
-        {
-          contentType: mediaItem.mediaFile.mimeType,
-        }
-      );
+      .upload(`${userId}/${sessionId}/${sanitizedFilename}`, imageBlob, {
+        contentType: mediaItem.mediaFile.mimeType,
+      });
     if (error) throw error;
     if (!data) throw new Error("No data returned from storage");
 
@@ -76,10 +81,10 @@ export async function processGPhotosImage({
     const { data: thumbnailData, error: thumbnailError } = await client.storage
       .from("thumbnails")
       .upload(
-        `${userId}/${sessionId}/thumb_${mediaItem.mediaFile.filename}`,
+        `${userId}/${sessionId}/thumb_${sanitizedFilename}`,
         thumbnailBlob,
         {
-          contentType: "image/jpeg", // Assuming we convert to JPEG for thumbnails
+          contentType: "image/jpeg",
         }
       );
 
