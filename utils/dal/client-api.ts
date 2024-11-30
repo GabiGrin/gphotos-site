@@ -121,7 +121,7 @@ export function createClientApi(client: SupabaseClient<Database>) {
     },
 
     getMonthlyVisits: async (
-      username: string,
+      siteId: string,
       month: string
     ): Promise<number> => {
       const formattedMonth = month.slice(0, 7);
@@ -129,7 +129,7 @@ export function createClientApi(client: SupabaseClient<Database>) {
       const { data, error } = await client
         .from("site_visits")
         .select("visit_count")
-        .eq("username", username)
+        .eq("site_id", siteId)
         .like("visit_date", `${formattedMonth}%`);
 
       if (error) {

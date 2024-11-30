@@ -163,10 +163,7 @@ export default function DashboardPage() {
     if (site?.username) {
       const currentMonth = new Date().toISOString().slice(0, 7);
       try {
-        const visits = await clientApi.getMonthlyVisits(
-          site.username,
-          currentMonth
-        );
+        const visits = await clientApi.getMonthlyVisits(site.id, currentMonth);
         setMonthlyVisits(visits);
       } catch (error) {
         console.error("Error fetching monthly visits:", error);
