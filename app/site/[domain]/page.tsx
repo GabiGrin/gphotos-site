@@ -152,7 +152,7 @@ export default async function UserGallery({
   }
 
   // Increment site view count
-  serverApi.incrementSiteView(host).catch((e) => {
+  serverApi.incrementSiteView(site.id).catch((e) => {
     logger.error(e, "Failed to increment site view");
   });
 

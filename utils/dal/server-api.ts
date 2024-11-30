@@ -650,9 +650,9 @@ export function createServerApi(client: SupabaseClient<Database>) {
       }
       return res.data[0];
     },
-    incrementSiteView: async (username: string) => {
+    incrementSiteView: async (siteId: string) => {
       const { error } = await client.rpc("increment_site_visits", {
-        p_username: username,
+        p_site_id: siteId,
       });
       if (error) throw error;
     },

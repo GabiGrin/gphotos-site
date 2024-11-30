@@ -148,27 +148,39 @@ export type Database = {
       site_visits: {
         Row: {
           id: number
+          site_id: string | null
           username: string
           visit_count: number
           visit_date: string
         }
         Insert: {
           id?: never
+          site_id?: string | null
           username: string
           visit_count?: number
           visit_date: string
         }
         Update: {
           id?: never
+          site_id?: string | null
           username?: string
           visit_count?: number
           visit_date?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "site_visits_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sites: {
         Row: {
           created_at: string | null
+          id: string
           layout_config: Json
           premium_overrides: Json | null
           premium_plan: string
@@ -180,6 +192,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          id?: string
           layout_config: Json
           premium_overrides?: Json | null
           premium_plan?: string
@@ -191,6 +204,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          id?: string
           layout_config?: Json
           premium_overrides?: Json | null
           premium_plan?: string
@@ -234,16 +248,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_top_sites_by_visitors: {
-        Args: {
-          target_date: string
-          top_x: number
-        }
-        Returns: {
-          username: string
-          visit_count: number
-        }[]
-      }
       get_top_user_sites: {
         Args: {
           date_filter: string
@@ -251,27 +255,34 @@ export type Database = {
         }
         Returns: {
           username: string
+          site_id: number
           site_visits: number
           image_count: number
         }[]
       }
-      increment_daily_site_visits: {
-        Args: {
-          p_username: string
-        }
-        Returns: undefined
-      }
-      increment_site_visits:
+      increment_daily_site_visits:
         | {
             Args: {
-              p_user_id: string
-              p_username: string
+              p_site_id: number
             }
             Returns: undefined
           }
         | {
             Args: {
-              p_username: string
+              p_site_id: string
+            }
+            Returns: undefined
+          }
+      increment_site_visits:
+        | {
+            Args: {
+              p_site_id: number
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_site_id: string
             }
             Returns: undefined
           }

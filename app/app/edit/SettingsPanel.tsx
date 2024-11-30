@@ -45,11 +45,14 @@ import {
   ChevronDown,
   CodeIcon,
   LockIcon,
+  InfoIcon,
 } from "lucide-react";
 import { MainButton } from "@/app/components/MainButton";
 import { usePremiumLimits } from "@/hooks/use-premium-limits";
 import ConnectDomainModal from "@/app/components/modals/ConnectDomainModal";
 import EmbedModal from "@/app/components/modals/EmbedModal";
+import { SimpleTooltip } from "@/components/ui/simple-tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface SettingsPanelProps {
   site: Site;
@@ -60,6 +63,8 @@ interface SettingsPanelProps {
   images: Photo[];
   albums: Album[];
   onAlbumsChange: (albums: Album[]) => void;
+  totalVisits: number;
+  monthlyVisits: number;
 }
 
 function EditButton({
@@ -141,6 +146,8 @@ export default function SettingsPanel({
   images,
   albums,
   onAlbumsChange,
+  totalVisits,
+  monthlyVisits,
 }: SettingsPanelProps) {
   const config = (site.layout_config as LayoutConfig) ?? {};
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -198,6 +205,7 @@ export default function SettingsPanel({
         <h1 className="text-xl md:text-2xl font-medium tracking-tight text-center">
           Edit your gallery
         </h1>
+
         <div className="flex flex-col md:flex-row gap-4 w-full justify-center items-center">
           <Link
             className="text-neutral-700 text-sm"
@@ -536,6 +544,34 @@ export default function SettingsPanel({
           >
             <EyeIcon className="w-4 h-4" /> View Gallery Website
           </a>
+        </div>
+        <div className="flex flex-col items-center gap-2 w-full p-4">
+          <div className="flex items-center gap-2 text-sm text-neutral-500">
+            <span>View Statistics</span>
+            <TooltipProvider>
+              <SimpleTooltip
+                content="Total and monthly page views. Each visit is counted, including repeat visits from the same person. Bot traffic is currently not excluded from these counts."
+                side="top"
+              >
+                <InfoIcon className="w-4 h-4 cursor-help" />
+              </SimpleTooltip>
+            </TooltipProvider>
+          </div>
+          <div className="flex gap-8 items-center">
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-semibold text-neutral-900">
+                {totalVisits.toLocaleString()}
+              </span>
+              <span className="text-sm text-neutral-500">Total Visits</span>
+            </div>
+            <div className="w-px h-12 bg-neutral-200" />
+            <div className="flex flex-col items-center">
+              <span className="text-2xl font-semibold text-neutral-900">
+                {monthlyVisits.toLocaleString()}
+              </span>
+              <span className="text-sm text-neutral-500">This Month</span>
+            </div>
+          </div>
         </div>
       </div>
 

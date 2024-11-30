@@ -168,7 +168,7 @@ export default async function AlbumPage({
   }
 
   // Increment site view count
-  serverApi.incrementSiteView(host).catch((e) => {
+  serverApi.incrementSiteView(site.id).catch((e) => {
     logger.error(e, "Failed to increment site view");
   });
 

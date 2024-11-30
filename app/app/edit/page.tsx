@@ -47,6 +47,8 @@ export default function DashboardPage() {
   const [shouldShowCongratulations, setShouldShowCongratulations] =
     useState(false);
 
+  const [monthlyVisits, setMonthlyVisits] = useState(0);
+
   const limits = usePremiumLimits(site);
 
   useEffect(() => {
@@ -157,6 +159,27 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchMonthlyVisits = async () => {
+    if (site?.username) {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      try {
+        const visits = await clientApi.getMonthlyVisits(
+          site.username,
+          currentMonth
+        );
+        setMonthlyVisits(visits);
+      } catch (error) {
+        console.error("Error fetching monthly visits:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (site?.username) {
+      fetchMonthlyVisits();
+    }
+  }, [site?.username]);
+
   if (!user || !site || !processedImages) {
     return (
       <div className="flex-1 w-full flex items-center justify-center py-56">
@@ -204,6 +227,8 @@ export default function DashboardPage() {
         images={processedImages}
         albums={albums}
         onAlbumsChange={setAlbums}
+        totalVisits={site?.visits || 0}
+        monthlyVisits={monthlyVisits}
       />
 
       {isManageImagesOpen && (

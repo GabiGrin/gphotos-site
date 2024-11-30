@@ -119,6 +119,26 @@ export function createClientApi(client: SupabaseClient<Database>) {
         )
         .subscribe();
     },
+
+    getMonthlyVisits: async (
+      username: string,
+      month: string
+    ): Promise<number> => {
+      const formattedMonth = month.slice(0, 7);
+
+      const { data, error } = await client
+        .from("site_visits")
+        .select("visit_count")
+        .eq("username", username)
+        .like("visit_date", `${formattedMonth}%`);
+
+      if (error) {
+        console.error("Error fetching monthly visits:", error);
+        return 0;
+      }
+
+      return data?.reduce((sum, row) => sum + (row.visit_count || 0), 0) || 0;
+    },
   };
 }
 
