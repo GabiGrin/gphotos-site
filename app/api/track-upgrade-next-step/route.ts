@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
           userId: userData.user.id,
           email: userData.user.email,
           timestamp: new Date().toISOString(),
+          plan: req.nextUrl.searchParams.get("plan"),
         }),
       }
     );
