@@ -68,7 +68,7 @@ export default async function DashboardLayout({
       <header className="border-b">
         <div className="max-w-5xl mx-auto px-4 py-1 flex items-center justify-between">
           <PosthogIdentifier user={user} />
-          <Link href="/dashboard" className="text-lg font-semibold">
+          <Link href="/" className="text-lg font-semibold">
             <Image src={logo} alt="Logo" width={130} height={30} />
           </Link>
           {site && <PremiumPlanBadge site={site} />}
