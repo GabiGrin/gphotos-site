@@ -5,26 +5,30 @@ export interface PremiumPlanLimits {
   albumLimit: number;
   branding: boolean;
   customDomain: boolean;
+  embedding: boolean;
 }
 
 export const premiumPlans = {
   free: {
     photoLimit: 50,
-    albumLimit: 1,
+    albumLimit: Infinity,
     branding: true,
     customDomain: false,
+    embedding: false,
   },
   basic: {
-    photoLimit: 150,
-    albumLimit: 3,
+    photoLimit: 1000,
+    albumLimit: Infinity,
     branding: true,
     customDomain: false,
+    embedding: false,
   },
   pro: {
-    photoLimit: 500,
+    photoLimit: Infinity,
     albumLimit: Infinity,
     branding: false,
     customDomain: true,
+    embedding: true,
   },
 };
 

@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Star, Sparkles, Shield } from "lucide-react";
+import { Star, Sparkles, Shield, CodeIcon } from "lucide-react";
 
 export function UpgradeModal() {
   const searchParams = useSearchParams();
@@ -62,6 +62,16 @@ export function UpgradeModal() {
                   <p className="font-medium">VIP Support & Features</p>
                   <p className="text-sm text-muted-foreground">
                     Priority support & early access to new features
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <CodeIcon className="h-5 w-5 text-purple-500 mt-1" />
+                <div>
+                  <p className="font-medium">Embed Your Gallery</p>
+                  <p className="text-sm text-muted-foreground">
+                    Embed your gallery on any website or platform
                   </p>
                 </div>
               </div>

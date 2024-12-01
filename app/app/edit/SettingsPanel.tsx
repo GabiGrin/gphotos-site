@@ -255,7 +255,10 @@ export default function SettingsPanel({
                 <span className="text-sm inline-flex items-center gap-3 text-neutral-700 w-[20px] pl-[0.5px]">
                   <CodeIcon />
                 </span>
-                <MainButton onClick={() => setShowEmbedModal(true)}>
+                <MainButton
+                  onClick={() => setShowEmbedModal(true)}
+                  premiumDisabled={!limits.embedding}
+                >
                   Embed gallery
                 </MainButton>
               </div>
