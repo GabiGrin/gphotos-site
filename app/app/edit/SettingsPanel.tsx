@@ -278,6 +278,7 @@ export default function SettingsPanel({
                       },
                     });
                   }}
+                  premiumDisabled={!limits.passwordProtection}
                 >
                   {config.security?.password?.enabled ? (
                     <>Password Protected</>

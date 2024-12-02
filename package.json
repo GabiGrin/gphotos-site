@@ -4,11 +4,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "types": "npx --yes supabase gen types typescript --project-id ffwdqslcgzreiytehizw --schema public > types/supabase.ts",
-    "seo": "tsx programmatic-seo/index.ts",
-    "seo:preview": "tsx programmatic-seo/preview.ts",
-    "seo:webflow": "tsx programmatic-seo/process-articles.ts",
-    "seo:fix-image-casing": "tsx programmatic-seo/fix-json-image-casing.ts"
+    "types": "npx --yes supabase gen types typescript --project-id ffwdqslcgzreiytehizw --schema public > types/supabase.ts"
   },
   "dependencies": {
     "@next/third-parties": "^15.0.3",

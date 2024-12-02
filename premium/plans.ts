@@ -6,6 +6,7 @@ export interface PremiumPlanLimits {
   branding: boolean;
   customDomain: boolean;
   embedding: boolean;
+  passwordProtection: boolean;
 }
 
 export const premiumPlans = {
@@ -15,6 +16,7 @@ export const premiumPlans = {
     branding: true,
     customDomain: false,
     embedding: false,
+    passwordProtection: false,
   },
   basic: {
     photoLimit: 1000,
@@ -22,6 +24,7 @@ export const premiumPlans = {
     branding: true,
     customDomain: false,
     embedding: false,
+    passwordProtection: true,
   },
   pro: {
     photoLimit: Infinity,
@@ -29,6 +32,7 @@ export const premiumPlans = {
     branding: false,
     customDomain: true,
     embedding: true,
+    passwordProtection: true,
   },
 };
 
