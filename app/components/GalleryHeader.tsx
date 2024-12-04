@@ -67,7 +67,7 @@ export default function GalleryHeader({
         )}
 
         {layoutConfig.content?.title?.show && (
-          <h1 className="text-4xl mb-4 px-4 tracking-tight">
+          <h1 className="text-4xl mb-4 px-4 tracking-tight text-center">
             {currentAlbum?.title ?? layoutConfig.content.title.value}
           </h1>
         )}
