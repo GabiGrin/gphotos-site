@@ -1,4 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/service";
+import { createServerApi } from "@/utils/dal/server-api";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -6,10 +8,22 @@ export async function GET(req: NextRequest) {
   const { data: userData } = await client.auth.getUser();
 
   if (!userData.user) {
-    return NextResponse.redirect("https://www.myphotos.site/upgrade-cs");
+    return NextResponse.redirect("https://app.myphotos.site/upgrade-cs");
   }
 
+  const plan = req.nextUrl.searchParams.get("plan") as "basic" | "pro";
+
   try {
+    const serviceClient = createServiceClient();
+    const serverApi = createServerApi(serviceClient);
+
+    await serverApi.upgradeUserPlan(userData.user.id, plan);
+
+    // Get the user's site info
+    const site = await serverApi
+      .getSiteByUserId(userData.user.id)
+      .catch(() => null);
+
     await fetch(
       "https://app.getflowcode.io/api/apps/477deaf4-1dab-42b1-9a2a-9186c4afba97/mps-new-upgrade-step-2",
       {
@@ -21,13 +35,15 @@ export async function GET(req: NextRequest) {
           userId: userData.user.id,
           email: userData.user.email,
           timestamp: new Date().toISOString(),
-          plan: req.nextUrl.searchParams.get("plan"),
+          plan: plan,
+          username: site?.username ?? "n/a",
         }),
       }
     );
-  } catch (error) {
-    console.error("Failed to track upgrade attempt:", error);
-  }
 
-  return NextResponse.redirect("https://www.myphotos.site/upgrade-cs");
+    return NextResponse.redirect("https://app.myphotos.site/upgrade-success");
+  } catch (error) {
+    console.error("Failed to process upgrade:", error);
+    return NextResponse.redirect("https://app.myphotos.site/upgrade-cs");
+  }
 }

@@ -52,6 +52,7 @@ export async function middleware(req: NextRequest) {
       path.startsWith("/auth") ||
       path.startsWith("/api/") ||
       path.startsWith("/admin")
+      // path.startsWith("/upgrade-success")
     ) {
       return NextResponse.next();
     }

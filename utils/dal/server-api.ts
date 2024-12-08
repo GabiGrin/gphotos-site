@@ -672,6 +672,25 @@ export function createServerApi(client: SupabaseClient<Database>) {
         image_count: Number(row.image_count),
       }));
     },
+    upgradeUserPlan: async (userId: string, plan: "basic" | "pro") => {
+      const expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 2);
+
+      const { error } = await client
+        .from("sites")
+        .update({
+          premium_plan: plan,
+          premium_overrides: {
+            expires_at: expiryDate.toISOString(),
+            upgraded_at: new Date().toISOString(),
+          },
+        })
+        .eq("user_id", userId);
+
+      if (error) {
+        throw new Error(`Failed to upgrade user plan: ${error.message}`);
+      }
+    },
   };
 
   return api;
