@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Sparkles, MessageCircle, Rocket } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -54,14 +54,12 @@ export default function UpgradeSuccessPage() {
             </motion.div>
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to MyPhotos Premium!{" "}
-            <Sparkles className="inline-block w-8 h-8 text-yellow-500 mb-1" />
+            You've been upgraded for free!
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            As we build the future of photo sharing, we've{" "}
-            <strong>upgraded your account for free</strong> for the next 2
-            months. Your feedback and ideas will help shape MyPhotos into
-            something amazing!
+            Our payment system is still in development. Meanwhile we've upgraded
+            your account for free for the next 2 months. In return - We'd love
+            to talk to get some feedback on how to improve MyPhotos.
           </p>
         </motion.div>
 
@@ -72,15 +70,12 @@ export default function UpgradeSuccessPage() {
             transition={{ delay: 0.3 }}
             className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
           >
-            <div className="flex items-center mb-4">
-              <Rocket className="w-6 h-6 text-blue-500 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-800">
-                What&apos;s Next?
-              </h2>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              What's Next?
+            </h2>
             <p className="text-gray-600">
-              Explore all the premium features now available to you. We&apos;re
-              excited to see what you&apos;ll create!
+              Explore all the premium features now available to you. We're
+              excited to see what you'll create!
             </p>
           </motion.div>
 
@@ -90,15 +85,12 @@ export default function UpgradeSuccessPage() {
             transition={{ delay: 0.4 }}
             className="bg-white p-6 rounded-xl shadow-md border border-gray-100"
           >
-            <div className="flex items-center mb-4">
-              <MessageCircle className="w-6 h-6 text-purple-500 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-800">
-                Let&apos;s Connect
-              </h2>
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Let's Connect
+            </h2>
             <p className="text-gray-600">
-              Our founders will reach out soon to hear your thoughts and ideas
-              on making MyPhotos even better.
+              We will reach out soon to hear your thoughts and ideas on making
+              MyPhotos even better.
             </p>
           </motion.div>
         </div>
