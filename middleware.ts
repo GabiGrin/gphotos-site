@@ -6,7 +6,10 @@ import logger from "./utils/logger";
 export async function middleware(req: NextRequest) {
   const url = req.nextUrl;
 
-  if (url.pathname.startsWith("/zipzap")) {
+  if (
+    url.pathname.startsWith("/zipzap") ||
+    url.pathname.startsWith("/sentry")
+  ) {
     return NextResponse.next();
   }
 
