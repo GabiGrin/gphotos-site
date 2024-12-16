@@ -8,7 +8,8 @@ export async function middleware(req: NextRequest) {
 
   if (
     url.pathname.startsWith("/zipzap") ||
-    url.pathname.startsWith("/sentry")
+    url.pathname.startsWith("/sentry") ||
+    url.pathname.startsWith("/monitoring")
   ) {
     return NextResponse.next();
   }
